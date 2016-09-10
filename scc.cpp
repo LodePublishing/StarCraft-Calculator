@@ -1,3 +1,5 @@
+// Protoss Templar Archive
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
@@ -47,8 +49,8 @@ int main(int argc, char* argv[])
 
 	HANDLE hStdOut=GetStdHandle(STD_OUTPUT_HANDLE);
 	srand(time(NULL));  
-	ifstream file ("goal_t.txt", ios::in|ios::binary|ios::ate);
-	ofstream out_file("bo_t.txt");
+	ifstream file ("goal_p.txt", ios::in|ios::binary|ios::ate);
+	ofstream out_file("bo_p.txt");
 	size = file.tellg();
 	file.seekg (0, ios::beg);
 	buffer = new unsigned char [size];
@@ -121,138 +123,97 @@ int main(int argc, char* argv[])
 		if(goal[i].what>0)
 			Ziel[i]=1;	
 
-	Ziel[SUPPLY_DEPOT]=1;
-	Ziel[SCV]=1;
-	Ziel[COMMAND_CENTER]=1;
-	Ziel[BARRACKS]=1;
+	Ziel[PYLON]=1;
+	Ziel[PROBE]=1;
+	Ziel[NEXUS]=1;
+	Ziel[GATEWAY]=1;
 	if(Goal_Harvested_Gas>0)
 	{
-		Ziel[REFINERY]=1;
-		Ziel[ONE_MINERAL_SCV_TO_GAS]=1;
-		Ziel[ONE_GAS_SCV_TO_MINERAL]=1;
+		Ziel[ASSIMILATOR]=1;
+		Ziel[ONE_MINERAL_PROBE_TO_GAS]=1;
+		Ziel[ONE_GAS_PROBE_TO_MINERAL]=1;
 	}
 
 
-if(goal[GHOST].what>0)
+if((goal[ARBITER].what>0)||(goal[RECALL].what>0)||(goal[STASIS_FIELD].what>0)||(goal[KHAYDARIN_CORE].what>0))
 {
-	Ziel[ACADEMY]=1;
-	Ziel[FACTORY]=1;
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[COVERT_OPS]=1;
+	Ziel[CYBERNETICS_CORE]=1;
+	Ziel[STARGATE]=1;
+	Ziel[CITADEL_OF_ADUN]=1;
+	Ziel[TEMPLAR_ARCHIVES]=1;
+	Ziel[ARBITER_TRIBUNAL]=1;
 }
-if(goal[GOLIATH].what>0)
+if((goal[DARK_TEMPLAR].what>0)||(goal[HIGH_TEMPLAR].what>0)||(goal[PSIONIC_STORM].what>0)||(goal[HALLUCINATION].what>0)||(goal[ARGUS_TALISMAN].what>0)||(goal[KHAYDARIN_AMULET].what>0)||(goal[MIND_CONTROL].what>0)||(goal[MAELSTROM].what>0))
 {
-	Ziel[FACTORY]=1;
-	Ziel[ARMORY]=1;
+	Ziel[CYBERNETICS_CORE]=1;
+	Ziel[CITADEL_OF_ADUN]=1;
+	Ziel[TEMPLAR_ARCHIVES]=1;
 }
-if(goal[SIEGE_TANK].what>0)
-{
-	Ziel[FACTORY]=1;
-	Ziel[MACHINE_SHOP]=1;
-}
-if( (goal[RESTORATION].what>0)||(goal[FIREBAT].what>0)||(goal[MEDIC].what>0)||(goal[COMSAT_STATION].what>0)||(goal[STIM_PACKS].what>0)||(goal[OPTICAL_FLARE].what>0)||(goal[U238_SHELLS].what>0)||(goal[CADUCEUS_REACTOR].what>0))
-	Ziel[ACADEMY]=1;
+if((goal[DRAGOON].what>0)||(goal[STARGATE].what>0)||(goal[ROBOTICS_FACILITY].what>0)||(goal[CITADEL_OF_ADUN].what>0)||(goal[AIR_WEAPONS].what>0)||(goal[PLATING].what>0)||(goal[SINGULARITY_CHARGE].what>0))
+	Ziel[CYBERNETICS_CORE]=1;
 
-if(goal[WRAITH].what>0)
+if((goal[LEG_ENHANCEMENTS].what>0)||(goal[TEMPLAR_ARCHIVES].what>0))
 {
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
+	Ziel[CYBERNETICS_CORE]=1;
+	Ziel[CITADEL_OF_ADUN]=1;
 }
 
-if(goal[SCIENCE_VESSEL].what>0)
+if(goal[DARK_ARCHON].what>0)
 {
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[CONTROL_TOWER]=1;
-}
-if(goal[DROPSHIP].what>0)
-{
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[CONTROL_TOWER]=1;
-}
-if(goal[BATTLE_CRUISER].what>0)
-{
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[CONTROL_TOWER]=1;
-	Ziel[PHYSICS_LAB]=1;
-}
-if(goal[VALKYRIE].what>0)
-{
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[ARMORY]=1;
-	Ziel[CONTROL_TOWER]=1;
-}
-if((goal[STARPORT].what>0)||(goal[VULTURE].what>0)||(goal[ARMORY].what>0))
-	Ziel[FACTORY]=1;
-
-if(goal[SCIENCE_FACILITY].what>0)
-	Ziel[STARPORT]=1;
-
-if(goal[NUCLEAR_SILO].what>0)
-{
-	Ziel[COVERT_OPS]=1;
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
+	Ziel[DARK_TEMPLAR]=1;
+	Ziel[TEMPLAR_ARCHIVES]=1;
+	Ziel[CITADEL_OF_ADUN]=1;
+	Ziel[CYBERNETICS_CORE]=1;
 }
 
-if((goal[SPIDER_MINES].what>0)||(goal[TANK_SIEGE_MODE].what>0)||(goal[ION_THRUSTERS].what>0)||(goal[CHARON_BOOSTER].what>0))
+
+if(goal[ARCHON].what>0)
 {
-	Ziel[FACTORY]=1;
-	Ziel[MACHINE_SHOP]=1;
+	Ziel[HIGH_TEMPLAR]=1;
+	Ziel[TEMPLAR_ARCHIVES]=1;
+	Ziel[CITADEL_OF_ADUN]=1;
+	Ziel[CYBERNETICS_CORE]=1;
 }
-if((goal[EMP_SHOCKWAVE].what>0)||(goal[IRRADIATE].what>0)||(goal[TITAN_REACTOR].what>0))
+
+if((goal[REAVER].what>0)||(goal[SCARAB_DAMAGE].what>0)||(goal[REAVER_CAPACITY].what>0)||(goal[GRAVITIC_DRIVE].what>0))
 {
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
+	Ziel[ROBOTICS_FACILITY]=1;
+	Ziel[ROBOTICS_SUPPORT_BAY]=1;
+	Ziel[CYBERNETICS_CORE]=1;
 }
-if((goal[YAMATO_GUN].what>0)||(goal[COLOSSUS_REACTOR].what>0))
+if((goal[OBSERVER].what>0)||(goal[SENSOR_ARRAY].what>0)||(goal[GRAVITIC_BOOSTERS].what>0))
 {
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[PHYSICS_LAB]=1;
+	Ziel[ROBOTICS_FACILITY]=1;
+	Ziel[OBSERVATORY]=1;
+	Ziel[CYBERNETICS_CORE]=1;
 }
-if((goal[CLOAKING_FIELD].what>0)||(goal[APOLLO_REACTOR].what>0))
+if((goal[CARRIER].what>0)||(goal[ARGUS_JEWEL].what>0)||(goal[APIAL_SENSORS].what>0)||(goal[GRAVITIC_THRUSTERS].what>0)||(goal[DISRUPTION_WEB].what>0)||(goal[CARRIER_CAPACITY].what>0))
 {
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[CONTROL_TOWER]=1;
+	Ziel[STARGATE]=1;
+	Ziel[FLEET_BEACON]=1;
+	Ziel[CYBERNETICS_CORE]=1;
 }
-if((goal[LOCKDOWN].what>0)||(goal[PERSONNEL_CLOAKING].what>0)||(goal[OCULAR_IMPLANTS].what>0)||(goal[MOEBIUS_REACTOR].what>0))
+if((goal[CORSAIR].what>0)||(goal[SCOUT].what>0)||(goal[FLEET_BEACON].what>0))
 {
-	Ziel[COVERT_OPS]=1;
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
+	Ziel[STARGATE]=1;
+	Ziel[CYBERNETICS_CORE]=1;
 }
-if((goal[INFANTRY_ARMOR].what>0)||(goal[INFANTRY_WEAPONS].what>0)||(goal[MISSILE_TURRET].what>0))
-	Ziel[ENGINEERING_BAY]=1;
+if((goal[SHUTTLE].what>0)||(goal[OBSERVATORY].what>0)||(goal[ROBOTICS_SUPPORT_BAY].what>0))
+{
+	Ziel[CYBERNETICS_CORE]=1;
+	Ziel[ROBOTICS_FACILITY]=1;
+}
 	
-if((goal[VEHICLE_PLATING].what>0)||(goal[VEHICLE_WEAPONS].what>0)||(goal[SHIP_PLATING].what>0)||(goal[SHIP_WEAPONS].what>0))
-	Ziel[ARMORY]=1;
-
-if((goal[INFANTRY_ARMOR].what>1)||(goal[INFANTRY_WEAPONS].what>1)||(goal[VEHICLE_PLATING].what>1)||(goal[VEHICLE_WEAPONS].what>1)||(goal[SHIP_PLATING].what>1)||(goal[SHIP_WEAPONS].what>1))
+if(goal[ARBITER_TRIBUNAL].what>0)
 {
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[SCIENCE_FACILITY]=1;
+	Ziel[CYBERNETICS_CORE]=1;
+	Ziel[STARGATE]=1;
+	Ziel[CITADEL_OF_ADUN]=1;
+	Ziel[TEMPLAR_ARCHIVES]=1;
 }
 
-if(goal[NUCLEAR_WARHEAD].what>0)
-{
-	Ziel[COVERT_OPS]=1;
-	Ziel[SCIENCE_FACILITY]=1;
-	Ziel[FACTORY]=1;
-	Ziel[STARPORT]=1;
-	Ziel[NUCLEAR_SILO]=1;
-}
+if((goal[ARMOR].what>0)||(goal[GROUND_WEAPONS].what>0)||(goal[PLASMA_SHIELDS].what>0)||(goal[PHOTON_CANNON].what>0))
+	Ziel[FORGE]=1;
 
 	for(i=0;i<BUILDING_TYPES;i++)
 		if(Ziel[i]==1)
@@ -279,12 +240,12 @@ if(goal[NUCLEAR_WARHEAD].what>0)
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
 	SetConsoleCursorPosition(hStdOut,coord);
 
-	printf("Welcome to the StarCraft Science Facility!\n");
+	printf("Welcome to the StarCraft Templar Archives!\n");
 	printf("May the BO be with you ;-)\n");
-	printf("Check the ""goal_t.txt"" file to change goals of the BO\n");
+	printf("Check the ""goal_p.txt"" file to change goals of the BO\n");
 	if((Max_Time==0)||(Max_Time>1800))
 	{
-		printf("Max_Time out of Range, please check ""goal_t.txt"", first number in file (use at maximum 30 minutes))\n");
+		printf("Max_Time out of Range, please check ""goal_p.txt"", first number in file (use at maximum 30 minutes))\n");
 		printf("... Continuing using 30 minutes as maximum\n");
 		Max_Time=1800;
 	}
@@ -295,7 +256,7 @@ if(goal[NUCLEAR_WARHEAD].what>0)
 	printf("Mutations       : %i   \n",Mutations);
 	printf("Mutation Rate   : %i   \n",Mut_Rate);
 	printf("\n");
-	printf("Goals (as stated in ""goal_t.txt"")\n");
+	printf("Goals (as stated in ""goal_p.txt"")\n");
 	for(i=0;i<BUILDING_TYPES;i++)
 		if(goal[i].what>0)
 			printf("- %s : %i    \n",stats[i].name,goal[i].what);
@@ -309,7 +270,7 @@ if(goal[NUCLEAR_WARHEAD].what>0)
 
 	SetConsoleCursorPosition(hStdOut,coord2);
 	printf("This is Freeware. Brought to you by clawsoftware.de\n");
-	printf("Press any key to cancel calculation. You will find then a solution in bo_t.txt.");
+	printf("Press any key to cancel calculation. You will find then a solution in bo_terra.txt.");
 	SetConsoleCursorPosition(hStdOut,coord);
 
 	printf("Calculating [");
@@ -451,9 +412,8 @@ if(goal[NUCLEAR_WARHEAD].what>0)
 	}
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
 	printf("Calculating completed.\n");
-	printf(" You can find the Zerg Build Order in the ""bo_t.txt""\n");
+	printf(" You can find the Protoss Build Order in the ""bo_prot.txt""\n");
 	printf(" Brought to you by clawsoftware.de\n");
-	printf("  Give it to all your friends :-)");
 	printf("\n\n\n\n\n\n\n\n");
 
 	//Alle runs ausgeben!

@@ -3,78 +3,74 @@
 #define MAX_PLAYER 128
 
 #define MAX_BUILDINGS 10 // How many buildings can you built simultaneously?
-#define BUILDING_TYPES 60
+#define BUILDING_TYPES 58
 
-#define MARINE 0
-#define GHOST 1
-#define VULTURE 2
-#define GOLIATH 3
-#define SIEGE_TANK 4
-#define SCV 5
-#define FIREBAT 6
-#define MEDIC  7
+#define DARK_TEMPLAR 0
+#define DARK_ARCHON 1
+#define PROBE 2
+#define ZEALOT 3
+#define DRAGOON 4
+#define HIGH_TEMPLAR 5
+#define ARCHON 6
+#define REAVER 7
+//scarab? ^^ ne... nur auf raeuber draufschlagen
+#define CORSAIR 8
+#define SHUTTLE 9
+#define SCOUT 10
+#define ARBITER 11
+#define CARRIER 12
+//interceptor? ^^ ne... nur auf Carrier draufschlagen mmmh... naja, mal guggn
+#define OBSERVER 13
 
-#define WRAITH 8
-#define SCIENCE_VESSEL 9
-#define DROPSHIP 10
-#define BATTLE_CRUISER 11
-#define VALKYRIE 12
-
-#define COMMAND_CENTER 13
-#define SUPPLY_DEPOT 14
-#define REFINERY 15
-#define BARRACKS 16
-#define ACADEMY 17
-#define FACTORY 18
-#define STARPORT 19
-#define SCIENCE_FACILITY 20
-#define ENGINEERING_BAY 21
-#define ARMORY 22
-#define MISSILE_TURRET 23
-#define BUNKER 24
-
-#define COMSAT_STATION 25
-#define NUCLEAR_SILO 26
-#define CONTROL_TOWER 27
-#define COVERT_OPS 28
-#define PHYSICS_LAB 29
-#define MACHINE_SHOP 30
-
-#define STIM_PACKS 31
-#define LOCKDOWN 32
-#define EMP_SHOCKWAVE 33
-#define SPIDER_MINES 34
-#define TANK_SIEGE_MODE 35
-#define IRRADIATE 36
-#define YAMATO_GUN 37
-#define CLOAKING_FIELD 38
-#define PERSONNEL_CLOAKING 39
-#define RESTORATION 40
-#define OPTICAL_FLARE 41
-
-#define U238_SHELLS 42
-#define ION_THRUSTERS 43
-#define TITAN_REACTOR 44
-#define OCULAR_IMPLANTS 45
-#define MOEBIUS_REACTOR 46
-#define APOLLO_REACTOR 47
-#define COLOSSUS_REACTOR 48
-#define CADUCEUS_REACTOR 49
-#define CHARON_BOOSTER 50
-
-#define INFANTRY_ARMOR 51
-#define INFANTRY_WEAPONS 52
-#define VEHICLE_PLATING 53
-#define VEHICLE_WEAPONS 54
-#define SHIP_PLATING 55
-#define SHIP_WEAPONS 56
-
-#define NUCLEAR_WARHEAD 57
-
-#define ONE_MINERAL_SCV_TO_GAS 58
-#define ONE_GAS_SCV_TO_MINERAL 59
+#define NEXUS 14
+#define ROBOTICS_FACILITY 15
+#define PYLON 16
+#define ASSIMILATOR 17
+#define OBSERVATORY 18
+#define GATEWAY 19
+#define PHOTON_CANNON 20
+#define CYBERNETICS_CORE 21
+#define CITADEL_OF_ADUN 22
+#define TEMPLAR_ARCHIVES 23
+#define FORGE 24
+#define STARGATE 25
+#define FLEET_BEACON 26
+#define ARBITER_TRIBUNAL 27
+#define ROBOTICS_SUPPORT_BAY 28
+#define SHIELD_BATTERY 29
 
 
+#define PSIONIC_STORM 30
+#define HALLUCINATION 31
+#define RECALL 32
+#define STASIS_FIELD 33
+#define DISRUPTION_WEB 34
+#define MIND_CONTROL 35
+#define MAELSTROM 36
+
+#define SINGULARITY_CHARGE 37
+#define LEG_ENHANCEMENTS 38
+#define SCARAB_DAMAGE 39
+#define REAVER_CAPACITY 40
+#define GRAVITIC_DRIVE 41
+#define SENSOR_ARRAY 42
+#define GRAVITIC_BOOSTERS 43
+#define KHAYDARIN_AMULET 44
+#define APIAL_SENSORS 45
+#define GRAVITIC_THRUSTERS 46
+#define CARRIER_CAPACITY 47
+#define KHAYDARIN_CORE 48
+#define ARGUS_JEWEL 49
+#define ARGUS_TALISMAN 50
+
+#define ARMOR 51
+#define PLATING 52
+#define GROUND_WEAPONS 53
+#define AIR_WEAPONS 54
+#define PLASMA_SHIELDS 55
+
+#define ONE_MINERAL_PROBE_TO_GAS 56
+#define ONE_GAS_PROBE_TO_MINERAL 57
 
 struct Stats
 {
@@ -93,73 +89,64 @@ struct GOAL
 //Abkuerzungen! ~ 10 Zeichen
 const Stats stats[BUILDING_TYPES]=
 {
-	{"Marine",24,50,0,1},
-	{"Ghost",50,25,75,1},
-	{"Vulture",30,75,0,2},
-	{"Goliath",40,100,50,2},
-	{"Siege Tank",50,150,100,2},
-	{"SCV",20,50,0,1},
-	{"Firebat",24,50,25,1},
-	{"Medic",30,50,25,1},
-	{"Wraith",60,150,100,2},
-	{"Science Vessel",80,100,225,2},
-	{"Dropship",50,100,100,2},
-	{"Battle Cruiser",133,400,300,6},
-	{"Valkyrie",50,250,125,3},
-
-	{"Command Center",120,400,0,0},
-	{"Supply Depot",40,100,0,0},
-	{"Refinery",40,100,0,0},
-	{"Barracks",80,150,0,0},
-	{"Academy",80,150,0,0},
-	{"Factory",80,200,100,0},
-	{"Starport",70,150,100,0},
-	{"Science Facility",60,100,150,0},
-	{"Engineering Bay",60,125,0,0},
-	{"Armory",80,100,50,0},
-	{"Missile Turret",30,75,0,0},
-	{"Bunker",30,100,0,0},
-
-	{"Comsat Station",40,50,50,0},
-	{"Nuclear Silo",40,100,100,0},
-	{"Control Tower",80,50,50,0},
-	{"Covert Ops",40,50,50,0},
-	{"Physics Lab",40,50,50,0},
-	{"Machine Shop",40,50,50,0},
-
-	{"Stim Packs",80,100,100,0},
-	{"Lockdown",100,200,200,0},
-	{"EMP Shockwave",120,200,200,0},
-	{"Spider Mines",80,100,100,0},
-	{"Siege Mode",80,150,150,0},
-	{"Irradiate",80,200,200,0},
-	{"Yamato Gun",120,100,100,0},
-	{"Cloaking Field",100,150,150,0},
-	{"Personnel Cloaking",80,100,100,0},
-	{"Restoration",80,100,100,0},
-	{"Optical Flare",120,100,100,0},
-
-	{"U-238 Shells",100,150,150,0},
-	{"Ion Thrusters",100,100,100,0},
-	{"Titan Reactor",166,150,150,0},
-	{"Ocular Implants",166,100,100,0},
-	{"Moebius Reactor",166,200,200,0},
-	{"Apollo Reactor",166,200,200,0},
-	{"Colossus Reactor",166,150,150,0},
-	{"Caduceus Reactor",166,150,150,0},
-	{"Charon Booster",133,100,100,0},
-
-	{"Infantry Armor",266,100,100,0},
-	{"Infantry Weapons",266,100,100,0},
-	{"Vehicle Plating",266,100,100,0},
-	{"Vehicle Weapons",266,100,100,0},
-	{"Ship Plating",266,150,150,0},
-	{"Ship Weapons",266,100,100,0},
-
-	{"Nuclear Warhead",100,200,200,1},
-
-	{"Bring one Mineral SCV to Gas",0,0,0,0},
-	{"Bring one Gas SCV to Mineral",0,0,0,0}
+	{"Dark Templar",50,125,100,2},
+	{"Dark Archon",20,0,0,0},
+	{"Probe",20,50,0,1},
+	{"Zealot",40,100,0,2},
+	{"Dragoon",50,125,50,2},
+	{"High Templar",50,50,150,2},
+	{"Archon",20,0,0,0},
+	{"Reaver",70,200,100,4},
+	{"Corsair",40,150,100,2},
+	{"Shuttle",60,200,0,2},
+	{"Scout",80,275,125,3},
+	{"Arbiter",160,100,350,4},
+	{"Carrier",140,350,250,6},
+	{"Observer",40,25,75,1},
+	{"Nexus",120,400,0,0},
+	{"Robotics Facility",80,200,200,0},
+	{"Pylon",30,100,0,0},
+	{"Assimilator",40,100,0,0},
+	{"Observatory",30,50,100,0},
+	{"Gateway",60,150,0,0},
+	{"Photon Cannon",50,150,0,0},
+	{"Cybernetics Core",60,200,0,0},
+	{"Citadel Of Adun",60,150,100,0},
+	{"Templar Archives",60,150,200,0},
+	{"Forge",40,150,0,0},
+	{"Stargate",70,150,150,0},
+	{"Fleet Beacon",60,300,200,0},
+	{"Arbiter Tribunal",60,200,150,0},
+	{"Robotics Support Bay",30,150,100,0},
+	{"Shield Battery",30,100,0,0},
+	{"Psionic Storm",120,200,200,0},
+	{"Hallucination",80,150,150,0},
+	{"Recall",120,150,150,0},
+	{"Stasis Field",100,150,150,0},
+	{"Disruption Web",80,200,200,0},
+	{"Mind Control",120,200,200,0},
+	{"Maelstrom",100,100,100,0},
+	{"Singularity Charge",166,150,150,0},
+	{"Leg Enhancements",133,150,150,0},
+	{"Scarab Damage",166,200,200,0},
+	{"Reaver Capacity",166,200,200,0},
+	{"Gravitic Drive",166,200,200,0},
+	{"Sensor Array",133,150,150,0},
+	{"Gravitic Boosters",133,150,150,0},
+	{"Khaydarin Amulet",166,150,150,0},
+	{"Apial Sensors",166,100,100,0},
+	{"Gravitic Thrusters",166,200,200,0},
+	{"Carrier Capacity",100,100,100,0},
+	{"Khaydarin Core",166,150,150,0},
+	{"Argus Jewel",166,100,100,0},
+	{"Argus Talisman",166,150,150,0},
+	{"Armor",266,100,100,0},
+	{"Plating",266,150,150,0},
+	{"Ground Weapons",266,100,100,0},
+	{"Air Weapons",266,100,100,0},
+	{"Plasma Shields",266,200,200,0},
+	{"One Mineral Probe To Gas",0,0,0,0},
+	{"One Gas Probe To Mineral",0,0,0,0}
 };	
 
 struct Namen
@@ -170,74 +157,64 @@ struct Namen
 
 const Namen kurz[BUILDING_TYPES]=
 {
-	{"Mari"},
-	{"Ghos"},
-	{"Vult"},
-	{"Goli"},
-	{"Tank"},
-	{"SCV "},
-	{"FBat"},
-	{"Medi"},
-	{"Wrai"},
-	{"ScVe"},
-	{"Drop"},
-	{"BatC"},
-	{"Valk"},
-
-	{"ComC"},
-	{"Depo"},
-	{"Refi"},
-	{"Barr"},
-	{"Acad"},
-	{"Fact"},
+	{"Dark"},
+	{"Dark"},
+	{"Prob"},
+	{"Zeal"},
+	{"Drag"},
+	{"High"},
+	{"Arch"},
+	{"Reav"},
+	{"Cors"},
+	{"Shut"},
+	{"Scou"},
+	{"Arbi"},
+	{"Carr"},
+	{"Obse"},
+	{"Nexu"},
+	{"Robo"},
+	{"Pylo"},
+	{"Assi"},
+	{"Obse"},
+	{"Gate"},
+	{"Phot"},
+	{"Cybe"},
+	{"Cita"},
+	{"Temp"},
+	{"Forg"},
 	{"Star"},
-	{"Scie"},
-	{"Engi"},
+	{"Flee"},
+	{"Arbi"},
+	{"Robo"},
+	{"Shie"},
+	{"Psio"},
+	{"Hall"},
+	{"Reca"},
+	{"Stas"},
+	{"Disr"},
+	{"Mind"},
+	{"Mael"},
+	{"Sing"},
+	{"Leg_"},
+	{"Scar"},
+	{"Reav"},
+	{"Grav"},
+	{"Sens"},
+	{"Grav"},
+	{"Khay"},
+	{"Apia"},
+	{"Grav"},
+	{"Carr"},
+	{"Khay"},
+	{"Argu"},
+	{"Argu"},
 	{"Armo"},
-	{"Miss"},
-	{"Bunk"},
-
-	{"Coms"},
-	{"NuSi"},
-	{"CoTo"},
-	{"CoOp"},
-	{"PhLa"},
-	{"MaSh"},
-
-	{"Stim"},
-	{"Lock"},
-	{"EMPS"},
-	{"Mine"},
-	{"Sieg"},
-	{"Irra"},
-	{"Yama"},
-	{"Cloa"},
-	{"Pers"},
-	{"Rest"},
-	{"Optc"},
-
-	{"U238"},
-	{"IonT"},
-	{"Tita"},
-	{"Ocul"},
-	{"Moeb"},
-	{"Apol"},
-	{"Colo"},
-	{"Cadu"},
-	{"Char"},
-
-	{"InAr"},
-	{"InWe"},
-	{"VeAr"},
-	{"VeWe"},
-	{"ShAr"},
-	{"ShWe"},
-
-	{"NuWa"},
-
+	{"Plat"},
+	{"Grou"},
+	{"AirW"},
+	{"Plas"},
 	{">gas"},
 	{">min"}
-
 };	
 
 
@@ -337,7 +314,7 @@ public:
 	unsigned char availible[BUILDING_TYPES];
 
 	unsigned short mins,gas,IP,min,n;
-	unsigned char scvmins,scvgas,scvbuilding,length,BuildingRunning;
+	unsigned char probemins,probegas,length,BuildingRunning;
 	short Supply;
 
 	unsigned char program[MAX_LENGTH];
@@ -358,36 +335,41 @@ public:
 
 	void Produce(unsigned char who)
 	{
-		if((who>=INFANTRY_ARMOR)&&(who<=SHIP_WEAPONS))
+		if((who>=ARMOR)&&(who<=PLASMA_SHIELDS))
 		{
 			building[nr].RB=stats[who].BT+force[who]*32;
 			switch(who)
 			{
-				case INFANTRY_ARMOR:
-				case INFANTRY_WEAPONS:
-				case VEHICLE_PLATING:
-				case VEHICLE_WEAPONS:
-				case SHIP_PLATING:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
-				case SHIP_WEAPONS:mins-=stats[who].mins+force[who]*50;gas-=stats[who].gas+force[who]*50;break;
+				case PLATING:
+				case ARMOR:
+				case AIR_WEAPONS:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
+				case GROUND_WEAPONS:mins-=stats[who].mins+force[who]*50;gas-=stats[who].gas+force[who]*50;break;
+				case PLASMA_SHIELDS:mins-=stats[who].mins+force[who]*100;gas-=stats[who].gas+force[who]*100;break;
 				default:break;
 			}
 		}	
 		else
 		{
-			building[nr].RB=stats[who].BT+((who>=COMMAND_CENTER)&&(who<=BUNKER))*3; // 3 Spielsekunden um zum Bauplatz zu fahren 
+			building[nr].RB=stats[who].BT+((who>=NEXUS)&&(who<=SHIELD_BATTERY))*5; // 3 Spielsekunden um zum Bauplatz zu fahren 
+//			if(who==ZERGLING)
+//			{
+//				if(force[METABOLIC_BOOST]==1)
+//					building[nr].RB+=30;
+//				if(force[METABOLIC_BOOST]==1)
+//					building[nr].RB+=50;
+//			}
 			mins-=stats[who].mins;
 		    gas-=stats[who].gas;
 		}
 		building[nr].type=who;
 		Supply-=stats[who].supply;
 
-		if((who<=BUNKER)&&(who>=COMMAND_CENTER))
+		if((who<=SHIELD_BATTERY)&&(who>=NEXUS))
 		{
-			if(scvmins>0)
-				scvmins--;
-			else if(scvgas>0)
-				scvgas--;
-			scvbuilding++;
+			if(probemins>0)
+				probemins--;
+			else if(probegas>0)
+				probegas--;
 		}
 		ok=1;
 	}
@@ -397,19 +379,22 @@ public:
 	void Build(unsigned char what)
 	{
 		unsigned char m;
-		
-			if((what==ONE_MINERAL_SCV_TO_GAS)&&(force[REFINERY]>0)&&(scvmins>0))
+
+		if((what>=NEXUS)&&(what<=SHIELD_BATTERY)&&(what!=PYLON)&&(force[PYLON]==0))
+			return;
+	
+			if((what==ONE_MINERAL_PROBE_TO_GAS)&&(force[ASSIMILATOR]>0)&&(probemins>0))
 			{
 				ok=1;
-				scvmins--;
-				scvgas++;
+				probemins--;
+				probegas++;
 			}
 			else
-			if((what==ONE_GAS_SCV_TO_MINERAL)&&(scvgas>0))
+			if((what==ONE_GAS_PROBE_TO_MINERAL)&&(probegas>0))
 			{
 				ok=1;
-				scvgas--;
-				scvmins++;
+				probegas--;
+				probemins++;
 			}
 			else
 			{
@@ -422,146 +407,173 @@ public:
 				}
 
 		if( ((Supply>=stats[what].supply) || (stats[what].supply==0)) &&
-			( mins>=stats[what].mins+((what>=INFANTRY_ARMOR)&&(what<=SHIP_PLATING))*force[what]*75+(what==SHIP_WEAPONS)*force[what]*50) &&
-			( gas>=stats[what].gas+((what>=INFANTRY_ARMOR)&&(what<=SHIP_PLATING))*force[what]*75+(what==SHIP_WEAPONS)*force[what]*50) &&
+			( mins>=stats[what].mins+((what==ARMOR)||(what==PLATING)||(what==AIR_WEAPONS))*force[what]*75+(what==GROUND_WEAPONS)*force[what]*50)+(what==PLASMA_SHIELDS)*force[what]*100 &&
+			(  gas>=stats[what].gas +((what==ARMOR)||(what==PLATING)||(what==AIR_WEAPONS))*force[what]*75+(what==GROUND_WEAPONS)*force[what]*50)+(what==PLASMA_SHIELDS)*force[what]*100 &&
 			(nr<255) && 
-			(scvmins+scvgas>=1*((what<=BUNKER)&&(what>=COMMAND_CENTER)))
+			(probemins+probegas>=1*((what<=SHIELD_BATTERY)&&(what>=NEXUS)))
 		  )
 
 		{
 			switch(what)
 			{
-				case MARINE:if((force[BARRACKS]>0)&&(availible[BARRACKS]>0)) 
+				case DARK_TEMPLAR:
+				case HIGH_TEMPLAR:if((force[GATEWAY]>0)&&(availible[GATEWAY]>0)&&(force[TEMPLAR_ARCHIVES]>0)) 
 							{
 								Produce(what);
-								availible[BARRACKS]--;
+								availible[GATEWAY]--;
 							};break;
-				case GHOST:if((force[BARRACKS]>0)&&(force[ACADEMY]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[COVERT_OPS]>0)&&(availible[BARRACKS]>0))
+				case DRAGOON:if((force[GATEWAY]>0)&&(force[CYBERNETICS_CORE]>0)&&(availible[GATEWAY]>0))
 							{
 								Produce(what);
-								availible[BARRACKS]--;
+								availible[GATEWAY]--;
 							};break;
-				case VULTURE:if((force[FACTORY]>0)&&(availible[FACTORY]>0)) 
+				case ZEALOT:if((force[GATEWAY]>0)&&(availible[GATEWAY]>0)) 
 							{
 								Produce(what);
-								availible[FACTORY]--;
+								availible[GATEWAY]--;
 							};break;
-				case GOLIATH:if((force[FACTORY]>0)&&(force[ARMORY]>0)&&(availible[FACTORY]>0)) 
+				case REAVER:if((force[ROBOTICS_SUPPORT_BAY]>0)&&(force[ROBOTICS_FACILITY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
 							{
 								Produce(what);
-								availible[FACTORY]--;
+								availible[ROBOTICS_FACILITY]--;
 							};break;
-				case SIEGE_TANK:if((force[FACTORY]>0)&&(force[MACHINE_SHOP]>0)&&(availible[FACTORY]>0)&&(availible[MACHINE_SHOP]>0)) 
+				case SHUTTLE:if((force[ROBOTICS_FACILITY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
 							{
 								Produce(what);
-								availible[FACTORY]--;
-								availible[MACHINE_SHOP]--;
+								availible[ROBOTICS_FACILITY]--;
 							};break;
-				case SCV:if((force[COMMAND_CENTER]>0)&&(availible[COMMAND_CENTER]>0)) 
+				case PROBE:if((force[NEXUS]>0)&&(availible[NEXUS]>0)) 
 							{
 								Produce(what);
-								availible[COMMAND_CENTER]--;
+								availible[NEXUS]--;
 							};break;
-				case FIREBAT:
-				case MEDIC:if((force[BARRACKS]>0)&&(force[ACADEMY]>0)&&(availible[BARRACKS]>0)) 
+				case OBSERVER:
+							if((force[ROBOTICS_FACILITY]>0)&&(force[OBSERVATORY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
 							{
 								Produce(what);
-								availible[BARRACKS]--;
+								availible[ROBOTICS_FACILITY]--;
 							};break;
-				case WRAITH:if((force[STARPORT]>0)&&(availible[STARPORT]>0)) 
+				case SCOUT:
+				case CORSAIR:if((force[STARGATE]>0)&&(availible[STARGATE]>0)) 
 							{
 								Produce(what);
-								availible[STARPORT]--;
+								availible[STARGATE]--;
 							};break;
-				case SCIENCE_VESSEL:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[SCIENCE_FACILITY]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+				case ARBITER:if((force[STARGATE]>0)&&(availible[STARGATE]>0)&&(force[TEMPLAR_ARCHIVES]>0)&&(force[ARBITER_TRIBUNAL]>0)) 
 							{
 								Produce(what);
-								availible[STARPORT]--;
-								availible[CONTROL_TOWER]--;
+								availible[STARGATE]--;
 							};break;
-				case DROPSHIP:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+				case CARRIER:if((force[STARGATE]>0)&&(availible[STARGATE]>0)&&(force[FLEET_BEACON]>0)) 
 							{
 								Produce(what);
-								availible[STARPORT]--;
-								availible[CONTROL_TOWER]--;
+								availible[STARGATE]--;
 							};break;
-				case BATTLE_CRUISER:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[PHYSICS_LAB]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+				case ARCHON:if(force[HIGH_TEMPLAR]>1)
 							{
 								Produce(what);
-								availible[STARPORT]--;
-								availible[CONTROL_TOWER]--;
+								force[HIGH_TEMPLAR]-=2;
 							};break;
-				case VALKYRIE:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[ARMORY]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+				case DARK_ARCHON:if(force[DARK_TEMPLAR]>1)
 							{
 								Produce(what);
-								availible[STARPORT]--;
-								availible[CONTROL_TOWER]--;
+								force[DARK_TEMPLAR]-=2;
 							};break;
-				case COMMAND_CENTER:
-				case SUPPLY_DEPOT:Produce(what);break;
-				case REFINERY:if(Vespene_Av>0) { Vespene_Av--;Produce(what);};break;
-				case BARRACKS:Produce(what);break;
-				case ACADEMY:
-				case FACTORY:if(force[BARRACKS]>0) Produce(what);break;
-				case STARPORT:if(force[FACTORY]>0) Produce(what);break;
-				case SCIENCE_FACILITY:if(force[FACTORY]>0) Produce(what);break;
-				case ENGINEERING_BAY:Produce(what);break;
-				case ARMORY:if(force[FACTORY]>0) Produce(what);break;
-				case MISSILE_TURRET:if(force[ENGINEERING_BAY]>0) Produce(what);break;
-				case BUNKER:if(force[BARRACKS]>0) Produce(what);break;
+				case FORGE:
+				case NEXUS:
+				case PYLON:Produce(what);break;
+				case ASSIMILATOR:if(Vespene_Av>0) { Vespene_Av--;Produce(what);};break;
+				case GATEWAY:Produce(what);break;
+				case CYBERNETICS_CORE:
+				case SHIELD_BATTERY:if(force[GATEWAY]>0) Produce(what);break;
+				case ROBOTICS_FACILITY:
+				case CITADEL_OF_ADUN:
+				case STARGATE:if(force[CYBERNETICS_CORE]>0) Produce(what);break;
+				case PHOTON_CANNON:if(force[FORGE]>0) Produce(what);break;
+				
+				case TEMPLAR_ARCHIVES:if(force[CITADEL_OF_ADUN]>0) Produce(what);break;
 
-				case COMSAT_STATION:if((force[COMMAND_CENTER]>force[COMSAT_STATION]+force[NUCLEAR_SILO])&&(availible[COMMAND_CENTER]>0)) Produce(what);break;
-				case NUCLEAR_SILO:if((force[COMMAND_CENTER]>force[COMSAT_STATION]+force[NUCLEAR_SILO])&&(availible[COMMAND_CENTER]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[COVERT_OPS]>0)) Produce(what);break;
-				case CONTROL_TOWER:if((force[STARPORT]>force[CONTROL_TOWER])&&(availible[STARPORT]>0)) Produce(what);break;
-				case COVERT_OPS:
-				case PHYSICS_LAB:if((force[SCIENCE_FACILITY]>force[COVERT_OPS]+force[PHYSICS_LAB])&&(availible[SCIENCE_FACILITY]>0)) Produce(what);break;
-				case MACHINE_SHOP:if((force[FACTORY]>force[MACHINE_SHOP])&&(availible[FACTORY]>0)) Produce(what);break;
+				case OBSERVATORY:
+				case ROBOTICS_SUPPORT_BAY:if(force[ROBOTICS_FACILITY]>0) Produce(what);break;
+				
+				case ARBITER_TRIBUNAL:if((force[STARGATE]>0)&&(force[TEMPLAR_ARCHIVES]>0))
+										  Produce(what);break;
+				case FLEET_BEACON:if(force[STARGATE]>0)
+									 Produce(what);break;
+				
+				case ARGUS_TALISMAN:
+				case KHAYDARIN_AMULET:
+				case PSIONIC_STORM:
+				case HALLUCINATION:
+				case MIND_CONTROL:
+				case MAELSTROM:if((force[TEMPLAR_ARCHIVES]>0)&&(availible[TEMPLAR_ARCHIVES]>0))
+							   {
+								   Produce(what);
+								   availible[TEMPLAR_ARCHIVES]--;
+							   };break;
+
+
+				case KHAYDARIN_CORE:
+				case RECALL:
+				case STASIS_FIELD:if((force[ARBITER_TRIBUNAL]>0)&&(availible[ARBITER_TRIBUNAL]>0))
+							   {
+								   Produce(what);
+								   availible[ARBITER_TRIBUNAL]--;
+							   };break;
+
+				case ARGUS_JEWEL:
+				case APIAL_SENSORS:
+				case GRAVITIC_THRUSTERS:				
+				case DISRUPTION_WEB:
+				case CARRIER_CAPACITY:if((force[FLEET_BEACON]>0)&&(availible[FLEET_BEACON]>0))
+							   {
+								   Produce(what);
+								   availible[FLEET_BEACON]--;
+							   };break;
+
+				case LEG_ENHANCEMENTS:if((force[CITADEL_OF_ADUN]>0)&&(availible[CITADEL_OF_ADUN]>0))
+							   {
+								   Produce(what);
+								   availible[CITADEL_OF_ADUN]--;
+							   };break;
 
 				
-				
-				case CHARON_BOOSTER:
-				case SPIDER_MINES:
-				case TANK_SIEGE_MODE:
-				case ION_THRUSTERS:if(force[MACHINE_SHOP]>0) Produce(what);break; //da stimmt was net :\ ... 
 
-				case TITAN_REACTOR:
-				case EMP_SHOCKWAVE:
-				case IRRADIATE:if((force[SCIENCE_FACILITY]>0)&&(availible[SCIENCE_FACILITY]>0)) Produce(what);break;
-				
-				case OCULAR_IMPLANTS:
-				case LOCKDOWN:
-				case MOEBIUS_REACTOR:
-				case PERSONNEL_CLOAKING:if((force[COVERT_OPS]>0)&&(availible[COVERT_OPS]>0)) Produce(what);break;
-				
-				case CADUCEUS_REACTOR:
-				case U238_SHELLS:
-				case STIM_PACKS:
-				case RESTORATION:
-				case OPTICAL_FLARE:if((force[ACADEMY]>0)&&(availible[ACADEMY]>0)) Produce(what);break;
+				case GRAVITIC_DRIVE:
+				case SCARAB_DAMAGE:
+				case REAVER_CAPACITY:if((force[ROBOTICS_SUPPORT_BAY]>0)&&(availible[ROBOTICS_SUPPORT_BAY]>0))
+									 {
+										 Produce(what);
+										 availible[ROBOTICS_SUPPORT_BAY]--;
+									 };break;
 
-				case COLOSSUS_REACTOR:
-				case YAMATO_GUN:if(force[PHYSICS_LAB]>0) Produce(what);break;
 
-				case APOLLO_REACTOR:
-				case CLOAKING_FIELD:if(force[CONTROL_TOWER]>0) Produce(what);break;
 
-				case INFANTRY_ARMOR:
-				case INFANTRY_WEAPONS:if((force[ENGINEERING_BAY]>0)&&(availible[ENGINEERING_BAY]>0)) 
-									   {
-										   if((force[what]==0)||( (force[what]>0)&&(force[SCIENCE_FACILITY]>0)))
-											   Produce(what);
-									   };break;
 
-				case VEHICLE_PLATING:
-				case VEHICLE_WEAPONS:
-				case SHIP_PLATING:
-				case SHIP_WEAPONS:if((force[ARMORY]>0)&&(availible[ARMORY]>0)) 
-								  {
-										   if((force[what]==0)||( (force[what]>0)&&(force[SCIENCE_FACILITY]>0)))
-											   Produce(what);
-								  };break;
-				case NUCLEAR_WARHEAD:if(force[NUCLEAR_SILO]>0) Produce(what);
-									 
+				case SENSOR_ARRAY:
+				case GRAVITIC_BOOSTERS:if((force[OBSERVATORY]>0)&&(availible[OBSERVATORY]>0))
+									 {
+										 Produce(what);
+										 availible[OBSERVATORY]--;
+									 };break;
+
+
+
+				case SINGULARITY_CHARGE:
+				case PLATING:
+				case AIR_WEAPONS:if((force[CYBERNETICS_CORE]>0)&&(availible[CYBERNETICS_CORE]>0)&&((force[what]==0)||(force[FLEET_BEACON]>0))) 
+								 {
+									 Produce(what);
+									 availible[CYBERNETICS_CORE]--;
+								 };break;
+
+				case ARMOR:
+				case GROUND_WEAPONS:
+				case PLASMA_SHIELDS:if((force[FORGE]>0)&&(availible[FORGE]>0)) 
+									{
+										Produce(what);
+										availible[FORGE]--;										
+									};break;								 
 				default:break;
 			}	
 		}
@@ -584,20 +596,20 @@ public:
 			BuildingRunning=0;
 			ok=0;
 
-			if(scvmins<56)
+			if(probemins<56)
 			{
-				mins+=mining[scvmins]; //~~~~~~~double wegmachen
-				harvested_mins+=mining[scvmins];
+				mins+=mining[probemins]; //~~~~~~~double wegmachen
+				harvested_mins+=mining[probemins];
 			}
 			else 
 			{
 				mins+=mining[56];
 				harvested_mins+=mining[56];
 			}
-			if(scvgas<5)
+			if(probegas<5)
 			{
-				gas+=gasing[scvgas];
-				harvested_gas+=gasing[scvgas];
+				gas+=gasing[probegas];
+				harvested_gas+=gasing[probegas];
 			}
 			else
 			{
@@ -616,45 +628,36 @@ public:
 					{
 						force[building[j].type]++;
 						availible[building[j].type]++;
-						if((building[j].type>=COMMAND_CENTER)&&(building[j].type<=BUNKER)) 
-						{
-							scvmins++;
-							scvbuilding--;
-						}
 
 						switch(building[j].type)
 						{
-							case SCV:scvmins++;availible[COMMAND_CENTER]++;break;
-							case SUPPLY_DEPOT:Supply+=8;break;
-							case COMMAND_CENTER:Supply+=10;break;
-							case REFINERY:break;
-							case MARINE:
-							case FIREBAT:
-							case MEDIC:
-							case GHOST:availible[BARRACKS]++;break;
+							case PROBE:probemins++;availible[NEXUS]++;break;
+							case PYLON:Supply+=7;break;
+							case NEXUS:Supply+=10;break;
+							case ASSIMILATOR:break;
+							case ZEALOT:
+							case DRAGOON:
+							case DARK_TEMPLAR:
+							case HIGH_TEMPLAR:availible[GATEWAY]++;break;
 							
-							case SIEGE_TANK:availible[MACHINE_SHOP]++;
-							case VULTURE:
-							case GOLIATH:availible[FACTORY]++;break;
+							case REAVER:
+							case SHUTTLE:
+							case OBSERVER:availible[ROBOTICS_FACILITY]++;break;
 
-							case SCIENCE_VESSEL:
-							case BATTLE_CRUISER:
-							case DROPSHIP:
-							case VALKYRIE:availible[CONTROL_TOWER]++;
-							case WRAITH:availible[STARPORT]++;break;
+							case SCOUT:
+							case CORSAIR:
+							case ARBITER:
+							case CARRIER:availible[STARGATE]++;
 
-			
+				
+							case PLASMA_SHIELDS:
+							case ARMOR:
+							case GROUND_WEAPONS:availible[FORGE]++;break;
 
-				case INFANTRY_ARMOR:
-				case INFANTRY_WEAPONS:availible[ENGINEERING_BAY]++;break;
+							case PLATING:
+							case AIR_WEAPONS:
+							case SINGULARITY_CHARGE:availible[CYBERNETICS_CORE]++;break;
 
-				case VEHICLE_PLATING:
-				case VEHICLE_WEAPONS:
-				case SHIP_PLATING:
-				case SHIP_WEAPONS:availible[ARMORY]++;break;
-
-
-					//UPGRADES SIND FALSCH, AVAILIBLE CHECKEN!
 							default:break;
 						}
 						ready=1;
@@ -784,13 +787,12 @@ void Init()
 	fitness=0;
 	mins=50;
 	gas=0;
-	force[COMMAND_CENTER]=1;
-	availible[COMMAND_CENTER]=1;
-	force[SCV]=4;
-	Supply=6;
-	scvmins=4;
-	scvgas=0;
-	scvbuilding=0;
+	force[NEXUS]=1;
+	availible[NEXUS]=1;
+	force[PROBE]=4;
+	Supply=5;
+	probemins=4;
+	probegas=0;
 	IP=0;
 }
 
