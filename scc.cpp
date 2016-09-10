@@ -1,7 +1,3 @@
-//build translater rein, outputs neu berechnen etc.
-//sloooooooooooooow
-//mal checken was da so lang braucht
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
@@ -11,1239 +7,236 @@
 #include <fstream.h>
 #include <time.h>
 #include <malloc.h>
+#include "main.h"
 
-//#define MAX_NODES 100
-
-#define HIDDEN 32
-
-#define INPUTS 22
-#define OUTPUTS 4
-#define WEIGHT_RANGE 10
-
-
-#define MAX_ORDERS 200
-
-//#define MAX_NODE_DEPTH 3
-
-#define RUNNINGS 10
-
-
-#define MAX_PLAYER 128
-#define MAX_BUILDINGS 10 // How many buildings can you built simultaneously?
-#define BUILDING_TYPES 56  // warum 64 und nicht 51??
-
-#define MAX_TIME 1000
-
-#define MAX_GENERATIONS 100
-#define MAX_VESPENE 1
-
-#define MUTATIONS 1
-
-// vielleicht von der FItness abhaengen lassen!
-
-#define MAX_PARENTS 4
-
-#define MAX_CHILDREN 12
-
-#define CROSS_OVER_EVENT HIDDEN*INPUTS/2
-
-#define ZERGLING 0
-#define HYDRALISK 1
-#define ULTRALISK 2
-#define DRONE 3
-#define DEFILER 4
-#define LURKER 5
-#define OVERLORD 6
-#define MUTALISK 7
-#define GUARDIEN 8
-#define QUEEN 9
-#define SCOURGE 10
-#define DEVOURER 11
-
-#define HATCHERY 12
-#define LAIR 13
-#define HIVE 14
-#define NYDUS_CANAL 15
-#define HYDRALISK_DEN 16
-#define DEFILER_MOUND 17
-#define GREATER_SPIRE 18
-#define QUEENS_NEST 19
-#define EVOLUTION_CHAMBER 20
-#define ULTRALISK_CAVERN 21
-#define SPIRE 22
-#define SPAWNING_POOL 23
-#define CREEP_COLONY 24
-#define SPORE_COLONY 25
-#define SUNKEN_COLONY 26
-#define EXTRACTOR 27
-
-#define VENTRAL_SACKS 28
-#define ANTENNAE 29
-#define PNEUMATIZED_CARAPACE 30
-#define METABOLIC_BOOST 31
-#define ADRENAL_GLANDS 32
-#define MUSCULAR_AUGMENTS 33
-#define GROOVED_SPINES 34
-#define GAMETE_MEIOSIS 35
-#define METASYNAPTIC_NODE 36
-#define CHITINOUS_PLATING 37
-#define ANABOLIC_SYNTHESIS 38
-
-#define BURROWING 39
-#define SPAWN_BROODLING 40
-#define DARK_SWARM 41
-#define PLAGUE 42
-#define CONSUME 43
-#define ENSNARE 44
-#define PARASITE 45
-#define LURKER_ASPECT 46
-
-#define CARAPACE 47
-#define FLYER_CARAPACE 48
-#define MELEE_ATTACKS 49
-#define MISSILE_ATTACKS 50
-#define FLYER_ATTACKS 51
-
-#define ONE_MINERAL_DRONE_TO_GAS 52
-#define ONE_GAS_DRONE_TO_MINERAL 53
-
-#define BREAK_UP_BUILDING_LAST 54
-#define BREAK_UP_BUILDING_FIRST 55
-
-#define LARVA_MAX 400
-
-struct Stats
-{
-	char name[35];
-	unsigned short BT; // Build Time
-	unsigned short mins,gas;
-	unsigned char supply;
-	unsigned char need; // 0: nothing, 1: larvae, 2: drone
-	unsigned char extractor,lair,den,evo,queens,spire,hive,ultra,defiler,greaterspire;
-			// pool, den, evo, hatch, lair, hive, defiler, spire, greater spire, 
-
-};
-
-unsigned char Ziel[BUILDING_TYPES]; // 0,1
-
-unsigned char Vespene_Av;
-
-unsigned long Fitness_All;
-unsigned short Fitness_Average;
-
-unsigned char Build_Av[BUILDING_TYPES]; // 0..BUILDING_TYPES
-unsigned char Max_Building_Types;
-
-//Abkuerzungen! ~ 10 Zeichen
-const Stats stats[BUILDING_TYPES]=
-{
-	{"Zergling",28,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
-	{"Hydralisk",28,75,0,1,1, 1,0,1,0,0,0,0,0,0,0},
-	{"Ultralisk",60,200,200,6,1, 1,1,0,0,1,0,1,1,0,0},
-	{"Drone",20,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
-	{"Defiler",50,50,150,2,1, 1,1,0,0,1,0,1,0,1,0},
-	{"Lurker",40,50,100,2,0, 1,1,1,0,0,0,0,0,0,0},
-	{"Overlord",40,100,0,0,1, 0,0,0,0,0,0,0,0,0,0},
-	{"Mutalisk",40,100,100,2,1, 1,1,0,0,0,1,0,0,0,0},
-	{"Guardien",40,50,100,2,0, 1,1,0,0,1,1,1,0,0,1},
-	{"Queen",50,100,100,2,1, 1,1,0,0,1,0,0,0,0,0},
-	{"Scourge",30,25,75,1,1, 1,1,0,0,0,1,0,0,0,0},
-	{"Devourer",40,100,50,2,0, 1,1,0,0,1,1,1,0,0,1},
-
-	{"Hatchery",120,300,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Lair",100,150,100,0,0, 1,1,0,0,0,0,0,0,0,0},
-	{"Hive",120,200,150,0,0, 1,1,0,0,1,0,1,0,0,0},
-	{"Nydus Canal",40,150,0,0,2, 1,1,0,0,1,0,1,0,0,0},
-	{"Hydralisk den",40,100,50,0,2, 1,0,1,0,0,0,0,0,0,0},
-	{"Defiler mound",60,100,100,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Greater Spire",120,100,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Queen's Nest",60,150,100,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Evolution Chamber",40,75,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Ultralisk Cavern",80,150,200,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Spire",120,200,150,0,2, 1,1,0,0,0,0,0,0,0,0},
-	{"Spawning Pool",80,200,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Creep Colony",20,75,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Spore Colony",20,50,0,0,0, 0,0,0,1,0,0,0,0,0,0},
-	{"Sunken Colony",20,50,0,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Extractor",40,50,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-
-	{"Ventral Sacs",160,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Antennae",133,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Pneumatized Carapace",133,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Metabolic Boost",100,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Adrenal Glands",100,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Muscular Augments",100,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Grooved Spines",100,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Gamete Meiosis",166,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Metasynaptic node",166,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Chitinous Plating",133,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Anabolic Synthesis",133,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-
-	{"Burrowing",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Spawn Broodling",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Dark Swarm",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Plague",100,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Consume",100,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Ensnare",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Parasite",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Lurker Aspect",120,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-
-	{"XCarapace",266,150,150,0,0, 0,0,0,1,0,0,0,0,0,0},
-	{"XFlyer Carapace",266,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"XMelee Attacks",266,100,100,0,0, 0,0,0,1,0,0,0,0,0,0},
-	{"XMissile Attacks",266,100,100,0, 0,0,0,1,0,0,0,0,0,0},
-	{"XFlyer Attacks",266,100,100,0, 0,0,0,0,0,0,0,0,0,0},
-	{"XBring one Mineral Drone to Gas",330,200,200,0, 0,0,0,0,0,0,0,0,0,0},
-	{"XBring one Gas Drone to Mineral",266,100,100,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Cancel Building Last",0,0,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Cancel Building First",0,0,0,0, 0,0,0,0,0,0,0,0,0,0}
-};	//`~~`~~~~
-
-
-const double gasing[5]=
-{
-	0,
-	0.89,
-	1.76,
-	2.30,
-	2.45
-};
-
-const double mining[57]=
-{
-	0,
-	0.66,
-	1.33,
-	2,
-	2.66,
-	3.34,
-	4.01,
-	4.67,
-	5.35,
-	6, //9
-	6.19,
-	6.37,
-	6.53,
-	6.67,
-	6.78, //14
-	7.02,
-	7.24,
-	7.44,
-	7.58, //18
-	7.78,
-	7.96,
-	8.12,
-	8.26,
-	8.37, //23
-	8.41,
-	8.45,
-	8.49,
-	8.52,
-	8.55, //28
-	8.58,
-	8.60,
-	8.62,
-	8.64,
-	8.66, //33
-	8.81,
-	8.96,
-	9.13,
-	9.30,
-	9.49,
-	9.69,
-	9.87, //40
-	10.94,
-	11,
-	11.06,
-	11.12,
-	11.17,
-	11.22,
-	11.27,
-	11.32,
-	11.37,
-	11.42,
-	11.47,
-	11.51,
-	11.55,
-	11.59,
-	10.63,//55
-	11
-};
-
-
-unsigned char run,y,rfit;
-unsigned short afit;
-
-
-
-struct HIDDEN_NODES
-{
-		short Input;
-		signed short CON[OUTPUTS];
-};
-
-struct INPUT_NODES
-{
-		unsigned char Input;
-		signed short CON[HIDDEN];
-};
-
-struct OUTPUT_NODES
-{
-		short Input;
-};
-
-unsigned short generation;
-unsigned char num;
-
-unsigned short x,i,j,A,B;
-
-unsigned char goal[BUILDING_TYPES];
-
-unsigned short Goal_Harvested_Gas,Goal_Harvested_Mins; 
-
-
-
-class Player
-{
-public:
-	unsigned char force[BUILDING_TYPES];
-	unsigned char availible[BUILDING_TYPES];
-
-	unsigned short mins,gas,larvae,order_num;
-	unsigned char dronemins,dronegas,New_Event;
-	short Supply;
-
-	struct Programm
-	{
-		unsigned char order;
-		unsigned short time;
-	} programm[MAX_ORDERS];
-	
-	struct Building
-	{
-		unsigned short RB; // Remaining Buildtime
-		unsigned char type; // Type of Building
-	} building[MAX_BUILDINGS];
-
-	unsigned char nr,ok;
-	unsigned char larva[LARVA_MAX]; // larvacounter for producing larvas
-	unsigned char NewBuildingReady,LastBuildingReady,larvacounter;
-
-	INPUT_NODES INode[INPUTS];
-	OUTPUT_NODES ONode[OUTPUTS];
-	HIDDEN_NODES HNode[HIDDEN];
-	//hidden 2 rein?mmmh... ??
-
-	unsigned short harvested_gas,harvested_mins;
-	unsigned short fitness,timer;
-
-
-	unsigned char RunNeuralNetwork()
-	{
-//		inputs... Situation, Buildings, To build etc., jede Menge :\
-//		Gas,Mins, Dronesmins,Dronesgas, Anzahl der Gebaeude, ...
-
-		//erstmal weniger input
-		// evtl techtree speichern und nur fuer die bo notwendige Gebaeude zulassen . . .
-
-		// TECHTREE:
-		// pool, den, evo, hatch, lair, hive, defiler, spire, greater spire, 
-
-
-
-
-
-//Mutas -> Spire, Lair, Pool, Extractor, Gas, Drones, Hatch, Cancel Building, Overlords
-//Zerglings -> Pool, Drones, Hatch, Overlords, Cancel Building
-//Ultras -> Drones, Pool, Lair, Extractor, Gas, Hatch, Ovis, Cancel Building, Queens nest, Ultra Lair
-//Guardiens -> Mutas + Greater Spire
-
-
-		unsigned short m,g;
-		m=mins/50;
-		g=gas/50;
-	
-		if(m<350)
-		{
-			INode[0].Input=(m%2>0);
-			INode[1].Input=(m%4>1);
-			INode[2].Input=(m%8>3);
-		}
-		else
-		{
-			INode[0].Input=1;INode[1].Input=1;INode[2].Input=1;
-		}
-		
-		if(g<350)
-		{
-			INode[3].Input=(g%2>0);
-			INode[4].Input=(g%4>1);
-			INode[5].Input=(g%8>3);
-		}
-		else
-		{
-			INode[3].Input=1;INode[4].Input=1;INode[5].Input=1;
-		}
-		
-		if(Supply<8)
-		{
-			INode[6].Input=(Supply%2>0);
-			INode[7].Input=(Supply%4>1);
-			INode[8].Input=(Supply%8>3);
-		}
-		else
-		{
-			INode[6].Input=1;INode[7].Input=1;INode[8].Input=1;
-		}
-		
-		if(dronemins<16)
-		{
-			INode[12].Input=(dronemins%2>0);
-			INode[13].Input=(dronemins%4>1);
-			INode[14].Input=(dronemins%8>3);
-			INode[15].Input=(dronemins%16>7);
-		}	
-		else
-		{
-			INode[9].Input=1;INode[10].Input=1;INode[11].Input=1;INode[12].Input=1;
-		}
-		
-	
-		if(dronegas<8)
-		{
-			INode[13].Input=(dronegas%2>0);
-			INode[14].Input=(dronegas%4>1);
-			INode[15].Input=(dronegas%8>3);
-		}
-		else
-		{
-			INode[13].Input=1;INode[14].Input=1;INode[15].Input=1;
-		}
-		
-		if(larvae<8)
-		{
-			INode[16].Input=((larvae%2)>0);
-			INode[17].Input=((larvae%4)>1);
-			INode[18].Input=((larvae%8)>3);
-		}
-		else
-		{
-			INode[16].Input=1;INode[17].Input=1;INode[18].Input=1;
-		}
-
-
-
-		if(force[MUTALISK]<8)
-		{
-			INode[19].Input=((force[MUTALISK]%2)>0);
-			INode[20].Input=((force[MUTALISK]%4)>1);
-			INode[21].Input=((force[MUTALISK]%8)>3);
-		}
-		else
-		{
-			INode[19].Input=1;INode[20].Input=1;INode[21].Input=1;
-		}
-
-//		INode[22].Input=((old%2)>0);
-//		INode[23].Input=((old%4)>1);
-//		INode[24].Input=((old%8)>3);
-//		INode[25].Input=((old%16)>7);
-
-
-
-		for(j=0;j<HIDDEN;j++)
-			HNode[j].Input=0;
-		for(j=0;j<OUTPUTS;j++)
-			ONode[j].Input=0;
-		
-		for(i=0;i<INPUTS;i++)
-			for(j=0;j<HIDDEN;j++)
-				HNode[j].Input+=(INode[i].Input>0)*(INode[i].CON[j]);
-		
-		for(i=0;i<HIDDEN;i++)
-			for(j=0;j<OUTPUTS;j++)
-					ONode[j].Input+=(HNode[i].Input>0)*(HNode[i].CON[j]);
-
-			// Anzahl In UND Outputs nach Max_Building_Types richten!
-
-			return((ONode[0].Input>0)*8+(ONode[1].Input>0)*4+(ONode[2].Input>0)*2+(ONode[3].Input>0));//1..128
-	}
-
-
-
-	void Produce(unsigned char who)
-	{
-		if((who>=CARAPACE)&&(who<=FLYER_ATTACKS))
-		{
-			building[nr].RB=stats[who].BT+force[who]*32;
-			switch(who)
-			{
-				case CARAPACE:
-				case FLYER_CARAPACE:
-				case FLYER_ATTACKS:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
-
-				case MELEE_ATTACKS:
-				case MISSILE_ATTACKS:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
-				default:break;
-			}
-		}	
-		else
-		{
-			building[nr].RB=stats[who].BT+(stats[who].need==2)*3; // 3 Spielsekunden um zum Bauplatz zu fahren 
-			mins-=stats[who].mins;
-		    gas-=stats[who].gas;
-		}
-		building[nr].type=who;
-		Supply-=stats[who].supply;
-		if(stats[who].need==1)
-			larvae--;
-		else
-	    if(stats[who].need==2)
-		{
-			force[DRONE]--;
-			Supply++;
-			if(dronemins>0)
-				dronemins--;
-			else if(dronegas>0)
-				dronegas--;
-		}
-		ok=1;
-	}
-
-	
-	
-	void Build(unsigned char what)
-	{
-		unsigned char m;
-		nr=255;
-		for(m=0;m<MAX_BUILDINGS;m++)
-			if(building[m].RB==0)
-			{
-				nr=m;
-				m=MAX_BUILDINGS;			
-			}
-
-		if( ((Supply>=stats[what].supply) || (stats[what].supply==0)) &&
-			( mins>=stats[what].mins+((what==CARAPACE)||(what==FLYER_CARAPACE)||(what==FLYER_ATTACKS))*force[what]*75+((what==MELEE_ATTACKS)||(what==MISSILE_ATTACKS))*force[what]*50 ) &&
-			( gas>=stats[what].gas+((what==CARAPACE)||(what==FLYER_CARAPACE)||(what==FLYER_ATTACKS))*force[what]*75+((what==MELEE_ATTACKS)||(what==MISSILE_ATTACKS))*force[what]*50 ) &&
-			(nr<255) && 
-			(dronemins+dronegas>=1*(stats[what].need==2)) &&
-			(larvae>=1*(stats[what].need==1))
-		  )
-
-		{
-			switch(what)
-			{
-				case ZERGLING:if(force[SPAWNING_POOL]>0) Produce(what);break;
-				case HYDRALISK:if(force[HYDRALISK_DEN]>0) Produce(what);break;
-				case ULTRALISK:if(force[ULTRALISK_CAVERN]>0) Produce(what);break;
-				case DRONE:Produce(what);break;
-				case DEFILER:if(force[DEFILER_MOUND]>0) Produce(what);break;
-				case LURKER:if((force[LURKER_ASPECT]>0)&&(force[HYDRALISK]>0))
-							{
-								force[HYDRALISK]--;
-								Produce(what);
-							};break;
-				case OVERLORD:Produce(what);break;
-				case MUTALISK:if(force[SPIRE]+force[GREATER_SPIRE]>0) Produce(what);break;
-				case GUARDIEN:if((force[GREATER_SPIRE]>0)&&(force[MUTALISK]>0))
-							  {
-								  force[MUTALISK]--;
-								  Produce(what);
-							  };break;
-				case QUEEN:if(force[QUEENS_NEST]>0) Produce(what);break;
-				case SCOURGE:if(force[SPIRE]+force[GREATER_SPIRE]>0) Produce(what);break;
-				case HATCHERY:Produce(what);break;
-				case LAIR:if((force[HATCHERY]>0)&&(force[SPAWNING_POOL]>0)&&(availible[HATCHERY]>0)) 
-						  {
-							  availible[HATCHERY]--;	  
-							  Produce(what);
-						  }
-							  break;
-				case HIVE:if((force[LAIR]>0)&&(force[QUEENS_NEST]>0)&&(availible[LAIR]>0))
-						  {
-							  availible[LAIR]--;
-							  Produce(what);
-						  }
-						  break;
-				case NYDUS_CANAL:if(force[HIVE]>0) Produce(what);break;
-				case HYDRALISK_DEN:if(force[SPAWNING_POOL]>0) Produce(what);break;
-				case DEFILER_MOUND:if(force[HIVE]>0) Produce(what);break;
-				case GREATER_SPIRE:if((force[SPIRE]>0)&&(availible[SPIRE]>0)&&(force[HIVE]>0)) 
-								   {
-									   availible[SPIRE]--;
-									   Produce(what);
-								   };break;
-				case QUEENS_NEST:if(force[LAIR]>0) Produce(what);break;
-				case EVOLUTION_CHAMBER:Produce(what);break;
-				case ULTRALISK_CAVERN:if(force[HIVE]>0) Produce(what);break;
-				case SPIRE:if(force[LAIR]>0) Produce(what);break;
-				case SPAWNING_POOL:Produce(what);break;
-				case CREEP_COLONY:Produce(what);break;
-				case SPORE_COLONY:if((force[EVOLUTION_CHAMBER]>0)&&(force[CREEP_COLONY]>0))
-								  {
-									  force[CREEP_COLONY]--;
-									  Produce(what);
-								  };break;
-				case SUNKEN_COLONY:if((force[SPAWNING_POOL]>0)&&(force[CREEP_COLONY]>0))
-								   {
-									   force[CREEP_COLONY]--;
-									   Produce(what);
-								   };break;
-				case EXTRACTOR:if(Vespene_Av>0) { Vespene_Av--;Produce(what);}break;//Fehler: wenn 2 extractoren gleichzeitig gebaut werden, gehts hier net richtig!
-				case VENTRAL_SACKS:if((force[VENTRAL_SACKS]==0)&&(force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
-								   {
-									   if(availible[LAIR]>0) availible[LAIR]--;
-									   else availible[HIVE]--;
-									   Produce(what);
-								   };break;
-				case ANTENNAE:if((force[ANTENNAE]==0)&&(force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
-							   {
-								   if(availible[LAIR]>0) availible[LAIR]--;
-								   else availible[HIVE]--;
-								   Produce(what);
-								};break;
-				case PNEUMATIZED_CARAPACE:if((force[PNEUMATIZED_CARAPACE]==0)&&(force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
-											{
-												if(availible[LAIR]>0) availible[LAIR]--;
-												else availible[HIVE]--;
-												Produce(what);
-											};break;
-				case METABOLIC_BOOST:if((force[METABOLIC_BOOST]==0)&&(force[SPAWNING_POOL]>0)&&(availible[SPAWNING_POOL]>0))
-									 {
-										 availible[SPAWNING_POOL]--;
-										 Produce(what);
-									 }
-					break;
-				case ADRENAL_GLANDS:if((force[ADRENAL_GLANDS]==0)&&(force[HIVE]>0)&&(force[SPAWNING_POOL]>0)&&(availible[SPAWNING_POOL]>0))
-									{
-									availible[SPAWNING_POOL]--;
-									Produce(what);
-								}
-								break;
-			case MUSCULAR_AUGMENTS:
-			case GROOVED_SPINES:if((force[what]==0)&&(force[HYDRALISK_DEN]>0)&&(availible[HYDRALISK_DEN]>0))
-									 {
-										availible[HYDRALISK_DEN]--;
-										Produce(what);
-									 };break;
-			case GAMETE_MEIOSIS:break;
-			case METASYNAPTIC_NODE:break;
-			case CHITINOUS_PLATING:if( (force[CHITINOUS_PLATING]==0)&&(force[ULTRALISK_CAVERN]>0)&&(availible[ULTRALISK_CAVERN]>0)) 
-								   {
-									   availible[ULTRALISK_CAVERN]--;
-									   Produce(what);
-								   }
-									break;
-			case ANABOLIC_SYNTHESIS:if( (force[ANABOLIC_SYNTHESIS]==0)&&(force[ULTRALISK_CAVERN]>0)&&(availible[ULTRALISK_CAVERN]>0)) 
-								   {
-									   availible[ULTRALISK_CAVERN]--;
-									   Produce(what);
-								   }
-								break;
-			case BURROWING:if((force[ANTENNAE]==0)&&(force[HATCHERY]+force[LAIR]+force[HIVE]>0)&&(availible[HATCHERY]+availible[LAIR]+availible[HIVE]>0)) 
-						   {
-							   if(availible[HATCHERY]>0)
-								   availible[HATCHERY]--;
-							   else if(availible[LAIR]>0)
-								   availible[LAIR]--;
-							   else availible[HIVE]--;
-							   Produce(what);
-						   }
-							   break;
-			case SPAWN_BROODLING:if((force[SPAWN_BROODLING]==0)&&(force[QUEENS_NEST]>0)&&(availible[QUEENS_NEST]>0))
-								 {
-									 availible[QUEENS_NEST]--;
-									 Produce(what);
-								 }
-									 break;
-			case DARK_SWARM:
-			case PLAGUE:
-			case CONSUME:if((force[what]==0)&&(force[DEFILER_MOUND]>0)&&(availible[DEFILER_MOUND]>0))
-						 {
-								availible[DEFILER_MOUND]--;
-								Produce(what);
-							}
-							 break;
-
-
-			case ENSNARE:
-			case PARASITE:if((force[what]==0)&&(force[QUEENS_NEST]>0)&&(availible[QUEENS_NEST]>0))
-						  {
-							  availible[QUEENS_NEST]--;
-							  Produce(what);
-						  }
-							  break;
-
-			case LURKER_ASPECT:if((force[LURKER_ASPECT]==0)&&(force[HYDRALISK_DEN]>0)&&(force[LAIR]>0)&&(availible[HYDRALISK_DEN]>0))
-							   {
-								   availible[HYDRALISK_DEN]--;
-								   Produce(what);
-							   }
-								   break;
-			case CARAPACE:
-			case MELEE_ATTACKS:
-			case MISSILE_ATTACKS:if((force[what]<3)&&(force[EVOLUTION_CHAMBER]>0)&&(availible[EVOLUTION_CHAMBER]>0)&&(force[HATCHERY+force[what]]>0))
-									 {
-									  availible[EVOLUTION_CHAMBER]--;
-									  Produce(what);
-									  }
-									 break;
-			case FLYER_CARAPACE:
-			case FLYER_ATTACKS:if((force[what]<3)&&(force[SPIRE]>0)&&(availible[SPIRE]>0)&&(force[HATCHERY+force[what]]>0))
-						 {
-							  if(availible[SPIRE]>0)
-								  availible[SPIRE]--;
-							  else availible[GREATER_SPIRE]--;
-							  Produce(what);
-						  }
-							   break;
-
-				default:break;
-			}	
-		}
-	}
-
-	
-	void Calculate()
-	{
-		unsigned char ready,BuildingRunning,program;
-		unsigned short min,n,oldmins,oldgas,ll;
-		ready=0;
-		timer=0;
-		harvested_gas=0;
-		harvested_mins=0;
-		New_Event=1; // nur fuer erste Aktvierung!
-		Vespene_Av=MAX_VESPENE;		
-		while((timer<MAX_TIME) && (ready==0))
-		{			
-			NewBuildingReady=0;
-			BuildingRunning=0;
-			ok=0;
-
-
-			oldmins=mins/50;oldgas=gas/50;
-
-			if(dronemins<56)
-			{
-				mins+=mining[dronemins]; //~~~~~~~double wegmachen
-				harvested_mins+=mining[dronemins];
-			}
-			else 
-			{
-				mins+=mining[56];
-				harvested_mins+=mining[56];
-			}
-			if(dronegas<5)
-			{
-				gas+=gasing[dronegas];
-				harvested_gas+=gasing[dronegas];
-			}
-			else
-			{
-				gas+=gasing[4];
-				harvested_gas+=gasing[4];
-			}
-
-			if( (oldmins<(mins/50)) || (oldgas<(gas/50)) )
-				New_Event=1;
-
-			for(j=0;j<MAX_BUILDINGS;j++)
-			{
-				if(building[j].RB>0)
-				{
-					BuildingRunning=1;
-					building[j].RB--;
-					if(building[j].RB==0)
-					{
-						NewBuildingReady=1;
-						LastBuildingReady=1;
-						New_Event=1;
-						for(i=0;i<MAX_BUILDINGS;i++)
-							LastBuildingReady&=(building[i].RB==0);
-						force[building[j].type]++;
-						availible[building[j].type]++;
-
-						switch(building[j].type)
-						{
-							case DRONE:dronemins++;break;
-							case OVERLORD:Supply+=8;break;
-							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;break;
-							case EXTRACTOR:break;		
-							case LAIR:force[HATCHERY]--;availible[LAIR]++;break;
-							case HIVE:force[LAIR]--;availible[HIVE]++;break;
-							case GREATER_SPIRE:force[SPIRE]--;break;
-							case VENTRAL_SACKS:
-							case ANTENNAE:
-							case PNEUMATIZED_CARAPACE:
-  								   if(availible[LAIR]<force[LAIR])
-										availible[LAIR]++;
-								   else availible[HIVE]++;
-								   break;
-							case METABOLIC_BOOST:
-							case ADRENAL_GLANDS:availible[SPAWNING_POOL]++;break;
-							case MUSCULAR_AUGMENTS:
-							case GROOVED_SPINES:availible[HYDRALISK_DEN]++;break;
-							case GAMETE_MEIOSIS:break;
-							case METASYNAPTIC_NODE:break;
-							case CHITINOUS_PLATING:
-							case ANABOLIC_SYNTHESIS:availible[ULTRALISK_CAVERN]++;break;
-
-							case BURROWING:
-							   if(availible[HATCHERY]<force[HATCHERY])
-								   availible[HATCHERY]++;
-							   else if(availible[LAIR]<force[LAIR])
-								   availible[LAIR]++;
-							   else availible[HIVE]++;
-							   break;
-							case SPAWN_BROODLING:availible[QUEENS_NEST]++;break;
-							case DARK_SWARM:
-							case PLAGUE:
-							case CONSUME:availible[DEFILER_MOUND]++;break;
-							case ENSNARE:
-							case PARASITE:availible[QUEENS_NEST]++;break;
-							case LURKER_ASPECT:availible[HYDRALISK_DEN]++;break;
-							
-							case CARAPACE:
-							case MELEE_ATTACKS:
-							case MISSILE_ATTACKS:availible[EVOLUTION_CHAMBER]++;break;
-
-							case FLYER_CARAPACE:
-							case FLYER_ATTACKS:
-								if(availible[SPIRE]<force[SPIRE])
-									availible[SPIRE]++;
-								else availible[GREATER_SPIRE]++;break;
-							default:break;
-						}
-					}
-				}
-			}
-
-			for(i=0;i<larvacounter;i++)
-				if(larvae<(force[HATCHERY]+force[LAIR]+force[HIVE])*3)
-				{
-					larva[i]--;
-					if(larva[i]==0)
-					{
-						larvae++;
-						larva[i]=20;
-						New_Event=1;
-					}
-				}
-
-//			Wann isses ueberhaupt notwendig neuralnetwork aufzurufen?
-//			Gebaeude fertig
-//			50 Mineralien/Gas gesammelt 
-//			Neue Larve
-
-			if(New_Event==1)
-//			for(ll=0;ll<2;ll++)
-			{
-//				if(ll==0)
-//					program=RunNeuralNetwork(64);
-				//else 
-				program=RunNeuralNetwork();
-				if(program<Max_Building_Types)
-					program=Build_Av[program];
-				else program=255;
-				
-
-				if((program>=ONE_MINERAL_DRONE_TO_GAS)&&(program<=BREAK_UP_BUILDING_LAST))
-				{
-					switch(program)
-					{
-						case ONE_MINERAL_DRONE_TO_GAS:if((dronemins>0)&&(force[EXTRACTOR]>0))
-										  {
-											  ok=1;
-											  dronemins--;
-											  dronegas++;
-										  }
-											  break;
-							case ONE_GAS_DRONE_TO_MINERAL:if(dronegas>0)
-										  {
-											  ok=1;
-											  dronegas--;
-											  dronemins++;
-										  }
-								break;
-
-						case BREAK_UP_BUILDING_FIRST:	// am weitesten fortgeschritten
-							if(BuildingRunning==1)
-							{
-										ok=1;
-										min=5000;
-										n=0;
-										for(i=0;i<MAX_BUILDINGS;i++)
-										if(building[i].RB>0)									
-										{
-											if((stats[building[i].type].need==2) && (building[i].RB<min)) // warum need=2? nur bei gebaeuden sinnvoll!
-											{
-												min=building[i].RB;
-												n=i;
-											}
-										}
-										if(min<5000)
-											{
-												dronemins++;
-												mins+=stats[building[n].type].mins*0.75;
-												gas+=stats[building[n].type].gas*0.75;
-												Supply--;
-												force[DRONE]++;
-												if(building[n].type==EXTRACTOR)
-													Vespene_Av++;
-												building[n].type=255;
-												building[n].RB=0;
-											}
-									}
-										break;
-						case BREAK_UP_BUILDING_LAST:   // gerade angefangen
-							if(BuildingRunning==1)
-							{
-										ok=1;
-										min=5000;
-										n=0;
-										for(i=0;i<MAX_BUILDINGS;i++)
-										if(building[i].RB>0)
-										{
-											if((stats[building[i].type].need==2) && (stats[building[i].type].BT-building[i].RB<min)) // warum need=2? nur bei gebaeuden sinnvoll!
-											{
-												min=stats[building[i].type].BT-building[i].RB;
-												n=i;
-											}
-										}
-										if(min<5000)
-											{
-												dronemins++;
-												mins+=stats[building[n].type].mins*0.75;
-												gas+=stats[building[n].type].gas*0.75;
-												Supply--;
-												force[DRONE]++;
-												if(building[n].type==EXTRACTOR)
-													Vespene_Av++;
-												building[n].type=255;
-												building[n].RB=0;
-											}
-							}
-										break;
-						default:break;
-					}
-				}
-
-			
-			else
-				Build(program);
-
-			if(ok==1)
-			{
-				programm[order_num].time=timer;
-				programm[order_num].order=program;
-				order_num++;
-			} else programm[order_num].order=255;
-
-			ready=1;
-			for(i=0;i<BUILDING_TYPES;i++)
-				ready&=(goal[i]<=force[i]);
-			}
-			
-			timer++;
-			New_Event=0;
-		}
-
-		
-
-
-
-
-
-
-
-	fitness=0;
-
-	if(ready==0)
-	{
-		timer=MAX_TIME;
-		//Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
-		
-		for(i=0;i<BUILDING_TYPES;i++)		
-			if(goal[i]>0)
-			{
-	 			if(goal[i]>force[i])
-					fitness+=((force[i]*100)/goal[i]);//*(goal[i]-force[i]);
-					else fitness+=100;
-			}
-			
-
-	// Ziele unterschiedlich bewerten!
-			// sqrt nochmal ueberlegen mmmh :| programm muss halt schritt fuer schritt belohnt werden ^^ vielleicht je nach techstufe, also z.B. pool: 1, lair: 2, spire: 3~~~~
-
-		if(Goal_Harvested_Gas>harvested_gas)
-			fitness+=(harvested_gas*100)/Goal_Harvested_Gas;
-		else fitness+=100;
-
-		if(Goal_Harvested_Mins>harvested_mins)
-			fitness+=(harvested_mins*100)/Goal_Harvested_Mins;
-		else fitness+=100;
-		//!!!!!!!!!!!!!!!!!
-
-	}
-	else
-	{
-		fitness=MAX_TIME-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
-		fitness+=200;//mins, gas
-		for(i=0;i<BUILDING_TYPES;i++)
-	 		if(goal[i]>0)
-				fitness+=100;
-	}
-}
-
-
-void Mutate()
-{
-	for(j=0;j<MUTATIONS;j++)
-	{
-		x=rand()%INPUTS;y=rand()%HIDDEN;
-		if(INode[x].CON[y]<WEIGHT_RANGE)
-			INode[x].CON[y]++;
-		x=rand()%INPUTS;y=rand()%HIDDEN;
-		if(INode[x].CON[y]>-WEIGHT_RANGE)
-			INode[x].CON[y]--;
-		x=rand()%INPUTS;y=rand()%HIDDEN;
-		if(HNode[x].CON[y]<WEIGHT_RANGE)
-			HNode[x].CON[y]++;
-		x=rand()%INPUTS;y=rand()%HIDDEN;
-		if(HNode[x].CON[y]>-WEIGHT_RANGE)
-			HNode[x].CON[y]--;
-	}
-}
-
-void Init()
-{
-	for(i=0;i<BUILDING_TYPES;i++)
-	{
-		force[i]=0;
-		availible[i]=0;
-	}
-	for(i=0;i<MAX_BUILDINGS;i++)
-	{
-		building[i].RB=0;
-		building[i].type=255;
-	}
-
-	for(i=0;i<LARVA_MAX;i++)
-		larva[i]=20;
-
-	fitness=0;
-	order_num=0;
-	
-	mins=50;
-	gas=0;
-	larvae=3;
-	force[HATCHERY]=1;
-	availible[HATCHERY]=1;
-	force[DRONE]=4;
-	force[OVERLORD]=1;
-	larvacounter=1;
-	Supply=5;
-	dronemins=4;
-	dronegas=0;
-	NewBuildingReady=0;
-
-	for(i=0;i<INPUTS;i++)
-		INode[i].Input=0;
-	for(i=0;i<HIDDEN;i++)
-		HNode[i].Input=0;
-	for(i=0;i<OUTPUTS;i++)
-		ONode[i].Input=0;
-}
-
-
-void Restart()
-{
-	for(i=0;i<INPUTS;i++)
-	{
-		INode[i].Input=0;
-		for(j=0;j<HIDDEN;j++)
-			INode[i].CON[j]=rand()%(1+2*WEIGHT_RANGE)-WEIGHT_RANGE;
-	}
-
-	for(i=0;i<HIDDEN;i++)
-	{
-		HNode[i].Input=0;
-		for(j=0;j<OUTPUTS;j++)
-			HNode[i].CON[j]=rand()%(1+2*WEIGHT_RANGE)-WEIGHT_RANGE;
-	}
-
-	for(i=0;i<OUTPUTS;i++)
-		ONode[i].Input=0;
-
-	afit=0;
-	for(i=0;i<MAX_ORDERS;i++)
-	{
-		programm[i].order=255;
-		programm[i].time=0;
-	}
-}
-};
-
-
+unsigned short run,rfit;
 Player *player[MAX_PLAYER];
 Player *tempp;
 Player *Save[RUNNINGS];
 
+const COORD coord={0,0},coord2={25,22},c11={3,8},c12={3,9},c13={3,10},c14={3,11},c15={3,12},c21={12,8},c22={12,9},c23={12,10},c24={12,11},c25={12,12},c31={22,8},c32={22,9},c33={22,10},c34={22,11},c35={22,12};
 int main(int argc, char* argv[])
 {
-	unsigned char calc,l;
-	unsigned short q,k;
+	unsigned char l;
+	unsigned short k,n,pos;
+	unsigned char * buffer;
+	long size;
 
-	
-
+	generation=0;
 	for(i=0;i<BUILDING_TYPES;i++)
-		goal[i]=0;
-//	goal[DRONE]=10;
-//	goal[OVERLORD]=2;
-//	goal[LAIR]=1;
-//	goal[MUTALISK]=6;
-//	goal[SUNKEN_COLONY]=1; //checken!
-//	goal[MUSCULAR_AUGMENTS]=1;
-//	goal[EXTRACTOR]=1;
-// 	goal[LAIR]=1;
-	goal[SPIRE]=1;
-	goal[SPAWNING_POOL]=1;
-//	goal[HYDRALISK_DEN]=1;
-//	goal[HYDRALISK]=12;
-	goal[ZERGLING]=12;
+	{
+		goal[i].what=0;
+		goal[i].time=0;
+		Ziel[i]=0;
 
-	ofstream out_file("zergbo2.txt");
-
+	}
 	Goal_Harvested_Mins=0;
 	Goal_Harvested_Gas=0;
 
-	for(i=0;i<BUILDING_TYPES;i++)
+	n=1;
+	pos=0;
+	Max_Time=0;
+	Max_Generations=0;
+	Max_Vespene=0;
+	Mutations=0;
+	Mut_Rate=0;
+	Max_Build_Types=0;
+	run=0;
+	afit=0;
+	rfit=0;
+
+	HANDLE hStdOut=GetStdHandle(STD_OUTPUT_HANDLE);
+	srand(time(NULL));  
+	ifstream file ("goal_z.txt", ios::in|ios::binary|ios::ate);
+	ofstream out_file("bo_z.txt");
+
+	size = file.tellg();
+	file.seekg (0, ios::beg);
+	buffer = new unsigned char [size];
+	file.read (buffer, size);
+	file.close();
+
+	while(n<size)
 	{
-		Goal_Harvested_Gas+=(goal[i]*stats[i].gas);
-		Goal_Harvested_Mins+=(goal[i]*stats[i].mins);
+		if((buffer[n]>=48)&&(buffer[n]<58))
+		{
+			if(Max_Time==0)
+			{
+				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				{
+					Max_Time=(buffer[n]-48)*600+(buffer[n+1]-48)*60;
+					n++;
+				}
+				else
+					Max_Time=(buffer[n]-48)*60;
+			}
+			else if(Max_Generations==0)
+				Max_Generations=(buffer[n]-48)*50+50;
+			else if(Max_Vespene==0)
+				Max_Vespene=(buffer[n]-48);
+			else if(Mutations==0)
+			{
+				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				{
+					Mutations=(buffer[n]-48)*10+(buffer[n+1]-48);
+					n++;
+				}
+				else
+					Mutations=(buffer[n]-48);
+			}
+			else if(Mut_Rate==0)
+			{
+				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				{
+					Mut_Rate=(buffer[n]-48)*10+(buffer[n+1]-48);
+					n++;
+				}
+				else
+					Mut_Rate=(buffer[n]-48);
+			}
+			else
+			{
+				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				{
+					goal[pos].what=(buffer[n]-48)*10+(buffer[n+1]-48);
+					n++;
+				}
+				else
+					goal[pos].what=buffer[n]-48;
+				pos++;
+			}
+		}
+		n++;
 	}
 
 
-	for(i=0;i<BUILDING_TYPES;i++)
-		Ziel[i]=0;
-
-	if(stats[(goal[EXTRACTOR]>0)].extractor==1)
-		Ziel[EXTRACTOR]=1;
-	if(stats[(goal[LAIR]>0)].lair==1)
-		Ziel[LAIR]=1;
-	if(stats[(goal[HYDRALISK_DEN]>0)].den==1)
-		Ziel[HYDRALISK_DEN]=1;
-	if(stats[(goal[EVOLUTION_CHAMBER]>0)].evo==1)
-		Ziel[EVOLUTION_CHAMBER]=1;
-	if(stats[(goal[QUEENS_NEST]>0)].queens==1)
-		Ziel[QUEENS_NEST]=1;
-	if(stats[(goal[SPIRE]>0)].spire==1)
-		Ziel[SPIRE]=1;
-	if(stats[(goal[HIVE]>0)].hive==1)
-		Ziel[HIVE]=1;
-	if(stats[(goal[ULTRALISK_CAVERN]>0)].ultra==1)
-		Ziel[ULTRALISK_CAVERN]=1;
-	if(stats[(goal[DEFILER_MOUND]>0)].defiler==1)
-		Ziel[DEFILER_MOUND]=1;
-	if(stats[(goal[GREATER_SPIRE]>0)].greaterspire==1)
-		Ziel[GREATER_SPIRE]=1;
+//Air Defense, Ground Defense faktor noch rein
 
 	for(i=0;i<BUILDING_TYPES;i++)
-		if(goal[i]>0)
+	{
+		Goal_Harvested_Gas+=(goal[i].what*stats[i].gas);
+		Goal_Harvested_Mins+=(goal[i].what*stats[i].mins)+(stats[goal[i].what].need==2)*50;
+	}
+
+	for(i=0;i<BUILDING_TYPES;i++)
+		if(goal[i].what>0)
+		{
+			if(stats[i].extractor==1) Ziel[EXTRACTOR]=1;
+			if(stats[i].lair==1) Ziel[LAIR]=1;
+			if(stats[i].den==1) Ziel[HYDRALISK_DEN]=1;
+			if(stats[i].evo==1)	Ziel[EVOLUTION_CHAMBER]=1;
+			if(stats[i].queens==1) Ziel[QUEENS_NEST]=1;
+			if(stats[i].spire==1) Ziel[SPIRE]=1;
+			if(stats[i].hive==1) Ziel[HIVE]=1;
+			if(stats[i].ultra==1) Ziel[ULTRALISK_CAVERN]=1;
+			if(stats[i].defiler==1) Ziel[DEFILER_MOUND]=1;
+			if(stats[i].greaterspire==1) Ziel[GREATER_SPIRE]=1;
+		}
+
+	for(i=0;i<BUILDING_TYPES;i++)
+		if(goal[i].what>0)
 			Ziel[i]=1;	
+
+	if(goal[SUNKEN_COLONY].what>0) Ziel[CREEP_COLONY]=1;
+	if(goal[SPORE_COLONY].what>0)
+	{
+		Ziel[CREEP_COLONY]=1;
+		Ziel[EVOLUTION_CHAMBER]=1;
+	}
 
 	Ziel[OVERLORD]=1;
 	Ziel[DRONE]=1;
 	Ziel[SPAWNING_POOL]=1;
 	Ziel[EXTRACTOR]=1;
 	Ziel[HATCHERY]=1;
-
+	Ziel[CREEP_COLONY]=1;
 	Ziel[ONE_MINERAL_DRONE_TO_GAS]=1;
 	Ziel[ONE_GAS_DRONE_TO_MINERAL]=1;
-	Ziel[BREAK_UP_BUILDING_LAST]=1;
-	Ziel[BREAK_UP_BUILDING_FIRST]=1;
-
-	Max_Building_Types=0;
+	Ziel[BREAK_UP_BUILDING]=1;
 
 	for(i=0;i<BUILDING_TYPES;i++)
 		if(Ziel[i]==1)
 		{
-			Build_Av[Max_Building_Types]=i;
-			Max_Building_Types++;
+			Build_Av[Max_Build_Types]=i;
+			Max_Build_Types++;
 		}
 
+	for(i=0;i<Max_Build_Types;i++)
+		Build_Bv[Build_Av[i]]=i;
 
-
-//	Input noch rein (vom Output her die Datei, damit man von einem evtl alten Programm ein neues Problem angehen kann)
-//Ausserdem: Goal Input datei, also insgesamt 2 Dateien...
-
-	COORD c11={3,8},c12={3,9},c13={3,10},c14={3,11},c15={3,12},c21={12,8},c22={12,9},c23={12,10},c24={12,11},c25={12,12},c31={22,8},c32={22,9},c33={22,10},c34={22,11},c35={22,12};
-
-	calc=0;
-
-	generation=0;
-	srand(time(NULL));
-	HANDLE hStdOut=GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD coord={0,0};
-	COORD coord2={25,22};
-	SetConsoleCursorPosition(hStdOut,coord2);
-	printf("This is Freeware. Brought to you by clawsoftware.de");
-
-	for(l=0;l<MAX_PLAYER;l++)
+		for(l=0;l<MAX_PLAYER;l++)
 	{
 		player[l]=(Player*)malloc(sizeof(Player));
 		player[l]->Restart();
 	}
-	run=0;
-
 	for(l=0;l<RUNNINGS;l++)
 	{
 		Save[l]=(Player*)malloc(sizeof(Player));
 		Save[l]->Restart();
-		for(q=0;q<MAX_ORDERS;q++)
-		{
-			Save[l]->programm[q].order=255;
-			Save[l]->programm[q].time=0;
-		}
 	}
 
-	SetConsoleCursorPosition(hStdOut,coord);
-		
-	printf("Calculating [");
-	for(l=0;l<MAX_PLAYER/2;l++)
-		printf("%c",calc);
-	printf("]\n");
 
+	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
+	SetConsoleCursorPosition(hStdOut,coord);
+
+	printf("Welcome to the StarCraft Evolution Chamber!\n");
+	printf("May the BO be with you ;-)\n");
+	printf("Check the ""goal_z.txt"" file to change goals of the BO\n");
+	if((Max_Time==0)||(Max_Time>1800))
+	{
+		printf("Max_Time out of Range, please check ""goal_z.txt"", first number in file (use at maximum 30 minutes))\n");
+		printf("... Continuing using 30 minutes as maximum\n");
+		Max_Time=1800;
+	}
+	else
+	printf("Max Time        : %i   \n",Max_Time);
+	printf("Max Generations : %i   \n",Max_Generations);
+	printf("Max Vespene     : %i   \n",Max_Vespene);
+	printf("Mutations       : %i   \n",Mutations);
+	printf("Mutation Rate   : %i   \n",Mut_Rate);
+	printf("\n");
+	printf("Goals (as stated in ""goal_z.txt"")\n");
+	for(i=0;i<BUILDING_TYPES;i++)
+		if(goal[i].what>0)
+			printf("- %s : %i    \n",stats[i].name,goal[i].what);
+	printf("\n");
+	printf(" Let the calculation begin . . . \n");
+	printf(" (Please read the ""readme.txt"" for help)\n");
+
+	l=getch();
+
+	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
+
+	SetConsoleCursorPosition(hStdOut,coord2);
+	printf("This is Freeware. Brought to you by clawsoftware.de\n");
+	printf("Press any key to cancel calculation. You will find then a solution in bo_z.txt.");
+	SetConsoleCursorPosition(hStdOut,coord);
+
+	printf("Calculating [");
+	for(l=0;l<MAX_PLAYER/4;l++)
+		printf("%c",176);
+	printf("]\n");
 
 	while( (kbhit()==0) && (run<RUNNINGS))
 	{
+		SetConsoleCursorPosition(hStdOut,coord);
+		Fitness_All=0;
+		printf("Calculating [");
+		x=0;
+
 		for(l=0;l<MAX_PLAYER;l++)
 			player[l]->Init();
 
-		for(l=1;l<MAX_PLAYER;l++)
+		for(l=0;l<MAX_PLAYER;l++)
 			player[l]->Mutate();
 	
-		SetConsoleCursorPosition(hStdOut,coord);
 		
-		calc++;
-		if(calc>2)
-			calc=1;
-		
-		printf("Calculating [");
-
 		for(l=0;l<MAX_PLAYER;l++)
 		{
 			player[l]->Calculate();
-			if(l%2==0) printf("%c",calc);
+			if(l%4==0) printf("%c",rand()%3+176);
 		}
-
 		printf("]\n");
-
-
-
-		
 
 		for(i=0;i<MAX_PLAYER-3;i++)
 			for(j=0;j<MAX_PLAYER-i-1;j++)
@@ -1254,14 +247,9 @@ int main(int argc, char* argv[])
 					player[j+1]=tempp;
 				}	
 
-		Fitness_All=0;
-
 		for(i=0;i<MAX_PLAYER;i++)
 			Fitness_All+=player[i]->fitness*(MAX_PLAYER-i);
-
 		Fitness_Average=2*Fitness_All/(MAX_PLAYER*MAX_PLAYER);
-
-		
 		if(Fitness_Average>afit)
 		{
 			afit=Fitness_Average;
@@ -1271,288 +259,161 @@ int main(int argc, char* argv[])
 		generation++;
 		rfit++;
 		printf("\n");
-		printf("%i runs remaining (this run %i generations remaining)      \n",RUNNINGS-run,MAX_GENERATIONS-rfit);
+		printf("%i runs remaining (this run at minimum %i generations remaining)   \n",RUNNINGS-run,Max_Generations-rfit);
 		printf("\n");
 		printf("Overview Generation %i / Average Fitness: %i  (Best: %i)  :         \n",generation,Fitness_Average,afit);
-		printf("Average Fitness Growth: %i     \n",Fitness_Average/generation);
+		printf("   \n");
 
 		printf("[fitness]  [time]  [position]\n");
 		printf("----------------------------------------\n");
 
+		SetConsoleCursorPosition(hStdOut,c11);printf("%4.4i",player[0]->fitness);
+		SetConsoleCursorPosition(hStdOut,c12);printf("%4.4i",player[MAX_PLAYER/16]->fitness);
+		SetConsoleCursorPosition(hStdOut,c13);printf("%4.4i",player[MAX_PLAYER/8]->fitness);
+		SetConsoleCursorPosition(hStdOut,c14);printf("%4.4i",player[MAX_PLAYER/4]->fitness);
+		SetConsoleCursorPosition(hStdOut,c15);printf("%4.4i",player[MAX_PLAYER/2]->fitness);
 
-	SetConsoleCursorPosition(hStdOut,c11);printf("%i",player[0]->fitness);
-	/*SetConsoleCursorPosition(hStdOut,c12);printf("%i",player[MAX_PLAYER/16]->fitness);
-	SetConsoleCursorPosition(hStdOut,c13);printf("%i",player[MAX_PLAYER/8]->fitness);
-	SetConsoleCursorPosition(hStdOut,c14);printf("%i",player[MAX_PLAYER/4]->fitness);
-	SetConsoleCursorPosition(hStdOut,c15);printf("%i",player[MAX_PLAYER/2]->fitness);
+		SetConsoleCursorPosition(hStdOut,c21);printf("%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);
+		SetConsoleCursorPosition(hStdOut,c22);printf("%.2i:%.2i",player[MAX_PLAYER/16]->timer/60,player[MAX_PLAYER/16]->timer%60);
+		SetConsoleCursorPosition(hStdOut,c23);printf("%.2i:%.2i",player[MAX_PLAYER/8]->timer/60,player[MAX_PLAYER/8]->timer%60);
+		SetConsoleCursorPosition(hStdOut,c24);printf("%.2i:%.2i",player[MAX_PLAYER/4]->timer/60,player[MAX_PLAYER/4]->timer%60);
+		SetConsoleCursorPosition(hStdOut,c25);printf("%.2i:%.2i",player[MAX_PLAYER/2]->timer/60,player[MAX_PLAYER/2]->timer%60);	
 
-	SetConsoleCursorPosition(hStdOut,c21);printf("%i:%i",player[0]->timer/60,player[0]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c22);printf("%i:%i",player[MAX_PLAYER/16]->timer/60,player[MAX_PLAYER/16]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c23);printf("%i:%i",player[MAX_PLAYER/8]->timer/60,player[MAX_PLAYER/8]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c24);printf("%i:%i",player[MAX_PLAYER/4]->timer/60,player[MAX_PLAYER/4]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c25);printf("%i:%i",player[MAX_PLAYER/2]->timer/60,player[MAX_PLAYER/2]->timer%60);
+		SetConsoleCursorPosition(hStdOut,c31);printf("#1");
+		SetConsoleCursorPosition(hStdOut,c32);printf("#%i",MAX_PLAYER/16);
+		SetConsoleCursorPosition(hStdOut,c33);printf("#%i",MAX_PLAYER/8);
+		SetConsoleCursorPosition(hStdOut,c34);printf("#%i",MAX_PLAYER/4);
+		SetConsoleCursorPosition(hStdOut,c35);printf("#%i",MAX_PLAYER/2);
 
-	SetConsoleCursorPosition(hStdOut,c31);printf("#1");
-	SetConsoleCursorPosition(hStdOut,c32);printf("#%i",MAX_PLAYER/16);
-	SetConsoleCursorPosition(hStdOut,c33);printf("#%i",MAX_PLAYER/8);
-	SetConsoleCursorPosition(hStdOut,c34);printf("#%i",MAX_PLAYER/4);
-	SetConsoleCursorPosition(hStdOut,c35);printf("#%i",MAX_PLAYER/2);*/
-
-	SetConsoleCursorPosition(hStdOut,c12);printf("%i",player[1]->fitness);
-	SetConsoleCursorPosition(hStdOut,c13);printf("%i",player[2]->fitness);
-	SetConsoleCursorPosition(hStdOut,c14);printf("%i",player[3]->fitness);
-	SetConsoleCursorPosition(hStdOut,c15);printf("%i",player[4]->fitness);
-
-	SetConsoleCursorPosition(hStdOut,c21);printf("%i:%i",player[0]->timer/60,player[0]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c22);printf("%i:%i",player[1]->timer/60,player[1]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c23);printf("%i:%i",player[2]->timer/60,player[2]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c24);printf("%i:%i",player[3]->timer/60,player[3]->timer%60);
-	SetConsoleCursorPosition(hStdOut,c25);printf("%i:%i",player[4]->timer/60,player[4]->timer%60);
-
-	SetConsoleCursorPosition(hStdOut,c31);printf("#1");
-	SetConsoleCursorPosition(hStdOut,c32);printf("#2");
-	SetConsoleCursorPosition(hStdOut,c33);printf("#3");
-	SetConsoleCursorPosition(hStdOut,c34);printf("#4");
-	SetConsoleCursorPosition(hStdOut,c35);printf("#5");
-
-//	for(i=0;i<(Fitness_Average/4);i++)
-//		out_file<<"*";
-//	out_file<<"\n";
-
-	printf("\n");
-	printf("Build Order of the best individual:");
-
+		printf("\n");
+		printf("   [Build Order of the best individual]");
+		//printf("\n");
 
 		x=0;
-		printf("\n");
-
-		for(i=0;(i<MAX_ORDERS)&&(player[0]->programm[i].time<player[0]->timer);i++)	
+		for(i=0;i<MAX_LENGTH;i++)
 		{
-			if(player[0]->programm[i].order<BUILDING_TYPES)
-			{
-				x++;
-				printf("%c%c,",stats[player[0]->programm[i].order].name[0],stats[player[0]->programm[i].order].name[2]);
-				if(x%20==0) printf("\n");
-			}
+			COORD c={((x/8)*10),14+x%8};
+			x++;
+			SetConsoleCursorPosition(hStdOut,c);
+			if((Build_Av[player[0]->program[i]]<BUILDING_TYPES)&&((player[0]->timep[i]>0)||(i==0))&&(player[0]->timep[i]<player[0]->timer))
+				printf("%2i.%s",x,kurz[Build_Av[player[0]->program[i]]].b);
+			else printf("        ");
+
 		}
-		printf("                                                                               \n");
-		printf("                                                                               ");
+		//printf("                                                                               \n");
+		//printf("                                                                               ");
 
 // besser machen, mehr von relativer Fitness abhaengen lassen -> schnellere Evolution (mei... lokale Minima, was solls)
-		
-// durchschnittliche Fitness herausfinden!
-
-						//sortieren unwichtig wenn folgende Fitness calculation
-
-		int ab,xa,xb;
-		for(x=0;x<MAX_PARENTS;x++)
-		{
-			ab=player[0]->fitness+10;
-
-			A=MAX_PLAYER;B=MAX_PLAYER;
-				for(i=0;i<MAX_PLAYER;i++)
-					if((player[i]->fitness>=Fitness_Average)&&(rand()%(ab-player[i]->fitness)==0))
-							A=i;
-				
-				for(i=0;i<MAX_PLAYER;i++)
-					if((player[i]->fitness>=Fitness_Average)&&(rand()%(ab-player[i]->fitness)==0))
-							B=i;
-
-				if(A==MAX_PLAYER) A=rand()%(MAX_PLAYER-MAX_CHILDREN*MAX_PARENTS);
-				if(B==MAX_PLAYER) B=rand()%(MAX_PLAYER-MAX_CHILDREN*MAX_PARENTS);
-				//~~~~
-
-
-				//Fitness dann noch relativ zur Gesamtfitness setzen!*/
-	//Nach fitness sortieren, 0-100, 0:~~~~
-				//oder (wenns sortiert ist...)
-//					A=MAX_PLAYER;
-//				for(i=0;(i<MAX_PLAYER-MAX_CHILDREN)&&(A==MAX_PLAYER);i++)
-//					if(rand()%(i+3)==0)
-//						A=i;
-//				B=MAX_PLAYER;
-//				for(i=0;(i<MAX_PLAYER)&&(B==MAX_PLAYER);i++)
-//					if(rand()%(i+3)==0)
-//						B=i;
-//				if(A==MAX_PLAYER) A=rand()%(MAX_PLAYER-MAX_CHILDREN);
-//				if(B==MAX_PLAYER) B=rand()%(MAX_PLAYER-MAX_CHILDREN);
-
-				for(l=0;l<MAX_CHILDREN;l++)
-				{
-					k=CROSS_OVER_EVENT; //~~~~~~
-					tempp=player[A];
-
-					for(i=0;i<INPUTS;i++)
-						for(j=0;j<HIDDEN;j++)
-						{
-							k--;
-							xa=player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j];
-							xb=tempp->INode[i].CON[j];
-							if(xa>xb)
-								player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j]--;
-							else if(xa<xb)
-								player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j]++;
-
-//							player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j]=tempp->INode[i].CON[j];
-							if(rand()%k==0)
-								{
-									k=CROSS_OVER_EVENT;
-									if(tempp==player[A])
-										tempp=player[B];
-									else tempp=player[A];
-								}
-						}
-
-					tempp=player[A];
-
-					for(i=0;i<HIDDEN;i++)
-						for(j=0;j<OUTPUTS;j++)
-						{
-							k--;
-							xa=player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j];
-							xb=tempp->INode[i].CON[j];
-							if(xa>xb)
-								player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j]--;
-							else if(xa<xb)
-								player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j]++;
-
-//							player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->HNode[i].CON[j]=tempp->HNode[i].CON[j];
-							if(rand()%k==0)
-								{
-									k=CROSS_OVER_EVENT;
-									if(tempp==player[A])
-										tempp=player[B];
-									else tempp=player[A];
-								}
-						}	
-
-			}
-}
-			
-//			for(k=1;k<MAX_PLAYER;k++)
-//			{
-			//	k=rand()%MAX_PLAYER;
-//				for(i=0;i<HIDDEN;i++)
-//					for(j=0;j<OUTPUTS;j++)
-//						player[k]->HNode[i].CON[j]=player[0]->HNode[i].CON[j];
-//				for(i=0;i<INPUTS;i++)
-//					for(j=0;j<HIDDEN;j++)
-//						player[k]->INode[i].CON[j]=player[0]->INode[i].CON[j];			
-//			}
-
-/*printf("... %i",player[0]->harvested_gas);*/
-
-
-	    if(rfit>=MAX_GENERATIONS)
+//		Bei den einzelnen Einheiten noch einen konstanten Faktor bei der Buildtime dazuzaehlen, abhaengig von Wegstrecke zum Gegner und Geschwindigkeit!
+		for(k=1;k<MAX_PLAYER;k++)
+			if(player[k]->fitness<player[0]->fitness)
+				for(i=0;i<MAX_LENGTH;i++)
+					player[k]->program[i]=player[0]->program[i];
+	
+	    if(rfit>=Max_Generations)
 		{
 			rfit=0;
 			generation=0;
-			calc=0;
+			for(i=0;i<MAX_LENGTH;i++)
+				Save[run]->program[i]=player[0]->program[i];
 
-			for(i=0;i<INPUTS;i++)
-				for(j=0;j<HIDDEN;j++)
-					Save[run]->INode[i].CON[j]=player[0]->INode[i].CON[j];
-			for(i=0;i<HIDDEN;i++)
-				for(j=0;j<OUTPUTS;j++)
-					Save[run]->HNode[i].CON[j]=player[0]->HNode[i].CON[j];
+			for(i=0;i<MAX_LENGTH;i++)
+				Save[run]->timep[i]=player[0]->timep[i];
 
 			Save[run]->fitness=player[0]->fitness;
 			Save[run]->timer=player[0]->timer;
 			Save[run]->harvested_mins=player[0]->harvested_mins;
 			Save[run]->harvested_gas=player[0]->harvested_gas;
 
-			for(i=0;i<MAX_ORDERS;i++)
-			{
-				Save[run]->programm[i].order=player[0]->programm[i].order;
-				Save[run]->programm[i].time=player[0]->programm[i].time;
-			}
-
 			for(i=0;i<BUILDING_TYPES;i++)
 				Save[run]->force[i]=player[0]->force[i];
 
-			run++;
-
 			for(l=0;l<MAX_PLAYER;l++)
 				player[l]->Restart();
+			run++;
 		}
-
 	} // end while...
 
-//Output
 
-if(run==0)
-{
-	for(i=0;i<INPUTS;i++)
-		for(j=0;j<HIDDEN;j++)
-			Save[run]->INode[i].CON[j]=player[0]->INode[i].CON[j];
-	for(i=0;i<HIDDEN;i++)
-		for(j=0;j<OUTPUTS;j++)
-			Save[run]->HNode[i].CON[j]=player[0]->HNode[i].CON[j];
-	Save[run]->fitness=player[0]->fitness;
-	Save[run]->timer=player[0]->timer;
-	Save[run]->harvested_mins=player[0]->harvested_mins;
-	Save[run]->harvested_gas=player[0]->harvested_gas;
+	//Output
 
-	for(i=0;i<MAX_TIME;i++)
+	if(run==0)
 	{
-		Save[run]->programm[i].order=player[0]->programm[i].order;
-		Save[run]->programm[i].time=player[0]->programm[i].time;
+		for(i=0;i<MAX_LENGTH;i++)
+		{
+			Save[run]->program[i]=player[0]->program[i];
+			Save[run]->timep[i]=player[0]->timep[i];
+		}	
+		Save[run]->fitness=player[0]->fitness;
+		Save[run]->timer=player[0]->timer;
+		Save[run]->harvested_mins=player[0]->harvested_mins;
+		Save[run]->harvested_gas=player[0]->harvested_gas;	
+	
+		for(i=0;i<BUILDING_TYPES;i++)
+			Save[run]->force[i]=player[0]->force[i];
 	}
-
-	for(i=0;i<BUILDING_TYPES;i++)
-		Save[run]->force[i]=player[0]->force[i];
-}
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
 	printf("Calculating completed.\n");
-	printf("Final fitness: %i (%i:%i Time used)\n",Save[0]->fitness,Save[0]->timer/60,Save[0]->timer%60);
-	printf("  You can find the Zerg Build Order in the ""zergbo.txt""\n");
+	printf(" You can find the Zerg Build Order in the ""bo_z.txt""\n");
 	printf(" Brought to you by clawsoftware.de\n");
 	printf("  Give it to all your friends :-)");
 	printf("\n\n\n\n\n\n\n\n");
 
-
-	//Alle runs ausgeben!
-	for(x=0;x<RUNNINGS;x++)
+	y=0;
+	if(run>0)
 	{
-		out_file<<"Fitness: "<<Save[x]->fitness<<"\n";
-		out_file<<"Time used: "<<Save[x]->timer/60<<":"<<Save[x]->timer%60<<"\n";
-
-		for(i=0;((i<MAX_ORDERS)&&(Save[x]->programm[i].time<Save[x]->timer));i++)	
-		{
-			if(Save[x]->programm[i].order<BUILDING_TYPES)
-				out_file<<(Save[x]->programm[i].time+0)<<". second: "<<stats[Save[x]->programm[i].order].name<<"\n";
-		}
-	
-		for(i=0;i<BUILDING_TYPES;i++)
-			if(Save[x]->force[i]>0)
-				out_file<<stats[i].name<<" : "<<(Save[x]->force[i]+0)<<"\n";
-
-		out_file<<"Harvested Minerals: "<<(Save[x]->harvested_mins+0)<<"\n";
-		out_file<<"Harvested Gas: "<<(Save[x]->harvested_gas+0)<<"\n";
-
+		afit=0;
+		for(x=0;x<RUNNINGS;x++)
+			if((Save[x]->fitness>afit)&&(Save[y]->timer<Max_Time))
+			{
+				afit=Save[x]->fitness;
+				y=x;
+			}
 	}
-		out_file.close();
+
+	out_file<<"StarCraft Evolution Chamber by ClawSoftware.de\n\n";
+	out_file<<"Build Order of best Individual:\n";
+	out_file<<"Fitness: "<<Save[y]->fitness<<"\n";
+	out_file<<"Time used: "<<Save[y]->timer/60<<":"<<Save[y]->timer%60<<"\n";	
+
+	for(i=0;i<MAX_LENGTH;i++)
+		if((Save[y]->timep[i]<Save[y]->timer)&&(Build_Av[Save[y]->program[i]]<BUILDING_TYPES)&&((Save[y]->timep[i]>0)||(i==0)))
+				out_file<<"["<<(Save[y]->timep[i]+0)/60<<":"<<(Save[y]->timep[i]+0)%60<<"] "<<stats[Build_Av[Save[y]->program[i]]].name<<"\n";
+
+	for(i=0;i<BUILDING_TYPES;i++)
+		if(Save[y]->force[i]>0)
+			out_file<<stats[i].name<<" : "<<(Save[y]->force[i]+0)<<"\n";
+	out_file<<"Harvested Minerals: "<<(Save[y]->harvested_mins+0)<<"\n";
+	out_file<<"Harvested Gas: "<<(Save[y]->harvested_gas+0)<<"\n";		
+
+if(run>0)
+	//Alle runs ausgeben!
+	for(x=0;x<run;x++)
+		if((Save[x]->timer<Max_Time)||(y!=x))			
+		{
+			out_file<<"\n----------------------------------------------------------\n\n";
+			out_file<<"Fitness: "<<Save[x]->fitness<<"\n";
+			out_file<<"Time used: "<<Save[x]->timer/60<<":"<<Save[x]->timer%60<<"\n";	
+
+			for(i=0;i<MAX_LENGTH;i++)
+				if((Save[x]->timep[i]<Save[x]->timer)&&(Build_Av[Save[x]->program[i]]<BUILDING_TYPES)&&((Save[x]->timep[i]>0)||(i==0)))
+						out_file<<"["<<(Save[x]->timep[i]+0)/60<<":"<<(Save[x]->timep[i]+0)%60<<"] "<<stats[Build_Av[Save[x]->program[i]]].name<<"\n";
+
+			for(i=0;i<BUILDING_TYPES;i++)
+				if(Save[x]->force[i]>0)
+					out_file<<stats[i].name<<" : "<<(Save[x]->force[i]+0)<<"\n";
+
+			out_file<<"Harvested Minerals: "<<(Save[x]->harvested_mins+0)<<"\n";
+			out_file<<"Harvested Gas: "<<(Save[x]->harvested_gas+0)<<"\n";	
+		}
+
+	out_file.close();
 
 	for(i=0;i<MAX_PLAYER;i++)
 		free(player[i]);
 	for(i=0;i<RUNNINGS;i++)
 		free(Save[i]);
-
 	tempp=NULL;
-	
 	x=getch();
 	return 0;
-//anzahl kinder von fitess abhaenge3n lassen
-
 }
-
-
-
-
-/*
-ChooseInstr
-SRESTART=2
-
- goals einlesen
-
-  save[0] ausgeben*/
