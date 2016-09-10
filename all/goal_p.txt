@@ -7,7 +7,7 @@ Units
         Dark Templar 0  0
          Dark Archon 0  0
                Probe 0  0
-              Zealot 0  0    
+              Zealot 3  5    
              Dragoon 0  0
         High Templar 0  0
               Archon 0  0
@@ -49,7 +49,7 @@ Researches
     Leg Enhancements 0  0     (Zealot speed)
        Scarab Damage 0  0     (Additional Damage for Reaverscarabs)
      Reaver Capacity 0  0     (Additional Scarabs for Reaver)
-      Gravitic Drive 0  0     (Shuttle speed)
+      Gravitic Drive 1  0     (Shuttle speed)
         Sensor Array 0  0     (Observer sight range)
    Gravitic Boosters 0  0     (Observer speed)
     Khaydarin Amulet 0  0     (Dark Templar energy)

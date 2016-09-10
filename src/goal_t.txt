@@ -8,13 +8,13 @@ Units		  Count Time
              Ghost 0 0
            Vulture 0 0
            Goliath 0 0
-        Siege Tank 2 0
+        Siege Tank 0 0
                SCV 0 0
            Firebat 0 0
              Medic 0 0
             Wraith 0 0
     Science Vessel 0 0
-          Dropship 1 0
+          Dropship 0 0
     Battle Cruiser 0 0
           Valkyrie 0 0
 
@@ -45,7 +45,7 @@ Researches
           Lockdown 0 0       (Ghost ability)
      EMP Shockwave 0 0
       Spider Mines 0 0	   (Vulture ability)
-   Tank Siege Mode 1 0
+   Tank Siege Mode 0 0
          Irradiate 0 0	   (Science Vessel ability)       
         Yamato Gun 0 0
     Cloaking Field 0 0      (Wraith ability)
@@ -67,8 +67,8 @@ Upgrades
   Infantry Weapons 0 0
    Vehicle Plating 0 0
    Vehicle Weapons 0 0
-      Ship Plating 0 0
-      Ship Weapons 0 0
+      Ship Plating 1 0
+      Ship Weapons 1 0
 
 Special
    Nuclear Warhead 0 0

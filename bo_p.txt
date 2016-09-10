@@ -1,0 +1,285 @@
+---------------------------------------------------
+---StarCraftCalculator by ClawSoftware.de [v1.02]--
+---------------------------------------------------
+
+[----Best solution---]
+
+     Time used: 08:20 minutes
+     Scouting unit after 02:40 minutes
+     [00:00] [04/09]                Probe [OK]
+     [00:20] [05/09]                Probe [Building availible]
+     [00:40] [06/09]                Probe [Building availible]
+     [01:00] [07/09]                Probe [Building availible]
+     [01:04] [08/09]                Pylon [enough Minerals]
+     [01:20] [08/09]                Probe [Building availible]
+     [01:40] [09/17]                Probe [Building availible]
+     [02:00] [10/17]                Probe [Building availible]
+     [02:01] [11/17]          Assimilator [OK]
+     [02:10] [11/17]              Gateway [enough Minerals]
+     [02:20] [11/17]                Probe [Building availible]
+     [02:40] [12/17]                Probe [Building availible]
+     [02:46] [13/17] Mineral Probe To Gas [Building availible]
+     [02:47] [13/17] Mineral Probe To Gas [OK]
+     [03:00] [13/17]                Probe [Building availible]
+     [03:20] [14/17]                Probe [Building availible]
+     [03:21] [15/17] Mineral Probe To Gas [OK]
+     [03:22] [15/17]     Cybernetics Core [OK]
+     [03:27] [15/17]                Forge [enough Minerals]
+     [04:27] [15/17]    Robotics Facility [Building availible]
+     [04:28] [15/17]      Citadel Of Adun [OK]
+     [04:33] [15/17]        Photon Cannon [enough Minerals]
+     [04:46] [15/17]                Pylon [enough Minerals]
+     [05:52] [15/25] Robotics Support Bay [Building availible]
+     [05:53] [15/25]              Shuttle [OK]
+     [05:58] [17/25]     Templar Archives [enough Gas]
+     [06:11] [17/25]              Gateway [enough Minerals]
+     [06:30] [17/25]        Photon Cannon [enough Minerals]
+     [06:56] [17/25]               Reaver [enough Minerals]
+     [07:13] [21/25]         Dark Templar [enough Minerals]
+     [07:29] [23/25]         Dark Templar [enough Minerals]
+
+     ---Force at the end---
+              Dark Templar :  2 [Last one: 08:19]
+                     Probe : 15 [Last one: 03:40]
+                    Reaver :  1 [Last one: 08:06]
+                   Shuttle :  1 [Last one: 06:53]
+                     Nexus :  1 [Last one: 00:00]
+         Robotics Facility :  1 [Last one: 05:52]
+                     Pylon :  2 [Last one: 05:21]
+               Assimilator :  1 [Last one: 02:46]
+                   Gateway :  2 [Last one: 03:15]
+             Photon Cannon :  2 [Last one: 07:25]
+          Cybernetics Core :  1 [Last one: 04:27]
+           Citadel Of Adun :  1 [Last one: 05:33]
+          Templar Archives :  1 [Last one: 07:03]
+                     Forge :  1 [Last one: 04:12]
+      Robotics Support Bay :  1 [Last one: 06:27]
+
+     Harvested Minerals : 3438
+     Harvested Gas      : 1076
+     Minerals at the end: 388
+     Gas at the end     : 176
+[---------end--------]
+
+Other solutions: 
+
+[----- 1. solution---]
+
+     Time used: 08:22 minutes
+     Scouting unit after 02:40 minutes
+     [00:00] [04/09]                Probe [OK]
+     [00:29] [05/09]          Assimilator [enough Minerals]
+     [00:55] [05/09]                Pylon [enough Minerals]
+     [01:08] [05/09]                Probe [enough Minerals]
+     [01:45] [06/17]              Gateway [enough Minerals]
+     [01:46] [06/17] Mineral Probe To Gas [OK]
+     [02:50] [06/17]     Cybernetics Core [Building availible]
+     [04:37] [06/17]    Robotics Facility [enough Gas]
+     [04:38] [06/17]                Probe [OK]
+     [06:03] [07/17] Robotics Support Bay [enough Gas]
+     [06:04] [07/17] Mineral Probe To Gas [OK]
+     [06:05] [07/17]              Shuttle [OK]
+     [06:49] [09/17]      Citadel Of Adun [enough Gas]
+     [08:21] [09/17]     Templar Archives [enough Gas]
+     [08:22] [09/17]                Forge [OK]
+     [09:06] [09/17]               Reaver [enough Gas]
+     [09:47] [13/17]        Photon Cannon [enough Minerals]
+     [09:48] [13/17] Gas Probe To Mineral [OK]
+     [10:20] [13/17]         Dark Templar [enough Minerals]
+     [10:59] [15/17]        Photon Cannon [enough Minerals]
+     [11:31] [15/17]         Dark Templar [enough Minerals]
+     [11:32] [17/17] Mineral Probe To Gas [OK]
+     [11:33] [17/17] Mineral Probe To Gas [OK]
+
+     ---Force at the end---
+              Dark Templar :   2 [Last one: 12:21]
+                     Probe :   7 [Last one: 04:58]
+                    Reaver :   1 [Last one: 10:16]
+                   Shuttle :   1 [Last one: 07:05]
+                     Nexus :   1 [Last one: 00:00]
+         Robotics Facility :   1 [Last one: 06:02]
+                     Pylon :   1 [Last one: 01:30]
+               Assimilator :   1 [Last one: 01:14]
+                   Gateway :   1 [Last one: 02:50]
+             Photon Cannon :   2 [Last one: 11:54]
+          Cybernetics Core :   1 [Last one: 03:55]
+           Citadel Of Adun :   1 [Last one: 07:54]
+          Templar Archives :   1 [Last one: 09:26]
+                     Forge :   1 [Last one: 09:07]
+      Robotics Support Bay :   1 [Last one: 06:38]
+
+     Harvested Minerals : 2524
+     Harvested Gas      : 1077
+     Minerals at the end: 124
+     Gas at the end     : 177
+[---------end--------]
+
+[----- 2. solution---]
+
+     Time used: 08:30 minutes
+     Scouting unit after 02:40 minutes
+     [00:00] [04/09]                Probe [OK]
+     [00:20] [05/09]                Probe [Building availible]
+     [00:40] [06/09]                Probe [Building availible]
+     [01:00] [07/09]                Probe [Building availible]
+     [01:04] [08/09]                Pylon [enough Minerals]
+     [01:20] [08/09]                Probe [Building availible]
+     [01:40] [09/17]              Gateway [enough Minerals]
+     [01:48] [09/17]                Probe [enough Minerals]
+     [02:03] [10/17]          Assimilator [enough Minerals]
+     [02:11] [10/17]                Probe [enough Minerals]
+     [02:45] [11/17]     Cybernetics Core [Building availible]
+     [02:48] [11/17] Mineral Probe To Gas [Building availible]
+     [02:49] [11/17] Mineral Probe To Gas [OK]
+     [02:50] [11/17] Mineral Probe To Gas [OK]
+     [02:51] [11/17]                Probe [OK]
+     [03:11] [12/17]                Probe [Building availible]
+     [03:50] [13/17]      Citadel Of Adun [Building availible]
+     [04:19] [13/17]    Robotics Facility [enough Gas]
+     [05:18] [13/17]     Templar Archives [enough Gas]
+     [05:19] [13/17]                Forge [OK]
+     [06:04] [13/17]        Photon Cannon [Building availible]
+     [06:05] [13/17] Robotics Support Bay [OK]
+     [06:06] [13/17]              Shuttle [OK]
+     [06:23] [15/17]         Dark Templar [Building availible]
+     [06:30] [17/17]                Pylon [enough Minerals]
+     [06:31] [17/17] Gas Probe To Mineral [OK]
+     [07:06] [17/25]               Reaver [Building availible]
+     [07:20] [21/25]        Photon Cannon [enough Minerals]
+     [07:21] [21/25] Mineral Probe To Gas [OK]
+     [07:39] [21/25]         Dark Templar [enough Minerals]
+     [07:47] [23/25]                Probe [enough Minerals]
+     [08:07] [24/25]                Probe [Building availible]
+
+     ---Force at the end---
+              Dark Templar :   2 [Last one: 08:29]
+                     Probe :  15 [Last one: 08:27]
+                    Reaver :   1 [Last one: 08:16]
+                   Shuttle :   1 [Last one: 07:06]
+                     Nexus :   1 [Last one: 00:00]
+         Robotics Facility :   1 [Last one: 05:44]
+                     Pylon :   2 [Last one: 07:05]
+               Assimilator :   1 [Last one: 02:48]
+                   Gateway :   1 [Last one: 02:45]
+             Photon Cannon :   2 [Last one: 08:15]
+          Cybernetics Core :   1 [Last one: 03:50]
+           Citadel Of Adun :   1 [Last one: 04:55]
+          Templar Archives :   1 [Last one: 06:23]
+                     Forge :   1 [Last one: 06:04]
+      Robotics Support Bay :   1 [Last one: 06:40]
+
+     Harvested Minerals : 3142
+     Harvested Gas      : 1083
+     Minerals at the end: 242
+     Gas at the end     : 183
+[---------end--------]
+
+[----- 4. solution---]
+
+     Time used: 08:45 minutes
+     Scouting unit after 02:40 minutes
+     [00:00] [04/09]                Probe [OK]
+     [00:29] [05/09]          Assimilator [enough Minerals]
+     [00:42] [05/09]                Probe [enough Minerals]
+     [01:08] [06/09]                Pylon [enough Minerals]
+     [01:14] [06/09] Mineral Probe To Gas [Building availible]
+     [01:19] [06/09]                Probe [enough Minerals]
+     [01:56] [07/17]              Gateway [enough Minerals]
+     [06:25] [07/17]     Cybernetics Core [OK]
+     [07:30] [07/17]    Robotics Facility [Building availible]
+     [07:31] [07/17]      Citadel Of Adun [OK]
+     [07:32] [07/17]                Forge [OK]
+     [08:36] [07/17]     Templar Archives [Building availible]
+     [08:37] [07/17] Mineral Probe To Gas [OK]
+     [08:38] [07/17] Gas Probe To Mineral [OK]
+     [08:39] [07/17] Mineral Probe To Gas [OK]
+     [08:55] [07/17]              Shuttle [Building availible]
+     [09:41] [09/17]         Dark Templar [Building availible]
+     [09:42] [11/17] Mineral Probe To Gas [OK]
+     [09:43] [11/17]        Photon Cannon [OK]
+     [09:55] [11/17] Robotics Support Bay [enough Gas]
+     [10:30] [11/17]               Reaver [Building availible]
+     [10:31] [15/17]        Photon Cannon [OK]
+     [10:54] [15/17]         Dark Templar [enough Minerals]
+
+     ---Force at the end---
+              Dark Templar :   2 [Last one: 11:44]
+                     Probe :   7 [Last one: 01:39]
+                    Reaver :   1 [Last one: 11:40]
+                   Shuttle :   1 [Last one: 09:55]
+                     Nexus :   1 [Last one: 00:00]
+         Robotics Facility :   1 [Last one: 08:55]
+                     Pylon :   1 [Last one: 01:43]
+               Assimilator :   1 [Last one: 01:14]
+                   Gateway :   1 [Last one: 03:01]
+             Photon Cannon :   2 [Last one: 11:26]
+          Cybernetics Core :   1 [Last one: 07:30]
+           Citadel Of Adun :   1 [Last one: 08:36]
+          Templar Archives :   1 [Last one: 09:41]
+                     Forge :   1 [Last one: 08:17]
+      Robotics Support Bay :   1 [Last one: 10:30]
+
+     Harvested Minerals : 2522
+     Harvested Gas      : 1069
+     Minerals at the end: 122
+     Gas at the end     : 169
+[---------end--------]
+
+[----- 5. solution---]
+
+     Time used: 08:29 minutes
+     Scouting unit after 02:40 minutes
+     [00:00] [04/09]                Probe [OK]
+     [00:20] [05/09]                Probe [Building availible]
+     [00:40] [06/09]                Probe [Building availible]
+     [01:00] [07/09]                Probe [Building availible]
+     [01:04] [08/09]                Pylon [enough Minerals]
+     [01:23] [08/09]          Assimilator [enough Minerals]
+     [01:49] [08/17]              Gateway [enough Minerals]
+     [01:57] [08/17]                Probe [enough Minerals]
+     [02:08] [09/17] Mineral Probe To Gas [Building availible]
+     [02:09] [09/17] Mineral Probe To Gas [OK]
+     [02:17] [09/17]                Probe [Building availible]
+     [02:37] [10/17]                Probe [Building availible]
+     [02:54] [11/17]     Cybernetics Core [enough Minerals]
+     [03:03] [11/17]                Probe [enough Minerals]
+     [03:23] [12/17]                Probe [Building availible]
+     [03:43] [13/17]                Probe [Building availible]
+     [03:44] [14/17]                Pylon [OK]
+     [04:03] [14/17]                Probe [Building availible]
+     [04:11] [15/17]    Robotics Facility [enough Minerals]
+     [04:30] [15/25]      Citadel Of Adun [enough Minerals]
+     [04:31] [15/25] Mineral Probe To Gas [OK]
+     [04:50] [15/25]                Forge [enough Minerals]
+     [05:36] [15/25]              Shuttle [Building availible]
+     [05:37] [17/25]     Templar Archives [OK]
+     [05:55] [17/25]        Photon Cannon [enough Minerals]
+     [06:42] [17/25]         Dark Templar [Building availible]
+     [06:43] [19/25] Robotics Support Bay [OK]
+     [07:18] [19/25]               Reaver [Building availible]
+     [07:32] [23/25]         Dark Templar [Building availible]
+     [07:33] [25/25]        Photon Cannon [OK]
+
+     ---Force at the end---
+              Dark Templar :   2 [Last one: 08:22]
+                     Probe :  15 [Last one: 04:23]
+                    Reaver :   1 [Last one: 08:28]
+                   Shuttle :   1 [Last one: 06:36]
+                     Nexus :   1 [Last one: 00:00]
+         Robotics Facility :   1 [Last one: 05:36]
+                     Pylon :   2 [Last one: 04:19]
+               Assimilator :   1 [Last one: 02:08]
+                   Gateway :   1 [Last one: 02:54]
+             Photon Cannon :   2 [Last one: 08:28]
+          Cybernetics Core :   1 [Last one: 03:59]
+           Citadel Of Adun :   1 [Last one: 05:35]
+          Templar Archives :   1 [Last one: 06:42]
+                     Forge :   1 [Last one: 05:35]
+      Robotics Support Bay :   1 [Last one: 07:18]
+
+     Harvested Minerals : 3327
+     Harvested Gas      : 1108
+     Minerals at the end: 427
+     Gas at the end     : 208
+[---------end--------]
+
