@@ -77,7 +77,7 @@
 		unsigned char i,j;
 		long Need_Gas;
 		building_types=BUILDING_TYPES_TERRA;
-		for(j=0;j<5;j++)
+		for(j=0;j<6;j++) // Nuclear Warhead needs 6 steps :)
 		for(i=0;i<BUILDING_TYPES_TERRA;i++)
 			if(goal[i].what>0)
 			{
@@ -113,8 +113,9 @@
 					case RESTORATION:
 					case OPTICAL_FLARE:
 					case U238_SHELLS:
-					case MOEBIUS_REACTOR:
+					case CADUCEUS_REACTOR:
 						if(goal[ACADEMY].what==0) goal[ACADEMY].what=1;break;
+					case MOEBIUS_REACTOR:
 					case PERSONNEL_CLOAKING:
 					case LOCKDOWN:
 					case NUCLEAR_SILO:
@@ -133,7 +134,7 @@
 						if(goal[STARPORT].what==0) goal[STARPORT].what=1;break;
 					case IRRADIATE:
 					case EMP_SHOCKWAVE:
-					case CADUCEUS_REACTOR:
+					case TITAN_REACTOR:
 					case PHYSICS_LAB:
 					case COVERT_OPS:
 						if(goal[SCIENCE_FACILITY].what==0) goal[SCIENCE_FACILITY].what=1;break;
@@ -243,19 +244,19 @@
 	// Maybe optimize the order of checks to improve speed
 			{
 				case MARINE:
-					if((force[BARRACKS]>0)&&(availible[BARRACKS]>0)) 
+					if(availible[BARRACKS]>0) 
 					{
 						Produce(what);
 						availible[BARRACKS]--;
 					};break;
 				case GHOST:
-					if((force[BARRACKS]>0)&&(force[ACADEMY]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[COVERT_OPS]>0)&&(availible[BARRACKS]>0))
+					if((force[ACADEMY]>0)&&(force[COVERT_OPS]>0)&&(availible[BARRACKS]>0))
 					{
 						Produce(what);
 						availible[BARRACKS]--;
 					};break;
 				case VULTURE:
-					if((force[FACTORY]>0)&&((availible[FACTORY]>0)||(av_factory>0))) 
+					if((availible[FACTORY]>0)||(av_factory>0)) 
 					{
 						Produce(what);
 						if(availible[FACTORY]>0)
@@ -263,7 +264,7 @@
 						else av_factory--;
 					};break;
 				case GOLIATH:
-					if((force[FACTORY]>0)&&(force[ARMORY]>0)&&((availible[FACTORY]>0)||(av_factory>0))) 
+					if((force[ARMORY]>0)&&((availible[FACTORY]>0)||(av_factory>0))) 
 					{
 						Produce(what);
 						if(availible[FACTORY]>0)
@@ -271,13 +272,13 @@
 						else av_factory--;
 					};break;
 				case SIEGE_TANK:
-					if((force[FACTORY]>0)&&(force[MACHINE_SHOP]>0)&&(av_factory>0)) 
+					if(av_factory>0) 
 					{
 						Produce(what);
 						av_factory--;
 					};break;
 				case SCV:
-					if((force[COMMAND_CENTER]>0)&&(availible[COMMAND_CENTER]>0)) 
+					if(availible[COMMAND_CENTER]>0)
 					{
 						Produce(what);
 						availible[COMMAND_CENTER]--;
@@ -290,32 +291,32 @@
 						availible[BARRACKS]--;
 					};break;
 				case WRAITH:
-					if((force[STARPORT]>0)&&((availible[STARPORT]>0)||(av_starport>0))) 
+					if((availible[STARPORT]>0)||(av_starport>0)) 
 					{
 						Produce(what);
-						if(availible[STARPORT]>0) 							availible[STARPORT]--;
+						if(availible[STARPORT]>0) 								availible[STARPORT]--;
 						else av_starport--;
 					};break;
 				case SCIENCE_VESSEL:
-					if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[SCIENCE_FACILITY]>0)&&(av_starport>0))
+					if((force[SCIENCE_FACILITY]>0)&&(av_starport>0))
 					{
 						Produce(what);
 						av_starport--;
 					};break;
 				case DROPSHIP:
-					if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(av_starport>0))
+					if(av_starport>0)
 					{
 						Produce(what);
 						av_starport--;
 					};break;
 				case BATTLE_CRUISER:
-					if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[PHYSICS_LAB]>0)&&(av_starport>0))
+					if((force[PHYSICS_LAB]>0)&&(av_starport>0))
 					{
 						Produce(what);
 						av_starport--;
 					};break;
 				case VALKYRIE:
-					if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[ARMORY]>0)&&(av_starport>0))
+					if((force[ARMORY]>0)&&(av_starport>0))
 					{
 						Produce(what);
 						av_starport--;
@@ -362,7 +363,7 @@
 						availible[COMMAND_CENTER]--;
 					};break;
 				case NUCLEAR_SILO:
-					if((force[COMMAND_CENTER]>force[COMSAT_STATION]+force[NUCLEAR_SILO])&&(availible[COMMAND_CENTER]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[COVERT_OPS]>0))
+					if((force[COMMAND_CENTER]>force[COMSAT_STATION]+force[NUCLEAR_SILO])&&(availible[COMMAND_CENTER]>0)&&(force[COVERT_OPS]>0))
 					{
 						Produce(what);
 						availible[COMMAND_CENTER]--;
@@ -394,20 +395,18 @@
 				case SPIDER_MINES:
 				case TANK_SIEGE_MODE:
 				case ION_THRUSTERS:
-					if((force[MACHINE_SHOP]>0)&&(availible[MACHINE_SHOP]>0))
+					if(availible[MACHINE_SHOP]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[MACHINE_SHOP]--;
 					};break;
 
 				case TITAN_REACTOR:
 				case EMP_SHOCKWAVE:
 				case IRRADIATE:
-					if((force[SCIENCE_FACILITY]>0)&&(availible[SCIENCE_FACILITY]>0)) 
+					if(availible[SCIENCE_FACILITY]>0) 
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[SCIENCE_FACILITY]--;
 					};break;
 				
@@ -415,10 +414,9 @@
 				case LOCKDOWN:
 				case MOEBIUS_REACTOR:
 				case PERSONNEL_CLOAKING:
-					if((force[COVERT_OPS]>0)&&(availible[COVERT_OPS]>0)) 
+					if(availible[COVERT_OPS]>0) 
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[COVERT_OPS]--;
 					};break;
 				
@@ -428,36 +426,32 @@
 				case RESTORATION:
 				case OPTICAL_FLARE:
 					
-					if((force[ACADEMY]>0)&&(availible[ACADEMY]>0)) 
+					if(availible[ACADEMY]>0) 
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[ACADEMY]--;
 					 };break;
 
 				case COLOSSUS_REACTOR:
 				case YAMATO_GUN:
-					if((force[PHYSICS_LAB]>0)&&(availible[PHYSICS_LAB]>0))
+					if(availible[PHYSICS_LAB]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[PHYSICS_LAB]--;
 					};break;
 
 				case APOLLO_REACTOR:
 				case CLOAKING_FIELD:
-						if((force[CONTROL_TOWER]>0)&&(availible[CONTROL_TOWER]>0))
+						if(availible[CONTROL_TOWER]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[CONTROL_TOWER]--;
 					};break;
 				case INFANTRY_ARMOR:
 				case INFANTRY_WEAPONS:
-						    if((force[ENGINEERING_BAY]>0)&&(availible[ENGINEERING_BAY]>0)&&((force[what]==0)||(force[SCIENCE_FACILITY]>0))) 
+						    if((availible[ENGINEERING_BAY]>0)&&((force[what]==0)||(force[SCIENCE_FACILITY]>0))) 
 									   {
 											Produce(what);
-	availible[what]=0;
 	availible[ENGINEERING_BAY]--;
 									   };break;
 
@@ -465,14 +459,13 @@
 				case VEHICLE_WEAPONS:
 				case SHIP_PLATING:
 				case SHIP_WEAPONS:
-					if((force[ARMORY]>0)&&(availible[ARMORY]>0)&&((force[what]==0)|| ((force[what]>0)&&(force[SCIENCE_FACILITY]>0)))) 
+					if((availible[ARMORY]>0)&&((force[what]==0)|| ((force[what]>0)&&(force[SCIENCE_FACILITY]>0)))) 
 					{
 					   Produce(what);
-					   availible[what]=0;
 					   availible[ARMORY]--;
 					  };break;
 				case NUCLEAR_WARHEAD:
-					if((force[NUCLEAR_SILO]>0)&&(availible[NUCLEAR_SILO]>0))
+					if(availible[NUCLEAR_SILO]>0)
 					{
 						Produce(what);
 						availible[NUCLEAR_SILO]--;
@@ -673,4 +666,9 @@ Player_Terra::Player_Terra()
 
 Player_Terra::~Player_Terra()
 {
+}
+
+void Player_Terra::readjust_goals()
+{
+	//nothing to readjust here as Terra has no morphing units
 }

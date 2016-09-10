@@ -15,7 +15,7 @@
 #define gizmowidth 35
 
 
-using namespace std;
+//using namespace std;
 
 inline unsigned char UpperCase(char x) {if(x>91) return (x-32); else return(x);}
 
@@ -84,8 +84,8 @@ int main(int argc, char* argv[])
 	unsigned short run,rfit,afit,sfit;
 	unsigned char counter,gcount;
 	char I[11],O[9],R[7];
-	unsigned short old_time,old_fit,old,s,t,u,generation,calc;
-	unsigned char a,Test,z,tunit;
+	unsigned short old_time,old_fit,old,old_t,old_sup,s,t,u,generation,calc;
+	unsigned char a,Test,z,tunit,translate;
 	char * buffer;
 	char * IOp;
 	char * gizmo;
@@ -107,6 +107,8 @@ int main(int argc, char* argv[])
 	old=200;
         counter=1;
 	old_fit=0;
+	translate=0;
+	
 	
 	srand(time(NULL));
 	clrscr();
@@ -123,18 +125,17 @@ int main(int argc, char* argv[])
 	sprintf(gizmo,"                                        Attention Defenders of the United Earth Directorate!                                        This is Admiral DuGalle.                                        You were all briefed before we left earth, so you know that we have come here to conquer this sector in the name of humanity.                                        Should any of you have second thoughts about performing your assigned duties, be reminded that if we fail in our mission here, not one of us will be going home.                                        We stand or fall together in this forsaken wasteland.                                        Serve the directorate serve humanity...                                       All other priorities are secondary to victory!                                        Dugall out.                                        ");
 	
 	char * helper;
-	helper=new char[850];
+	helper=new char[1447];
 
 // TODO: Farben!	
-	sprintf(helper,"You may call 'scc' with the following parameters:\n\nscc T|P|Z                         : Calculate best build order (goals given by goal_t.txt, goal_p.txt or goal_z.txt)\nscc                               : Same as above but you may chose the race manually\nscc -i <file with goals>          : same as above but use this file instead of goal_*.txt (NO times yet)\nscc -b <goals>                    : same as above but use goals given by the command line (i.e. ""scc -b 5 Marines supplydepot battlecruiser"")\nscc -i <file with build order> -t : Use the build order given by this file and calculate the time it needs (in the scc - environment)\nscc -b <build order> -t           : same as 'scc -i <file> -t' but use command line parameters as build order (i.e. ""scc -b 4 scvs supplydepot refinery barracks 5 marines 3 onescvtogas 4 scvs factory"")\n\n"); 
+   	 sprintf(helper,"\nYou may call 'scc' with the following parameters:\n\nscc T|P|Z                         : Calculate best build order (goals given by\n                                    goal_t.txt, goal_p.txt or goal_z.txt)     \nscc                               : Same as above but you may chose the race  \n				    manually                                  \nscc -i <file with goals>          : same as above but use this file instead of\n                                    goal_*.txt (NO times yet)                 \nscc -b <goals>                    : same as above but use goals given by the  \n                                    command line (i.e. 'scc -b 5 Marines      \n                                    supplydepot battlecruiser')               \nscc -i <file with build order> -t : Use the build order given by this file and\n                                    calculate the time it needs (in the scc - \n                                    environment)                              \nscc -b <build order> -t           : same as 'scc -i <file> -t' but use the    \n                                    command line parameters as build order    \n                                    (i.e. 'scc -b 4 scvs supplydepot refinery \n                                    barracks 3 onescvtogas 4 scvs factory') \n\nCheck 'goal_t.txt', 'goal_p.txt', 'goal_z.txt' and especially 'settings.txt,too!\n                                                                Version 1.02b\n"); 
 
 	if(argc<=1)
 	{
 		printf("%s",helper);
 		delete helper;
 	}
-	
-	if(argc>1)
+	else
 	{
 		if(UpperCase(argv[1][0])=='T')
 			race=0;
@@ -146,6 +147,7 @@ int main(int argc, char* argv[])
 		{
 			if(UpperCase(argv[1][1])=='I')
 			{
+				translate=1; // We need a translation of the data later
 				IOp = new char [sizeof(argv[2])]; 
 				IOp=argv[2];
 				FILE * pFile2;
@@ -166,10 +168,11 @@ int main(int argc, char* argv[])
 				fread(buffer,1,size,pFile2);
 				fclose(pFile2);
 				printf("File closed, data saved [%i Bytes].\n",size);
-			} else 
+			} else  // not 'I'
 	// B? User called 'scc' with a goal / build order list as parameter
-			if(UpperCase(argv[1][1]=='B'))
+			if(UpperCase(argv[1][1])=='B')
 			{
+				translate=1; // we need a translation of the data later
 				size=0;
 				for(t=2;t<argc;t++)
 					size+=sizeof(argv[t])+100;
@@ -204,69 +207,89 @@ int main(int argc, char* argv[])
 					buffer[s]=10;
 					s++;
 				}
-			} else return(1);
-			printf("Translating data...");
-			for(t=0;t<MAX_LENGTH;t++)
+			} else //not 'B', not 'I'
 			{
-				for(s=0;s<26;s++) bo[t].code[s]=0;
-				bo[t].type=0;
-				bo[t].race=5;
-				bo[t].length=0;
+				printf("%s",helper);
+			        delete helper;
+				return(1);
 			}
-			s=0;t=0;
-			zahl=0;	
-			while(s<size)
-			{		
-		//TODO: DOS / LINUX compability, next line 1310 <=> 10
+	         } else //not '-'
+		 {
+                 	printf("%s",helper);
+			delete helper;
+			return(1);
+		 }			 
+	} // end of 'not argc<=1'
+		
 				
-		//translate the parameter arguments buffer to actual goals	
-				if(buffer[s]==10)
-				{
-					if(zahl==0)
-						t++;
-					else 				
-						bo[t].count=0;
-					zahl=0;
-				}
-				else if((buffer[s]>47)&&(buffer[s]<58))
-				{
-					if((s<size-2)&&(buffer[s+2]>47)&&(buffer[s+2]<58))
-					{
-						setattr(0,31,40);
-						printf("FATAL ERROR: Count too high! Do not use larger numbers than 99!\n");
-						setattr(0,37,40);
-						printf("Exiting...\n");
-						return(1);
-					}
-					if((s<size-1)&&(buffer[s+1]>47)&&(buffer[s+1]<58))
-					{
-						zahl=(buffer[s]-48)*10+(buffer[s+1]-48);
-						s++;
-					}
-					else zahl=buffer[s]-48;
-				}
-				else if(buffer[s]>64)
-				{
-					bo[t].code[(int)(UpperCase(buffer[s])-65)]++;
-					bo[t].length++;
-					if(zahl>0)
-						bo[t].count=zahl;
-					else if(bo[t].count==0)
-						bo[t].count=1;
-					zahl=0;
-				}
-				s++;
+//TODO!! inform the user about the abort...			
+	if(translate==1)
+	{
+		printf("Translating data...");
+		
+		for(t=0;t<MAX_LENGTH;t++)
+		{
+			for(s=0;s<26;s++) bo[t].code[s]=0;
+			bo[t].type=0;
+			bo[t].race=5;
+			bo[t].length=0;
+		}
+		s=0;t=0;
+		zahl=0;	
+
+		while(s<size)
+		{		
+			//TODO: DOS / LINUX compability, next line 1310 <=> 10
+					
+			//translate the parameter arguments buffer to actual goals	
+			if(buffer[s]==10)
+			{
+				if(zahl==0)
+					t++;
+				else 				
+					bo[t].count=0;
+				zahl=0;
 			}
+			else if((buffer[s]>47)&&(buffer[s]<58))
+			{
+				if((s<size-2)&&(buffer[s+2]>47)&&(buffer[s+2]<58))
+				{
+					setattr(0,31,40);
+					printf("FATAL ERROR: Count too high! Do not use larger numbers than 99!\n");
+					setattr(0,37,40);
+					printf("Exiting...\n");
+					return(1);
+				}
+				if((s<size-1)&&(buffer[s+1]>47)&&(buffer[s+1]<58))
+				{
+					zahl=(buffer[s]-48)*10+(buffer[s+1]-48);
+					s++;
+				}
+				else zahl=buffer[s]-48;
+			}
+			else if(buffer[s]>64)
+			{
+				bo[t].code[(int)(UpperCase(buffer[s])-65)]++;
+				bo[t].length++;
+				if(zahl>0)
+					bo[t].count=zahl;
+				else if(bo[t].count==0)
+					bo[t].count=1;
+				zahl=0;
+			}
+			s++;
+		} // end of buffer checking
 
-			for(t=0;t<MAX_LENGTH;t++)
-	                	if(bo[t].length>0)
-					for(s=0;s<26;s++)
-					{
-						bo[t].code[s]*=100;
-						bo[t].code[s]=bo[t].code[s]/bo[t].length;
-					}
-			delete buffer;
-
+		//calculate the relative frequency of letters
+		for(t=0;t<MAX_LENGTH;t++)
+       	        	if(bo[t].length>0)
+				for(s=0;s<26;s++)
+				{
+					bo[t].code[s]*=100;
+					bo[t].code[s]=bo[t].code[s]/bo[t].length;
+				}
+		delete buffer;
+		
 		//Create lists with numbers of chars of the names in stats 	
 		for(i=0;i<3;i++)
 			for(j=0;j<60;j++)
@@ -286,72 +309,74 @@ int main(int argc, char* argv[])
 					mystats[i][j].code[t]*=100;
 					mystats[i][j].code[t]=mystats[i][j].code[t]/mystats[i][j].length;
 				}
-			}
-
+			} // End of creating relative frequencies out of stats names
 			
-			
-			int Abstand;
-			for(k=0;k<MAX_LENGTH;k++)
-				if(bo[k].count>0)
+		// Calculate the distance between the parameter and the stats names
+		int Distance;
+		for(k=0;k<MAX_LENGTH;k++)
+			if(bo[k].count>0)
 			{
 				f=60000;
 				for(i=0;i<3;i++)
 					for(j=0;j<60;j++)
 					{
-						Abstand=0;
+						Distance=0;
 						for(t=0;t<26;t++)
-							Abstand+=bo[k].code[t]*bo[k].code[t]+mystats[i][j].code[t]*mystats[i][j].code[t]-2*bo[k].code[t]*mystats[i][j].code[t];
-						if(f>Abstand)
+							Distance+=bo[k].code[t]*bo[k].code[t]+mystats[i][j].code[t]*mystats[i][j].code[t]-2*bo[k].code[t]*mystats[i][j].code[t];
+						if(f>Distance)
 						{
-							f=Abstand;
+							f=Distance;
 							bo[k].race=i;
 							bo[k].type=j;
 							bo[k].tmp=f;
 						}
 					}
-			}
-			countr[0]=0;
-			countr[1]=0;
-			countr[2]=0;
-			// Counter to determine the race on basis of the frequency of races in the accumulated bo-data...
-			for(i=0;i<MAX_LENGTH;i++)
-				if(bo[i].race<3)
-					countr[bo[i].race]++;
-			if((countr[0]>countr[1])&&(countr[0]>countr[2]))
-				race=0;
-			else if(countr[1]>countr[2])
-				race=1;
-			else race=2;
+			} // end of calculating distance
+		 
+		countr[0]=0;
+		countr[1]=0;
+		countr[2]=0;
+// Counter to determine the race on basis of the frequency of races in the accumulated bo-data...
+		for(i=0;i<MAX_LENGTH;i++)
+			if(bo[i].race<3)
+				countr[bo[i].race]++;
+		if((countr[0]>countr[1])&&(countr[0]>countr[2]))
+			race=0;
+		else if(countr[1]>countr[2])
+			race=1;
+		else race=2;
+	
+//... and recheck the whole data on basis of the new information ( so that all bo's are in the same race...
 
-			//... and recheck the whole data on basis of the new information 
-			for(i=0;i<MAX_LENGTH;i++)
-				if((bo[i].race!=race)&&(bo[i].race<3))
+		for(i=0;i<MAX_LENGTH;i++)
+			if((bo[i].race!=race)&&(bo[i].race<3))
+			{
+				f=60000;
+				for(j=0;j<60;j++)
 				{
-					f=60000;
-					for(j=0;j<60;j++)
+					Distance=0;
+					for(t=0;t<26;t++)
+					Distance+=(mystats[race][j].code[t]-bo[i].code[t])*(mystats[race][j].code[t]-bo[i].code[t]);
+					if(f>Distance)
 					{
-						Abstand=0;
-						for(t=0;t<26;t++)
-							Abstand+=(mystats[race][j].code[t]-bo[i].code[t])*(mystats[race][j].code[t]-bo[i].code[t]);
-						if(f>Abstand)
-						{
-							f=Abstand;
-							bo[i].race=race;
-							bo[i].type=j;
-							bo[i].tmp=f;
-						}
+						f=Distance;
+						bo[i].race=race;
+						bo[i].type=j;
+						bo[i].tmp=f;
 					}
 				}
-			
-			if((argv[argc-1][0]=='-')&&(UpperCase(argv[argc-1][1])=='T'))
-				Test=2;
-			else Test=1;
+			}
+		//end of race-recheck
+				
+		if((argc>3)&&(argv[argc-1][0]=='-')&&(UpperCase(argv[argc-1][1])=='T'))
+			Test=2;
+		else Test=1;
 
 		setattr(0,32,40);
-		printf("ok.\n");
+		printf(" ok\n");
 		setattr(0,37,40);
-		}
-	} 
+	
+	}
 	
 	//TODO: input additional arguments (like 'using defaults', scouttime or everything in settings.txt
 	//TODO: Improve the implementation of parameter checking... looks really confusing 
@@ -385,7 +410,7 @@ int main(int argc, char* argv[])
 	}
 	printf("[%s]",R);
 	setattr(0,32,40);
-	printf(" ok.\n");
+	printf(" ok\n");
 	setattr(0,37,40);
 
 	if(Test==0)
@@ -486,41 +511,54 @@ int main(int argc, char* argv[])
 					player[0]->program[t].built=0;	
 				}
 		
-			// Kinda hacked. As the build order which the user has input does not include the force a player already has it is added here.
-		// i.e. "scc -b Drone" results in a goal[DRONE].what == 5
+		// "scc -b Drone" results in a goal[DRONE].what == 5
 			for(s=0;s<building_types;s++)
 				if(player[0]->force[s]>0)
 					goal[s].what+=player[0]->force[s];
-			
-			
+			player[0]->readjust_goals(); // actually affects only zerg (and archon of the protoss)
+
+			printf("Translated goals:\n");
+			for(s=0;s<building_types;s++)
+				if(goal[s].what>0)
+					printf("%s : %i\n",stats[race][s].name,goal[s].what); 
+			printf("\nPress Enter to show time\n");
+
+			a=getchar();
 			player[0]->timer=setup.Max_Time;
 			player[0]->IP=0;
 
 			player[0]->Calculate();
 
 		//print out all orders that are executed without problems
-			printf("ok:\n");
+			printf("Successful build order:           [Requirement fulfilled]\n");
 			for(s=0;s<MAX_LENGTH;s++)
 				if(player[0]->program[s].built==1)
-			printf("    %s [%.2i,%.2i] %s\n",stats[race][Build_Av[player[0]->program[s].order]].name,player[0]->program[s].time/60,player[0]->program[s].time%60,error_m[player[0]->program[s].success]);
+			printf("    %s [%.2i:%.2i] %s\n",stats[race][Build_Av[player[0]->program[s].order]].name,player[0]->program[s].time/60,player[0]->program[s].time%60,error_m[player[0]->program[s].success]);
 				else s=MAX_LENGTH;
 				
-			printf("Needed Time: [%.2i:%.2i] ",player[0]->timer/60,player[0]->timer%60);
+			printf("Needed Time: ");	
+			setattr(0,32,40);
+			printf("[%.2i:%.2i] ",player[0]->timer/60,player[0]->timer%60);
+			setattr(0,37,40);
 	
 		// no solution? probably forgot a tech building or supply
 			if(player[0]->timer==setup.Max_Time)
 			{
-				printf(" => invalid build order, goals not reached.\n");	
+				printf("\n => invalid build order, goals not reached.\n");	
 				s=0;
 			//determine the order which could not be executed
 				while(s<MAX_LENGTH)
 					if((s+1<MAX_LENGTH)&&(player[0]->program[s+1].built==0))
 					{
-						printf("Probably your build order failed because this was not fulfilled:\n");
-					       setattr(0,31,40);
-				               printf("%s [%s]\n",error_m[player[0]->program[s].success],stats[race][Build_Av[player[0]->program[s].order]].name);
-					       setattr(0,37,40);
-						printf("Check your build order, reread the readme and/or contact ClawSoftware :)\n");
+						printf("When trying to build ");
+					        setattr(0,32,40);
+				       		printf("%s",stats[race][Build_Av[player[0]->program[s].order]].name);
+					        setattr(0,37,40);
+				                printf(" the following requirement failed : \n");
+						setattr(0,31,40);
+						printf("%80s\n",error_m[player[0]->program[s].success]);
+					        setattr(0,37,40);
+						printf("\nCheck your build order, reread the readme and/or contact ClawSoftware :)\n");
 						s=MAX_LENGTH;
 					} else s++;
 				}
@@ -543,7 +581,7 @@ printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
 	clrscr();
 	gotoxy(0,0);
 
-	printf("Welcome to StarCraftCalculator v1.02!\n");
+	printf("Welcome to StarCraftCalculator v1.02 [3/30/03]!\n");
 	printf("-------------------------------------\n\n");
 	printf("- Check the ""%s"" file to change goals of the BO\n",I);
 	printf("  You may change additional settings in the ""settings.txt"" file.\n");
@@ -563,7 +601,10 @@ printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
 	clrscr();
 	gotoxy(0,0);
 	printf("\n");
-	printf("Goals (as stated in ""%s"")\n",I);
+	if(translate==0)
+		printf("Goals (as stated in ""%s"")\n",I);
+	else printf("Goals (as received from command line)\n");
+	
 	for(s=0;s<building_types;s++)
 		if(goal[s].what>0)
 		{
@@ -589,7 +630,7 @@ printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
                 rfit++;
 	        calc++;
 		  	  
-//TODO: player[0] is not yet initialized as the best build order ...
+//TODO: player[0] is not yet initialized as the best build order ... (in the very first run)
 // probably the best thing to do is to move the block to the end 
 		old_time=player[0]->timer;
 		old_fit=player[0]->pFitness; 
@@ -618,6 +659,7 @@ printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
 			 }
 		
 		// bigger than afit or sfit? good! We completed another goal or at least a part of it
+		// Maybe implement another parameter to deactivate sFitness... will (maybe!) cause faster calculation but worse build orders (in terms of resources)
 		if(player[0]->pFitness>afit)
 		{
 			afit=player[0]->pFitness;
@@ -668,21 +710,6 @@ printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
 		gotoxy(13,6);if(player[0]->timer<setup.Max_Time) printf("%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);else printf(" ---- ");
 		setattr(0,37,40);
 		
-		//display time above the coloums
-		//TODO: if the top element is missing, determine the next 'built' order 
-		for(s=0;s<5;s++)
-		{
-			t=0;
-			while((t<HEIGHT)&&(player[0]->program[(s+1)*HEIGHT-t].built==0)) t++;
-			gotoxy(WIDTH*s+2,25);
-			if((t<HEIGHT)||(player[0]->program[s*HEIGHT].built>0))
-			{
-				printf("[%.2i:%.2i]",player[0]->program[(s+1)*HEIGHT-t].time/60,player[0]->program[(s+1)*HEIGHT-t].time%60);
-			} else printf("       ");
-		}
-		
-		   t=0;
-
 setattr(0,31,40);
 if((calc%80==0)||(calc%80==1)) setattr(0,37,40); else setattr(0,31,40);
 	gotoxy(20,3);printf("     ooo    ooo   ooo   o      oo    ooo ");
@@ -699,40 +726,109 @@ if((calc%80==8)||(calc%80==9)) setattr(0,37,40); else setattr(0,31,40);
 			tgoal[s]=goal[s].what;
 //bolog logs how long which build order stands there (you know, the colors ;-)
 		//TODO: recognize moved blocks to stress real Mutations
-		for(s=0;s<MAX_LENGTH;s++)
+		
+		old=200;
+		old_t=0;
+		old_sup=0;
+		counter=1;
+		t=0;
+		setattr(0,37,40);
+			
+		if(setup.Detailed_Output==1)
 		{
-			if(bolog[s].order==player[0]->program[s].order)
+			for(s=0;s<5;s++)
+                	{
+		       		t=0;
+		                while((t<HEIGHT)&&(player[0]->program[(s+1)*HEIGHT-t].built==0)) t++;
+		               	gotoxy(WIDTH*s+2,25);
+				if((t<HEIGHT)||(player[0]->program[s*HEIGHT].built>0))
+					printf("[%.2i:%.2i]",player[0]->program[(s+1)*HEIGHT-t].time/60,player[0]->program[(s+1)*HEIGHT-t].time%60);
+				else printf("       ");
+			}
+			
+			t=0;
+			for(s=0;s<MAX_LENGTH;s++)
 			{
-				if(bolog[s].count<160)
-					bolog[s].count++;
+				gotoxy((t/HEIGHT)*WIDTH,9+t%HEIGHT);
+				t++;
+				setattr(0,37,40);
+				if(player[0]->program[s].built==1)
+				{
+					if(bolog[s].order==player[0]->program[s].order)
+                                	{
+				        	if(bolog[s].count<160)
+							bolog[s].count++;
+					} else
+					{
+						bolog[s].count=0;
+						bolog[s].order=player[0]->program[s].order;
+					}
+					
+					setattr(0,34,40);
+					if(tgoal[Build_Av[player[0]->program[s].order]]>0)
+					{
+						printf("@");
+						tgoal[Build_Av[player[0]->program[s].order]]--;
+					} else printf(" ");
+					setattr(0,35,40);
+					printf("%c",error_sm[player[0]->program[s].success]);
+					setAt(bolog[s].count);
+					printf("%s",kurz[race][Build_Av[player[0]->program[s].order]].b);
+					setattr(0,37,40);
+					if(player[0]->program[s].need_Supply<100)
+						printf(" %.2i",player[0]->program[s].need_Supply);
+					else printf("%3i",player[0]->program[s].need_Supply);
+				}
+				else printf(" ------    "); 
+			}
+		}
+		else
+		{
+		for(s=0;(s<MAX_LENGTH)&&(t<3*HEIGHT+3);s++)
+		{
+			while((player[0]->program[s].built==0)&&(s<MAX_LENGTH-1))
+                        	s++;
+                        if(old==Build_Av[player[0]->program[s].order]) counter++;
+			else if(old<200)
+			{
+				if(bolog[t].order==old)
+	                        {
+					if(bolog[t].count<160)
+					bolog[t].count++;
+				}
+                                else
+				{
+					bolog[t].count=0;
+					bolog[t].order=old;
+				}
+				
+				gotoxy((t/(HEIGHT+1))*17,9+t%(HEIGHT+1));
+				if(counter>1) printf("%2i",counter); else printf("  ");
+				setAt(bolog[t].count);
+				t++;
+				printf("%s",kurz[race][old].b);
+				setattr(0,37,40);
+			        printf(" %.2i:%.2i ",old_t/60,old_t%60);
+				setattr(0,35,40);
+				if(old_sup<100) printf("%.2i",old_sup); else printf("%3i",old_sup);
+				setattr(0,37,40);
+				counter=1;
+				old=Build_Av[player[0]->program[s].order];
+				old_t=player[0]->program[s].time;
+				old_sup=player[0]->program[s].need_Supply;
 			}
 			else
-			{	bolog[s].count=0;
-				bolog[s].order=player[0]->program[s].order;
-			}
-			gotoxy((t/HEIGHT)*WIDTH,9+t%HEIGHT);
-			t++;
-			setattr(0,37,40);
-			if(player[0]->program[s].built==1)
 			{
-				if(setup.colors==1)
-					setattr(0,34,40);
-				if(tgoal[Build_Av[player[0]->program[s].order]]>0)
-				{
-					printf("@");
-					tgoal[Build_Av[player[0]->program[s].order]]--;
-				} else printf(" ");
-				if(setup.colors==1)
-					setattr(0,35,40);
-				printf("%c",error_sm[player[0]->program[s].success]);
-				setAt(bolog[s].count);
-				printf("%s",kurz[race][Build_Av[player[0]->program[s].order]].b);
-				setattr(0,37,40);
-				if(player[0]->program[s].need_Supply<100)
-				printf(" %.2i",player[0]->program[s].need_Supply);
-				else printf("%3i",player[0]->program[s].need_Supply);
+				old=Build_Av[player[0]->program[s].order];
+				old_t=player[0]->program[s].time;
+				old_sup=player[0]->program[s].need_Supply;
 			}
-			else printf(" ------    "); 
+		}
+		for(s=t;(s<=MAX_LENGTH)&&(s<3*(HEIGHT+1));s++)
+		{
+			gotoxy((s/(HEIGHT+1))*17,9+s%(HEIGHT+1));
+			printf("  ------       x");
+		}
 		}
 
 		setattr(0,37,40);
@@ -752,6 +848,7 @@ if((calc%80==8)||(calc%80==9)) setattr(0,37,40); else setattr(0,31,40);
 				 	forcelog[s].count=0;
 				        forcelog[s].order=player[0]->force[s];
 				}
+				
 				setAt(forcelog[s].count);
 				gotoxy(70,t);				
 				printf("%s:%2i ",kurz[race][s].b,player[0]->force[s]);
@@ -882,6 +979,8 @@ if((calc%80==8)||(calc%80==9)) setattr(0,37,40); else setattr(0,31,40);
 			for(s=0;s<MAX_LENGTH;s++)
 				bolog[s].count=0;
 		}
+	    if(player[0]->force[13]==255)
+		    a=getchar();
 	    
 	} // end while...
 
@@ -955,9 +1054,9 @@ if((calc%80==8)||(calc%80==9)) setattr(0,37,40); else setattr(0,31,40);
 // Start saving the data	
 	FILE * pFile;
 	pFile = fopen(O,"w");
-	fprintf(pFile,"--------------------------------------------------\n");
-	fprintf(pFile,"------StarCraftCalculator by ClawSoftware.de------\n");
-	fprintf(pFile,"--------------------------------------------------\n\n");
+	fprintf(pFile,"---------------------------------------------------\n");
+	fprintf(pFile,"---StarCraftCalculator by ClawSoftware.de [v1.02]--\n");
+	fprintf(pFile,"---------------------------------------------------\n\n");
 	fprintf(pFile,"Build Order of best Individual:\n");
 	
 	fprintf(pFile,"Time used: %.2i:%.2i minutes\n",Save[t]->timer/60,Save[t]->timer%60);	

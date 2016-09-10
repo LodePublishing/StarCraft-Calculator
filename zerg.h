@@ -10,6 +10,7 @@ public:
 	virtual void Build(unsigned short what);
 	virtual void Calculate();
 	virtual void InitRaceSpecific();
+	virtual void readjust_goals();
 	Player_Zerg();
 	virtual ~Player_Zerg();
 };

@@ -6,20 +6,20 @@ set Dark Templars to for example two and left everything else at zero)
 Units
             Zergling 0 0        // one zergling actually means one egg with two zerglings
            Hydralisk 0 0
-           Ultralisk 0 0
+           Ultralisk 2 0
                Drone 0 0
              Defiler 0 0
-              Lurker 0 0
+              Lurker 2 0
             Overlord 0 0
             Mutalisk 0 0
-            Guardien 0 0
-               Queen 0 0 
-             Scourge 0 0      // one scourge actually means one egg with two scourges
+            Guardien 3 0
+               Queen 1 0 
+             Scourge 1 0      // one scourge actually means one egg with two scourges
             Devourer 0 0
 Buildings                      
             Hatchery 0 0 
-                Lair 0 0
-                Hive 1 0
+                Lair 1 0
+                Hive 0 0
          Nydus Canal 0 0
        Hydralisk den 0 0
        Defiler mound 0 0
@@ -28,7 +28,7 @@ Buildings
    Evolution Chamber 0 0
     Ultralisk Cavern 0 0
                Spire 0 0
-       Spawning Pool 0 0
+       Spawning Pool 1 0
         Creep Colony 0 0
         Spore Colony 0 0
        Sunken Colony 0 0

@@ -1,6 +1,5 @@
 #include "zerg.h"
 #include "settings.h"
-#include <stdio.h>
 
 #define BUILDING_TYPES_ZERG 53
 
@@ -69,7 +68,7 @@
 		unsigned char i,j;
 		long Need_Gas;
 		building_types=BUILDING_TYPES_ZERG;
-		for(j=0;j<5;j++)
+		for(j=0;j<6;j++) // Deepth 6, just to be sure :)
 		for(i=0;i<BUILDING_TYPES_ZERG;i++)
 			if(goal[i].what>0)
 			{
@@ -186,7 +185,6 @@
 		Max_Build_Types=0;
 		
 		Ziel[EXTRACTOR]=1;
-		Ziel[CREEP_COLONY]=1;
 		
 		for(i=0;i<BUILDING_TYPES_ZERG;i++)
 		if(Ziel[i]==1)
@@ -237,7 +235,8 @@
 					if(building[i].RB>0)
 					{
 						if((stats[2][building[i].type].type==2) && (stats[2][building[i].type].BT-building[i].RB<min))
-		// type == 2 because this makes only sense with buildings			
+		// type == 2 because this makes only sense with buildings			// Sure... but what about Lurker, Guardien, Sunken, ...  ?
+		// mmmh... on the other hand this really makes no sense :}
 						{
 							min=stats[2][building[i].type].BT-building[i].RB;
 							n=i;
@@ -309,6 +308,7 @@
 					break;
 				case LURKER:
 					if((force[LURKER_ASPECT]>0)&&(force[HYDRALISK]>0))
+				//not very good doing a force[]-- here... 
 					{
 						force[HYDRALISK]--;
 						Produce(what);
@@ -321,6 +321,7 @@
 						Produce(what);
 					break;
 				case GUARDIEN:
+		//like Lurker... force[]-- is not good...
 					if((force[GREATER_SPIRE]>0)&&(force[MUTALISK]>0))
 					{
 						force[MUTALISK]--;
@@ -338,13 +339,13 @@
 					Produce(what);
 					break;
 				case LAIR:
-					if((force[HATCHERY]>0)&&(force[SPAWNING_POOL]>0)&&(availible[HATCHERY]>0)) 
+					if((force[SPAWNING_POOL]>0)&&(availible[HATCHERY]>0)) 
 					{
 						availible[HATCHERY]--;	  
 						Produce(what);
 					};break;
 				case HIVE:
-					if((force[LAIR]>0)&&(force[QUEENS_NEST]>0)&&(availible[LAIR]>0))
+					if((force[QUEENS_NEST]>0)&&(availible[LAIR]>0))
 					{
 						availible[LAIR]--;
 						Produce(what);
@@ -362,7 +363,7 @@
 						Produce(what);
 					break;
 				case GREATER_SPIRE:
-					if((force[SPIRE]>0)&&(availible[SPIRE]>0)&&(force[HIVE]>0)) 
+					if((availible[SPIRE]>0)&&(force[HIVE]>0)) 
 					{
 						availible[SPIRE]--;
 						Produce(what);
@@ -394,6 +395,8 @@
 						force[CREEP_COLONY]--;
 						Produce(what);
 					};break;
+		//what if spore/sunken colony is canceled!?
+		// NOTHING! Canceling a sunken/Guardien/whatever is senseless!
 				case SUNKEN_COLONY:
 					if((force[SPAWNING_POOL]>0)&&(force[CREEP_COLONY]>0))
 					{
@@ -411,26 +414,24 @@
 				case VENTRAL_SACKS:
 				case ANTENNAE:
 				case PNEUMATIZED_CARAPACE:
-					if((force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
+					if(availible[LAIR]+availible[HIVE]>0)
 					{
 						if(availible[LAIR]>0) 
 							availible[LAIR]--;
-						else availible[HIVE]--;
-						availible[what]=0;
+						else if(availible[HIVE]>0) availible[HIVE]--;
+						// else?
 						Produce(what);
 					};break;
 				case METABOLIC_BOOST:
-					if((force[SPAWNING_POOL]>0)&&(availible[SPAWNING_POOL]>0))
+					if(availible[SPAWNING_POOL]>0)
 					{
 						availible[SPAWNING_POOL]--;
-						availible[what]=0;
 						Produce(what);
 					};break;
 				case ADRENAL_GLANDS:
-					if((force[HIVE]>0)&&(force[SPAWNING_POOL]>0)&&(availible[SPAWNING_POOL]>0))
+					if((force[HIVE]>0)&&(availible[SPAWNING_POOL]>0))
 					{
 						availible[SPAWNING_POOL]--;
-						availible[what]=0;
 						Produce(what);
 					};break;
 				case MUSCULAR_AUGMENTS:
@@ -438,25 +439,22 @@
 					if((force[HYDRALISK_DEN]>0)&&(availible[HYDRALISK_DEN]>0))
 					{
 						availible[HYDRALISK_DEN]--;
-						availible[what]=0;
 						Produce(what);
 					};break;
 				case CHITINOUS_PLATING:
 					if((force[ULTRALISK_CAVERN]>0)&&(availible[ULTRALISK_CAVERN]>0)) 
 					{
 						availible[ULTRALISK_CAVERN]--;
-						availible[what]=0;
 						Produce(what);
 				  	};break;
 				case ANABOLIC_SYNTHESIS:
-					if((force[ULTRALISK_CAVERN]>0)&&(availible[ULTRALISK_CAVERN]>0)) 
+					if(availible[ULTRALISK_CAVERN]>0) 
 					{
 						availible[ULTRALISK_CAVERN]--;
-						availible[what]=0;
 						Produce(what);
 					};break;
 				case BURROWING:
-					if((force[HATCHERY]+force[LAIR]+force[HIVE]>0)&&(availible[HATCHERY]+availible[LAIR]+availible[HIVE]>0)) 
+					if(availible[HATCHERY]+availible[LAIR]+availible[HIVE]>0) 
 					{
 						if(availible[HATCHERY]>0)
 							availible[HATCHERY]--;
@@ -464,51 +462,45 @@
 							availible[LAIR]--;
 						else availible[HIVE]--;
 							Produce(what);
-						availible[what]=0;
 					 };break;
 				case ENSNARE:
 				case GAMETE_MEIOSIS:
 				case SPAWN_BROODLING:
-					if((force[QUEENS_NEST]>0)&&(availible[QUEENS_NEST]>0))
+					if(availible[QUEENS_NEST]>0)
 					{
 						availible[QUEENS_NEST]--;
 						Produce(what);
-						availible[what]=0;
 					};break;
 				case METASYNAPTIC_NODE:
 				case PLAGUE:
 				case CONSUME:
-					if((force[DEFILER_MOUND]>0)&&(availible[DEFILER_MOUND]>0))
+					if(availible[DEFILER_MOUND]>0)
 					{
 						availible[DEFILER_MOUND]--;
 						Produce(what);
-						availible[what]=0;
 					};break;
 				case LURKER_ASPECT:
-					if((force[HYDRALISK_DEN]>0)&&(force[LAIR]>0)&&(availible[HYDRALISK_DEN]>0))
+					if((force[LAIR]>0)&&(availible[HYDRALISK_DEN]>0))
 					{
 						availible[HYDRALISK_DEN]--;
 						Produce(what);
-						availible[what]=0;
 					};break;
 				case CARAPACE:
 				case MELEE_ATTACKS:
 				case MISSILE_ATTACKS:
-					if((force[EVOLUTION_CHAMBER]>0)&&(availible[EVOLUTION_CHAMBER]>0)&&(force[HATCHERY+force[what]]>0))
+					if((availible[EVOLUTION_CHAMBER]>0)&&(force[HATCHERY+force[what]]>0))
 			      		{
 						availible[EVOLUTION_CHAMBER]--;
 						Produce(what);
-						availible[what]=0;
 					};break;
 				case FLYER_CARAPACE:
 				case FLYER_ATTACKS:
-					if((force[SPIRE]>0)&&(availible[SPIRE]>0)&&(force[HATCHERY+force[what]]>0))
+					if((availible[SPIRE]>0)&&(force[HATCHERY+force[what]]>0))
 					{
 						if(availible[SPIRE]>0)
 							availible[SPIRE]--;
 						else availible[GREATER_SPIRE]--;
 						Produce(what);
-						availible[what]=0;
 					};break;
 				default:break;
 			}	
@@ -563,6 +555,7 @@
 					if(building[j].RB==0)
 					{
 						if((setup.Time_to_Enemy>0)&&(building[j].type<HATCHERY)&&(building[j].on_the_run==0)&&(building[j].type!=OVERLORD)&&(building[j].type!=DRONE)&&(building[j].type!=LURKER))
+			//TODO: Why no Lurker?				
 						{
 							building[j].on_the_run=1;
 							if(building[j].type==ZERGLING)
@@ -595,15 +588,20 @@
 							else if((building[j].type==GUARDIEN)||(building[j].type==DEFILER))
 								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
 						}
+					// End of the 'run to enemy' part
+						
 						switch(building[j].type)
 						{
 							case DRONE:peonmins++;break;
 							case OVERLORD:Supply+=8;Max_Supply+=8;break;
 							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;Max_Supply++;break;
 							case EXTRACTOR:break;		
-							case LAIR:force[HATCHERY]--;availible[LAIR]++;break;
-							case HIVE:force[LAIR]--;availible[HIVE]++;break;
+							case LAIR:force[HATCHERY]--;break;
+							case HIVE:force[LAIR]--;break;
 							case GREATER_SPIRE:force[SPIRE]--;break;
+							case SPORE_COLONY:
+							case SUNKEN_COLONY:force[CREEP_COLONY]--;break;
+									   
 							case VENTRAL_SACKS:
 							case ANTENNAE:
 							case PNEUMATIZED_CARAPACE:
@@ -617,6 +615,10 @@
 							case CHITINOUS_PLATING:
 							case ANABOLIC_SYNTHESIS:availible[ULTRALISK_CAVERN]++;break;
 
+
+
+										/// UHUHOHO !! what if burrowing is researched in a lair and a new hatchery is built?	mmmh?
+										//Maybe implement for every building[] an origin pointer, in which building type it was researched!
 							case BURROWING:
 							   if(availible[HATCHERY]<force[HATCHERY])
 								   availible[HATCHERY]++;
@@ -639,14 +641,13 @@
 							
 							case CARAPACE:
 							case MELEE_ATTACKS:
-							case MISSILE_ATTACKS:availible[EVOLUTION_CHAMBER]++;availible[building[j].type]=1;break;
+							case MISSILE_ATTACKS:availible[EVOLUTION_CHAMBER]++;break;
 
 							case FLYER_CARAPACE:
 							case FLYER_ATTACKS:
 								if(availible[SPIRE]<force[SPIRE])
 									availible[SPIRE]++;
 								else availible[GREATER_SPIRE]++;
-								availible[building[j].type]=1;
 								break;
 							default:break;
 						}
@@ -716,3 +717,50 @@ Player_Zerg::Player_Zerg()
 Player_Zerg::~Player_Zerg()
 {
 }
+
+void Player_Zerg::readjust_goals()
+{
+	unsigned short i,j;
+	for(i=0;i<building_types;i++)
+        	if(goal[i].what>0)
+		{
+			if(stats[2][i].type==2)
+			{
+				if((i!=HIVE)&&(i!=LAIR)&&(i!=SUNKEN_COLONY)&&(i!=SPORE_COLONY))
+					goal[DRONE].what--;
+				else if(i==HIVE)
+					goal[LAIR].what--;
+				//mmmh... if the user forgot 'goal[LAIR]', this leads to an overflow... maybe implement later a complete 'goal check' function here
+				else if(i==LAIR)
+					goal[HATCHERY].what--;
+				else if(i==SPORE_COLONY)
+					goal[CREEP_COLONY].what--;
+				else if(i==SUNKEN_COLONY)
+					goal[CREEP_COLONY].what--;
+			}
+			else if(i==LURKER)
+				goal[HYDRALISK].what--;
+			else if(i==GUARDIEN)
+				goal[MUTALISK].what--;
+			else if(i==DEVOURER)
+				goal[MUTALISK].what--;
+		}
+	goal[DRONE].what++; // because of the predefined goal[HATCHERY].what==1
+	i=MAX_LENGTH-1;
+
+	//why i AND j ? Well... there could be multiple BREAK_UP_BUILDING commands...
+	while(i>0)
+	{
+		if(Build_Av[program[i].order]==BREAK_UP_BUILDING)
+		{
+			j=i;
+			while(j>0)
+			{
+				if(stats[2][Build_Av[program[j].order]].type==2)
+					goal[Build_Av[program[j].order]].what--;				j--;
+			}
+		}
+		i--;
+	}
+}
+

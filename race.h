@@ -44,13 +44,14 @@ public:
 	virtual void Build() {};
 	virtual void Calculate() {}; 
 	virtual void InitRaceSpecific() {};
-
+	virtual void readjust_goals() {};
 
 	void CheckReady(unsigned char j);
 	void CalculateFitness();
 	void Mutate();
 	void Restart();
 	void Produce(unsigned char who);
+	
 	void Harvest_Resources();
 	void Init();
 	RACE();

@@ -7,6 +7,7 @@ public:
 	virtual void Build(unsigned short what);
 	virtual void Calculate();
 	virtual void InitRaceSpecific();
+	virtual void readjust_goals();
 	Player_Protoss();
 	virtual ~Player_Protoss();
 };

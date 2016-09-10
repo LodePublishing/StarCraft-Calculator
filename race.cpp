@@ -1,7 +1,6 @@
 #include "race.h"
 #include "settings.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 // TODO: recheck the speed of the units in zerg.cpp, protoss.cpp and terra.cpp
 // TODO: Implement the locations of buildings (expansion, wallin, ...)
@@ -122,6 +121,8 @@ void RACE::Produce(unsigned char what)
 	building[nr].type=what;
 	Supply-=stats[race][what].supply;
 	building[nr].on_the_run=0;
+	if(stats[race][what].type>2) // Researches, Upgrades
+		availible[what]=0;
 	if(stats[race][what].type==4)
 	{
 		building[nr].RB+=force[what]*32;
@@ -229,7 +230,7 @@ void RACE::Init()
                if(stats[race][i].type<3)
 	               availible[i]=0;
 	       else
-	               availible[i]=1;
+	               availible[i]=1;//Researches that can be researched only once
 	}
 	for(i=0;i<MAX_BUILDINGS;i++)
 	{

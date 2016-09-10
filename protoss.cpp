@@ -74,7 +74,7 @@
 		long Need_Gas;
 		
 		building_types=BUILDING_TYPES_PROTOSS;
-		for(j=0;j<5;j++)
+		for(j=0;j<6;j++) // Depth 6, just to be sure :)
 		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
 			if(goal[i].what>0)
 			{
@@ -233,62 +233,62 @@
 			{
 				case DARK_TEMPLAR:
 				case HIGH_TEMPLAR:
-					if((force[GATEWAY]>0)&&(availible[GATEWAY]>0)&&(force[TEMPLAR_ARCHIVES]>0)) 
+					if((availible[GATEWAY]>0)&&(force[TEMPLAR_ARCHIVES]>0)) 
 					{
 						Produce(what);
 						availible[GATEWAY]--;
 					};break;
 				case DRAGOON:
-					if((force[GATEWAY]>0)&&(force[CYBERNETICS_CORE]>0)&&(availible[GATEWAY]>0))
+					if((force[CYBERNETICS_CORE]>0)&&(availible[GATEWAY]>0))
 					{
 						Produce(what);
 						availible[GATEWAY]--;
 					};break;
 				case ZEALOT:
-					if((force[GATEWAY]>0)&&(availible[GATEWAY]>0)) 
+					if(availible[GATEWAY]>0) 
 					{
 						Produce(what);
 						availible[GATEWAY]--;
 					};break;
 				case REAVER:
-					if((force[ROBOTICS_SUPPORT_BAY]>0)&&(force[ROBOTICS_FACILITY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
+					if((force[ROBOTICS_SUPPORT_BAY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
 					{
 						Produce(what);
 						availible[ROBOTICS_FACILITY]--;
 					};break;
 				case SHUTTLE:
-					if((force[ROBOTICS_FACILITY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
+					if(availible[ROBOTICS_FACILITY]>0) 
 					{
 						Produce(what);
 						availible[ROBOTICS_FACILITY]--;
 					};break;
 				case PROBE:
-					if((force[NEXUS]>0)&&(availible[NEXUS]>0)) 
+					if(availible[NEXUS]>0) 
 					{
 						Produce(what);
 						availible[NEXUS]--;
 					};break;
 				case OBSERVER:
-					if((force[ROBOTICS_FACILITY]>0)&&(force[OBSERVATORY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
+					if((force[OBSERVATORY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
 					{
 						Produce(what);
 						availible[ROBOTICS_FACILITY]--;
 					};break;
 				case SCOUT:
 				case CORSAIR:
-					if((force[STARGATE]>0)&&(availible[STARGATE]>0)) 
+					if(availible[STARGATE]>0) 
 					{
 						Produce(what);
 						availible[STARGATE]--;
 					};break;
 				case ARBITER:
-					if((force[STARGATE]>0)&&(availible[STARGATE]>0)&&(force[TEMPLAR_ARCHIVES]>0)&&(force[ARBITER_TRIBUNAL]>0)) 
+					if((availible[STARGATE]>0)&&(force[TEMPLAR_ARCHIVES]>0)&&(force[ARBITER_TRIBUNAL]>0)) 
 					{
 						Produce(what);
 						availible[STARGATE]--;
 					};break;
 				case CARRIER:
-					if((force[STARGATE]>0)&&(availible[STARGATE]>0)&&(force[FLEET_BEACON]>0)) 
+					if((availible[STARGATE]>0)&&(force[FLEET_BEACON]>0)) 
 					{
 						Produce(what);
 						availible[STARGATE]--;
@@ -359,71 +359,63 @@
 				case HALLUCINATION:
 				case MIND_CONTROL:
 				case MAELSTROM:
-					if((force[TEMPLAR_ARCHIVES]>0)&&(availible[TEMPLAR_ARCHIVES]>0))
+					if(availible[TEMPLAR_ARCHIVES]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[TEMPLAR_ARCHIVES]--;
 					};break;
 				case KHAYDARIN_CORE:
 				case RECALL:
 				case STASIS_FIELD:
-					if((force[ARBITER_TRIBUNAL]>0)&&(availible[ARBITER_TRIBUNAL]>0))
+					if(availible[ARBITER_TRIBUNAL]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[ARBITER_TRIBUNAL]--;
 					};break;
 				case ARGUS_JEWEL:
 				case APIAL_SENSORS:
 				case GRAVITIC_THRUSTERS:							case DISRUPTION_WEB:
 				case CARRIER_CAPACITY:
-					if((force[FLEET_BEACON]>0)&&(availible[FLEET_BEACON]>0))
+					if(availible[FLEET_BEACON]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[FLEET_BEACON]--;
 					};break;
 				case LEG_ENHANCEMENTS:
-					if((force[CITADEL_OF_ADUN]>0)&&(availible[CITADEL_OF_ADUN]>0))
+					if(availible[CITADEL_OF_ADUN]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[CITADEL_OF_ADUN]--;
 					};break;
 				case GRAVITIC_DRIVE:
 				case SCARAB_DAMAGE:
 				case REAVER_CAPACITY:
-					if((force[ROBOTICS_SUPPORT_BAY]>0)&&(availible[ROBOTICS_SUPPORT_BAY]>0))
+					if(availible[ROBOTICS_SUPPORT_BAY]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[ROBOTICS_SUPPORT_BAY]--;
 					};break;
 				case SENSOR_ARRAY:
 				case GRAVITIC_BOOSTERS:
-					if((force[OBSERVATORY]>0)&&(availible[OBSERVATORY]>0))
+					if(availible[OBSERVATORY]>0)
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[OBSERVATORY]--;
 					 };break;
 				case SINGULARITY_CHARGE:
 				case PLATING:
 				case AIR_WEAPONS:
-					if((force[CYBERNETICS_CORE]>0)&&(availible[CYBERNETICS_CORE]>0)&&((force[what]==0)||(force[FLEET_BEACON]>0))) 
+					if((availible[CYBERNETICS_CORE]>0)&&((force[what]==0)||(force[FLEET_BEACON]>0))) 
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[CYBERNETICS_CORE]--;
 					};break;
 				case ARMOR:
 				case GROUND_WEAPONS:
 				case PLASMA_SHIELDS:
-					if((force[FORGE]>0)&&(availible[FORGE]>0)&&(availible[what]>0)) 
+					if((availible[FORGE]>0)&&((what==PLASMA_SHIELDS)||(force[TEMPLAR_ARCHIVES]>0)||(force[what]==0)))
 					{
 						Produce(what);
-						availible[what]=0;
 						availible[FORGE]--;
 					};break;
 				default:break;
@@ -626,3 +618,17 @@ Player_Protoss::Player_Protoss()
 Player_Protoss::~Player_Protoss()
 {
 }
+
+void Player_Protoss::readjust_goals()
+{
+	unsigned short i;
+	for(i=0;i<building_types;i++)
+		if(goal[i].what>0)
+		{
+			if(i==DARK_ARCHON)
+				goal[DARK_TEMPLAR].what-=2;
+			if(i==ARCHON)
+				goal[HIGH_TEMPLAR].what-=2;
+		}
+}
+
