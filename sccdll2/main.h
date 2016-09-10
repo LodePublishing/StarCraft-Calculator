@@ -15,8 +15,11 @@
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
 #define UNIT_TYPE_COUNT 100
-#define MAX_GOALS 100
+#define MAX_GOALS 100 // count of possible different goals
 #define MAX_SUPPLY 200
+
+
+//CODE INITIALISIEREN!
 
 
 struct Building
@@ -32,19 +35,13 @@ struct Building
         // TODO: Aus Optimierungsgruenden: Eine logforce Variable die _Alle_ Einheiten mitzaehlt
 };
 
-/*struct LAST
+struct LAST
 {
 	int what;
 	int location;
 	int count;
-};*/
-
-
-struct LOCATION
-{
-	int force[UNIT_TYPE_COUNT];
-	int availible[UNIT_TYPE_COUNT];
 };
+
 
 
 struct GOAL

@@ -116,4 +116,12 @@ int PLAYER::setBasicHarvestPerSecond(int* mining, int* gasing)
 	basicMineralHarvestPerSecond=mining;
 	basicGasHarvestPerSecond=gasing;
 	return(1);
-}
+};
+
+int PLAYER::setGoal(GOAL_ENTRY* goal)
+{
+	if(!goal)
+		return(0);
+	this->goal=goal;
+	return(1);
+};

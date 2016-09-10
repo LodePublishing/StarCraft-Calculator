@@ -2,6 +2,7 @@
 #define __PLAYER_H
 
 #include "main.h"
+#include "goal.h"
 
 class SCCDLL_API PLAYER
 {
@@ -16,6 +17,7 @@ class SCCDLL_API PLAYER
         const int* basicMineralHarvestPerSecond;
         const int* basicGasHarvestPerSecond;
 	public:
+		GOAL_ENTRY* goal;
 		int getMins();
 		int getGas();
 		int getTimer();
@@ -34,6 +36,7 @@ class SCCDLL_API PLAYER
 		int setSupply(int num);
 		int setMaxSupply(int num);
 		int setBasicHarvestPerSecond(int* mining, int* gasing);
+		int setGoal(GOAL_ENTRY* goal);
 };
 
 

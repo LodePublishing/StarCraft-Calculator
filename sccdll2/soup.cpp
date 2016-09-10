@@ -3,6 +3,8 @@
 #include <cstring>
 #include <time.h>
 #include <windows.h>
+#include "race.h"
+#include "anarace.h"
 
 bool APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
@@ -20,41 +22,124 @@ bool APIENTRY DllMain( HANDLE hModule,
     return TRUE;
 }
 
-SOUP::SOUP(MAP* map,GOAL_ENTRY* goal, ...)
+int SOUP::setMap(MAP* map)
 {
-	va_list args;
-	va_start(args,goal);
-	GOAL_ENTRY* tGoal[MAX_PLAYER];
-	tGoal[0]=goal;
-	int i;
-	for(i=0;i<map->getMaxPlayer();i++)
-		tGoal[i+1]=va_arg(args,GOAL_ENTRY*);
+	if(!map)
+		return(0);
+	mapInitialized=1;
+	pMap=map;
+	return(1);
+};
 
-/*	settings=data;
-    RACE::pSet=settings;
+
+int SOUP::setGoal(GOAL_ENTRY* goal, int player)
+{
+	if((!mapInitialized)||(player<0)||(player>=pMap->getMaxPlayer()))
+		return(0);
+//	if(!this->goal[player]) ~~~~~~~~
+//	{
+		goalCount++;
+		if(goalCount==pMap->getMaxPlayer())
+			goalsInitialized=1;
+//	}
+	this->goal[player]=goal;
+	return(pMap->player[player].setGoal(goal));
+};
+
+int SOUP::setParameters(GA* ga)
+{
+	if(!ga)
+		return(0);
+	gaInitialized=1;
+	this->ga=ga;
+	PRERACE::ga=ga;
+	return(1);
+};
+
+int SOUP::initSoup()
+{
+	int i;
+	if(!mapInitialized)
+		return(-1);
+	if(!goalsInitialized)
+		return(-2);
+	if(!gaInitialized)
+		return(-3);
+	if(!PRERACE::setMap(pMap))
+		return(-4);
+
+	for(i=MAX_PROGRAMS;i--;)
+	{
+		player[i]=new RACE();
+		if(i>MAX_PROGRAMS/2)
+		{
+			if(!player[i]->loadPlayer(1)) //~~
+			{
+				for(int j=i;j>=0;j--)
+					delete player[j];
+				return(-5);
+			}
+		}
+		else
+		{
+			if(!player[i]->loadPlayer(0)) //~~
+			{
+				for(int j=i;j>=0;j--)
+					delete player[j];
+				return(-5);
+			}
+		}
+	};
+
+	for(i=2;i--;) //~~ getmaxplayer oder so
+	{
+		anaplayer[i]=new ANARACE();
+		if(!(anaplayer[i]->loadPlayer(i))) 
+		{
+			for(int j=i;j>=0;j--)
+				delete player[j];
+			return(-6);
+		};
+	};
+	for(i=0;i<MAX_PROGRAMS;i++)
+		player[i]->resetGeneCode();
+
+	playerInitialized=1;
+	return(1);
+};
+
+
+SOUP::SOUP()
+{
+	run_number=0;
+	playerInitialized=0;
+	mapInitialized=0;
+	goalCount=0;
+	gaInitialized=0;
+	goalsInitialized=0;
+
+/*	RACE::setMap(this->map);
+    RACE::sepSet=settings;
 	RACE::pMap=data->pMap;
     ANARACE::pSet=settings;
-	ANARACE::pMap=data->pMap;
-	srand(time(NULL));
-	for(i=MAX_PLAYER;i--;)
-		player[i]=new RACE();
-	anaplayer=new ANARACE();*/
+	ANARACE::pMap=data->pMap;*/
+//	anaplayer=new ANARACE();
 
 //TODO!!! static pSet hier initialisieren! race und anarace noch nicht initialisieren sondern ueber new hier aufrufen!
 //	for(i=RUNNINGS;i--;) statistics[i]=new STATISTICS;
 };
 
 SOUP::~SOUP()
-
 {
 	int i;
-	for(i=0;i<MAX_PLAYER;i++)
-		delete player[i];
+	if(playerInitialized)
+		for(i=0;i<MAX_PLAYER;i++)
+			delete player[i];
 //	delete settings;
 //	delete [] statistics;
 };
 
-/*int compare(const void* a,const void* b)
+int compare(const void* a,const void* b)
 {
 	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<(*(RACE*)b).sFitness)) || ( ((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness==(*(RACE*)b).sFitness)&& ((*(RACE*)a).tFitness>=(*(RACE*)b).tFitness)) )
 		return (1);
@@ -65,32 +150,48 @@ SOUP::~SOUP()
 
 //TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
 
+void SOUP::resetLocations()
+{
+
+	//kommen ja immer 4, 2 oder 1 in ein paaring...
+/*	int i,j;
+
+	for(i=0;i<MAX_LOCATIONS;i++)
+	{
+		location[i].force=pMap->location[i].force;
+		location[i].availible=
+	}*/
+};
+
 ANARACE* SOUP::newGeneration()
 {
 	int i;
-	if(anaplayer->run>=settings->ga.maxRuns) return(0);
-		for(i=MAX_PLAYER;i--;)
-		{
-			player[i]->resetData();
-			player[i]->initLocations();
-			if(i>0) player[i]->mutateGeneCode();
-		}
+	if((!mapInitialized)||(!goalsInitialized)||(!gaInitialized)||(ANARACE::getRun()>=ga->maxRuns)) 
+		return(0);
 
-		for(i=MAX_PLAYER;i--;)
-			player[i]->calculate();
-
-		/*for(i=7;i--;)
-			qsort(player[i*16],MAX_PLAYER/16,sizeof(RACE),compare);
-		for(i=7;i--;)
-		{
-			int p1=rand()%(MAX_PLAYER/16);
-			int p2=rand()%(MAX_PLAYER/16);
-			int c1=rand()%(MAX_PLAYER/16);
-			int c2=c1;
-			while(c1==c2)
-				c2=rand()%(MAX_PLAYER/16);
-			player[p1*16]->crossOver(player[p2*16],player[c1*16+7],player[c2*16+7]);
-		}*/
+	for(i=MAX_PLAYER;i--;)
+	{
+		player[i]->resetData();
+		if(i>0) player[i]->mutateGeneCode();
+	}
+	
+	for(i=MAX_PLAYER;i--;)
+	{
+		resetLocations();
+		player[i]->calculate();
+	}
+	/*for(i=7;i--;)
+		qsort(player[i*16],MAX_PLAYER/16,sizeof(RACE),compare);
+	for(i=7;i--;)
+	{
+		int p1=rand()%(MAX_PLAYER/16);
+		int p2=rand()%(MAX_PLAYER/16);
+		int c1=rand()%(MAX_PLAYER/16);
+		int c2=c1;
+		while(c1==c2)
+			c2=rand()%(MAX_PLAYER/16);
+		player[p1*16]->crossOver(player[p2*16],player[c1*16+7],player[c2*16+7]);
+	}*/
 /*	
 int j;		
 		for(i=0;i<MAX_PLAYER;i++)
@@ -151,6 +252,6 @@ int j;
 			anaplayer->maxsFitness=0;
 			anaplayer->maxtFitness=0;
 			anaplayer->unchangedGenerations=0;
-		}
-	return(anaplayer);
-};*/
+		}*/
+	return(anaplayer[0]);
+};

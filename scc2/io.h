@@ -1,7 +1,7 @@
 #ifndef __IO_H
 #define __IO_H
 
-#include "e:\scc\sccdll2\anarace.h" 
+#include "C:\sc\sccdll2\anarace.h" 
 
 #define HEIGHT 16 // Number of entries (build order list)
 #define WIDTH 11 // witdh of the entries

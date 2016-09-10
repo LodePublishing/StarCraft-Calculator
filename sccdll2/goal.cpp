@@ -34,6 +34,12 @@ int GOAL_ENTRY::setRace(int num)
 	return(1);
 };
 
+const UNIT_STATISTICS* GOAL_ENTRY::getpStats()
+{
+	return(pStats);
+};
+
+
 int GOAL_ENTRY::adjustGoals()
 {
 	int i,j,k;
@@ -80,6 +86,14 @@ int GOAL_ENTRY::adjustGoals()
 	isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
 	isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
 
+	maxBuildTypes=0;
+	for(i=UNIT_TYPE_COUNT;i--;)
+		if(isBuildable[i]==1)
+		{
+			genoToPhaenotype[maxBuildTypes]=i;
+			phaenoToGenotype[i]=maxBuildTypes;
+			maxBuildTypes++;
+		};
 	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
 	return(1);
 };
@@ -116,6 +130,12 @@ int GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 	return(1);
 };
 
+int GOAL_ENTRY::getMaxBuildTypes()
+{
+	return(maxBuildTypes);
+};
+
+
 GOAL_ENTRY::GOAL_ENTRY()
 {
 	int i;
@@ -135,5 +155,7 @@ GOAL_ENTRY::GOAL_ENTRY()
 	{
 	  isVariable[i]=0;
 	  isBuildable[i]=0;
+	  genoToPhaenotype[i]=0;
+	  phaenoToGenotype[i]=0;
 	}
 };

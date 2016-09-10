@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "e:\scc\sccdll2\main.h"
+#include "C:\sc\sccdll2\main.h"
 #include "io.h"
-#include "e:\scc\sccdll2\anarace.h"
-#include "e:\scc\sccdll2\text.h"
+#include "C:\sc\sccdll2\anarace.h"
+#include "C:\sc\sccdll2\text.h"
 
 void setColor(unsigned char c)
 {

@@ -4,6 +4,8 @@
 #include "player.h"
 #include "location.h"
 
+#define MAX_MAPS 25
+
 class SCCDLL_API MAP
 {
 	private:
@@ -19,7 +21,8 @@ class SCCDLL_API MAP
 		int setMaxLocations(int num);
 		int setMaxPlayer(int num);
 
-		MAP_LOCATION location[MAX_LOCATIONS];
+		int locationList[MAX_LOCATIONS][MAX_LOCATIONS];			
+		MAP_LOCATION_BASIC location[MAX_LOCATIONS];
 		PLAYER player[MAX_PLAYER];
 		MAP();
 		~MAP();

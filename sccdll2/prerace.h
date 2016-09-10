@@ -1,17 +1,36 @@
 #ifndef __PRERACE_H
 #define __PRERACE_H
 
-#include "baserace.h"
+#include "main.h"
+#include "map.h"
+#include "player.h"
+#include "ga.h"
+#include "location.h"
 
-class SCCDLL_API PRERACE:public BASERACE
+class SCCDLL_API PRERACE
 {
-	private:
-		int player;
-		int mins,gas,timer;
+	protected:
+		int playerNum;
+		static int run;
+		int mins,gas,timer,IP;
         int mineralHarvestPerSecond[MAX_LOCATIONS][45];
         int gasHarvestPerSecond[MAX_LOCATIONS][5];
+		int harvestedGas,harvestedMins;
 		int supply,maxSupply;
+		static MAP* pMap;
+		static LAST last[MAX_LENGTH];
+		static int lastcounter;
+		static int lastwhat;
+        int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
+        int length;
 	public:
+		const UNIT_STATISTICS* pStats;
+		//Location ueberlegen...Andere Spieler interessieren eigentlich nur peripher bei Bewegungen und beim Sammeln! Also ein ganz normales Location wie bisher machen und ein location in denen Gegner/Alliierte mit drin sind
+		MAP_LOCATION location[MAX_LOCATIONS];
+        int Code[2][MAX_LENGTH];
+		void harvestResources();
+		static GA* ga;
+		PLAYER* player;   //private? mmmh...
 		int getPlayer();
 		int loadPlayer(int num);
         int adjustMineralHarvest(int loc);
@@ -21,72 +40,16 @@ class SCCDLL_API PRERACE:public BASERACE
 		int setMins(int num);
 		int setGas(int num);
 		int setTimer(int num);
+		static int setMap(MAP* map);
+
+			
 		int getSupply();
 		int getMaxSupply();
 		int getMins();
 		int getGas();
 		int getTimer();
-
-
-/*		static const UNIT_STATISTICS* pStats;
-
-		
-        ,timer; //starting/current mins/gas/timer
-	
-		GOAL goal[MAX_GOALS];
-		static int goalCount;
-		static int allGoal[UNIT_TYPE_COUNT]; //former goal...
-		static int globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT]; //?
-		void addGoal(int unit, int count, int time, int location);
-	
-		static int maxBuildTypes;
-        static int genoToPhaenotype[UNIT_TYPE_COUNT];
-        static int phaenoToGenotype[UNIT_TYPE_COUNT];
-		static int isBuildable[UNIT_TYPE_COUNT];
-        static int isVariable[UNIT_TYPE_COUNT];
-		
-
-        void adjustMineralHarvest(int loc);
-        void adjustGasHarvest(int loc);
-		
-		
-		Building building[MAX_BUILDINGS];
-		static int initialized;//»»
-		
-		static LAST last[MAX_LENGTH];
-		int lastwhat; //~~
-		static int lastcounter;
-		int IP;
-
-        
-        int mutationRate;
-        int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...
-
-		void harvestResources();
-
-        /*int buildGene(int what);
-        void calculateFitness(int ready);
-        static void init();
-        static void adjustGoals();
-        static void generateBasicBuildOrder(); //pre-process goals to create a b
-        void harvestResources();
-        static int genoToPhaenotype[UNIT_TYPE_COUNT];*/
-/*        int length;
-		int harvestedGas,harvestedMins;
-
-//Output:
-	int pFitness,sFitness,tFitness;
-    int Code[2][MAX_LENGTH];
-	//int phaenoCode[2][MAX_LENGTH];
-//Controls:
-	static const DATA* pSet;
-/*	void mutateGeneCode();
-	void calculate(); 
-	void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one
-	void resetData(); //resets all data to standard values
-	void initLocations();
-	void crossOver(RACE* parent2, RACE* child1, RACE* child2);*/
-	PRERACE();
+		static int getRun();
+		PRERACE();
 };
 
 #endif // __PRERACE_H

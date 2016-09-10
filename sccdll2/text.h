@@ -1,3 +1,6 @@
+#ifndef __TEXT_H
+#define __TEXT_H
+
 #include "main.h"
 
 struct Namen
@@ -7,10 +10,10 @@ struct Namen
  
 const char error_m[ERROR_MESSAGES][21]=
 {
-        "OK",
-        "enough Minerals",
-        "enough Gas",
-        "supply satisfied",
+	"OK",
+	"enough Minerals",
+	"enough Gas",
+	"supply satisfied",
 	"prerequisite built",
 	"facility availible",
 	"unknown problem"
@@ -19,7 +22,7 @@ const char error_m[ERROR_MESSAGES][21]=
 
 char error_sm[ERROR_MESSAGES]=
 {
-	        'O','M','G','S','P','F','U'
+	'O','M','G','S','P','F','U'
 };
 //TODO: restliche units einfuegen
 const Namen kurz[RACES][UNIT_TYPE_COUNT]=
@@ -64,3 +67,5 @@ const Namen kurz[RACES][UNIT_TYPE_COUNT]=
 	}
 };	
 
+
+#endif

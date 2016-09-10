@@ -3,16 +3,16 @@
 #include <string.h>
 
 // TODO: reimplement/recheck the speed of the units
-/*
+
 void ANARACE::calculate()
 {
 //ZERG: Larvenproduktion!  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
-	int timeout=pSet->ga.maxTimeOut;
-	int time=pSet->ga.maxTime;
+	int timeout=ga->maxTimeOut;
+	int time=ga->maxTime;
 	int ready=0;
 	int i,j;
-	IP=pSet->ga.maxLength-1;
+	IP=ga->maxLength-1;
 	//mins, gas hier rein...
 	while((time)&&(!ready)&&(IP>0))
 	{
@@ -22,13 +22,13 @@ void ANARACE::calculate()
 					//evtl versuchen umzuschreiben, dass er mehrere Befehle pro Sekunde machen kann ... TODO
 		if(Code[0][IP]>Code[1][IP]) //dominance
 		{
-			if(!(ok=buildGene(genoToPhaenotype[Code[dominant=0][IP]])))
-				ok=buildGene(genoToPhaenotype[Code[dominant=1][IP]]);
+			if(!(ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=0][IP]])))
+				ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=1][IP]]);
 		}
 		else
 		{
-			if(!(ok=buildGene(genoToPhaenotype[Code[dominant=1][IP]])))
-				ok=buildGene(genoToPhaenotype[Code[dominant=0][IP]]);
+			if(!(ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=1][IP]])))
+				ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=0][IP]]);
 		}
                 if(success.type>0)
 		{
@@ -41,13 +41,13 @@ void ANARACE::calculate()
 		{
 			if(timeout) 
 			{
-				program[IP].time=pSet->ga.maxTime-time; //ANA~
+				program[IP].time=ga->maxTime-time; //ANA~
 		                program[IP].dominant=dominant; //ANA~
 		                program[IP].type=Code[dominant][IP];
 			}
 			else 
 			{
-				program[IP].time=pSet->ga.maxTime+1;
+				program[IP].time=ga->maxTime+1;
 				program[IP].success[dominant].type=TIMEOUT;
 				program[IP].success[dominant].what=0;
 				program[IP].success[dominant].loc=0;
@@ -55,7 +55,7 @@ void ANARACE::calculate()
 			program[IP].needSupply=maxSupply-supply;
 			program[IP].haveSupply=maxSupply;
 			
-			timeout=pSet->ga.maxTimeOut;
+			timeout=ga->maxTimeOut;
 			IP--;
 		}
 	
@@ -161,13 +161,13 @@ void ANARACE::calculate()
 					lastcounter++;
 	//			IP zeugs checken... length is immer 2 :/	
 					for(i=MAX_GOALS;i--;)
-						if((goal[i].unit>0)&&((goal[i].location==0)||(build->location==goal[i].location))&&(build->type==goal[i].unit)&&((goal[i].time==0)||(time<=goal[i].time)))
+						if((player->goal->goal[i].unit>0)&&((player->goal->goal[i].location==0)||(build->location==player->goal->goal[i].location))&&(build->type==player->goal->goal[i].unit)&&((player->goal->goal[i].time==0)||(time<=player->goal->goal[i].time)))
 							ftime[build->type]=time;
 					
 					ready=1;
 					for(i=MAX_GOALS;i--;)
 						
-						ready&=( ( ((goal[i].location==0)&&(goal[i].count<=location[0].force[goal[i].unit]))||((goal[i].location>0)&&(goal[i].count<=location[goal[i].location].force[goal[i].unit])) )&&((goal[i].time>=ftime[i])||(goal[i].time==0)));
+						ready&=( ( ((player->goal->goal[i].location==0)&&(player->goal->goal[i].count<=location[0].force[player->goal->goal[i].unit]))||((player->goal->goal[i].location>0)&&(player->goal->goal[i].count<=location[player->goal->goal[i].location].force[player->goal->goal[i].unit])) )&&((player->goal->goal[i].time>=ftime[i])||(player->goal->goal[i].time==0)));
 					// oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
 				}
 			}
@@ -177,7 +177,7 @@ void ANARACE::calculate()
 		timeout--;
 	}
 	 //end while
-	length=pSet->ga.maxLength-IP;
+	length=ga->maxLength-IP;
 
 //TODO: Alles rausschmeissen, was schon von race berechnet wurde!
 	if(ready) 
@@ -185,7 +185,7 @@ void ANARACE::calculate()
 //		pFitness=time;
 		timer=time;
 	}
-	else timer=pSet->ga.maxTime;
+	else timer=ga->maxTime;
 	
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
 	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
@@ -439,7 +439,7 @@ int ANARACE::buildGene(int what)
                                         building[nr].facility=0;
                                         building[nr].location=last[lastcounter].location;
                                         building[nr].type=last[lastcounter].what;
-                                        building[nr].RB=pMap[last[lastcounter].location].distance[last[lastcounter].location+count]*100/pStats[last[lastcounter].what].speed;
+                                        building[nr].RB=location[last[lastcounter].location].getDistance(last[lastcounter].location+count)*100/pStats[last[lastcounter].what].speed;
                                         building[nr].onTheRun=1;
 					building[nr].IP=IP; // ~ANA
                                                 // 2x Unit => send 8/All instead of just one unit there
@@ -496,7 +496,7 @@ int ANARACE::buildGene(int what)
 //						program[building[n].IP].built=1;
 					}*/
 //TODO: Verwandtschaftsgrad fuer crossing over feststellen!	
-/*	if(ok)
+	if(ok)
 		program[IP].built=1; //ANA~
 	return ok;
 }
@@ -529,7 +529,7 @@ void ANARACE::resetData() // resets all data to standard starting values
 						
 		program[i].haveSupply=0;
                 program[i].needSupply=0;
-                program[i].time=pSet->ga.maxTime+1;
+                program[i].time=ga->maxTime+1;
 		program[i].type=255;
                 program[i].mins=0;
                 program[i].gas=0;
@@ -538,11 +538,13 @@ void ANARACE::resetData() // resets all data to standard starting values
         }
 	harvestedGas=0;
 	harvestedMins=0;
-	mins=pSet->misc.mins;
-	gas=pSet->misc.gas;
-	supply=pSet->misc.supply;
-	maxSupply=pSet->misc.maxSupply;
-	timer=pSet->ga.maxTime;
+
+	setMins(player->getMins());
+	setGas(player->getGas());
+	setTimer(player->getTimer());
+	setSupply(player->getSupply());
+	setMaxSupply(player->getMaxSupply());
+
 	for(i=0;i<4;i++)
 	{
 		last[i].location=1;
@@ -559,7 +561,7 @@ void ANARACE::resetData() // resets all data to standard starting values
 }
 
 
-void ANARACE::init()
+/*void ANARACE::init()
 {
 	pStats=pSet->pStats;
 	basicMineralHarvestPerSecond=pSet->misc.pMineralHarvestPerSecond;
@@ -567,26 +569,10 @@ void ANARACE::init()
 	adjustGoals(); //goals und buildable kopieren, goalcount etc.
 //#ifdef DEBUGSCC	
 	initialized=1;
-}
+}*/
 
 
-void ANARACE::adjustGoals()
-{
-	int i;
-// TODO: Maybe additional checks of the data sets here...
-//Anfangsforce checken
-	memcpy(goal,pSet->goalList.goal,sizeof(GOAL)*MAX_GOALS);
-        memcpy(isBuildable,pSet->goalList.isBuildable,UNIT_TYPE_COUNT*4);
-	maxBuildTypes=0;
-	for(i=UNIT_TYPE_COUNT;i--;)
-		if(isBuildable[i]==1)
-		{
-			genoToPhaenotype[maxBuildTypes]=i;
-			phaenoToGenotype[i]=maxBuildTypes;
-			maxBuildTypes++;
-		}
-}
-
+/*
 void ANARACE::initLocations()
 {
 	int i;
@@ -600,30 +586,11 @@ void ANARACE::initLocations()
 
 ANARACE::ANARACE()
 {
-/*	run=0;
-	unchangedGenerations=0;
 	generation=0;
 	maxpFitness=0;
 	maxsFitness=0;
 	maxtFitness=0;
-	length=pSet->ga.maxLength;
-	pMap=pSet->pMap;
-	if(!initialized) init();
-	initLocations();
-	resetData();*/
+	unchangedGenerations=0;
+/*	if(!initialized) init();
+	initLocations();*/
 }
-
-/*GOAL ANARACE::goal[MAX_GOALS];
-int ANARACE::genoToPhaenotype[UNIT_TYPE_COUNT];
-int ANARACE::phaenoToGenotype[UNIT_TYPE_COUNT];
-int ANARACE::isBuildable[UNIT_TYPE_COUNT];
-const UNIT_STATISTICS* ANARACE::pStats;
-const DATA* ANARACE::pSet;
-int ANARACE::initialized;
-int ANARACE::maxBuildTypes;
-const int* ANARACE::basicMineralHarvestPerSecond;
-const int* ANARACE::basicGasHarvestPerSecond;
-const MAP_LOCATION* ANARACE::pMap;
-int ANARACE::lastcounter;
-LAST ANARACE::last[MAX_LENGTH];*/
-
