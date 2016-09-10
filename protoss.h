@@ -498,7 +498,7 @@ public:
 	
 	void Calculate()
 	{
-		unsigned short tt,i,j;
+		unsigned short tt,i,j,tSupply;
 		ready=0;
 		timer=0;
 		harvested_gas=0;
@@ -507,19 +507,10 @@ public:
 		//minsready=0;
 		Vespene_Av=setup.Vespene_Geysirs;		
 		tt=0;
-		
 
 		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
-		{			
-	/*		if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
-			{
-				scout=1;
-				if(peonmins>0)
-					peonmins--;
-				else peongas--;
-				Scout_Time=timer;
-			}*/
-			
+		{
+			tSupply=Supply;			
 			BuildingRunning=0;
 			ok=0;
 
@@ -609,8 +600,8 @@ public:
 						switch(building[j].type)
 						{
 							case PROBE:peonmins++;availible[NEXUS]++;break;
-							case PYLON:Supply+=8;break;
-							case NEXUS:Supply+=9;break;
+							case PYLON:Supply+=8;Max_Supply+=8;break;
+							case NEXUS:Supply+=9;Max_Supply+=9;break;
 							case ASSIMILATOR:break;
 							case ZEALOT:
 							case DRAGOON:
@@ -684,7 +675,8 @@ public:
 			{
 				if(tt<=267) program[IP].time=timer;
 				else program[IP].time=20000;
-				program[IP].temp=availible[GATEWAY];
+				program[IP].need_Supply=Max_Supply-tSupply;
+				program[IP].have_Supply=Max_Supply;
 				tt=0;
 				IP++;
 			}
@@ -709,6 +701,7 @@ void InitRaceSpecific()
 	availible[NEXUS]=1;
 	force[PROBE]=4;
 	Supply=5;
+	Max_Supply=9;
 }
 
 };

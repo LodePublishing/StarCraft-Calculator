@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 	
 	if(argc>1)
 	{
-	if((argv[1][0]='T')||(argv[1][0]=='t'))
+	if((argv[1][0]=='T')||(argv[1][0]=='t'))
 		race=0;
 	else if((argv[1][0]=='P')||(argv[1][0]=='p'))
 		race=1;
@@ -337,10 +337,12 @@ int main(int argc, char* argv[])
 			rfit=0;
 			generation=0;
 			for(s=0;s<MAX_LENGTH;s++)
-				Save[run]->program[s]=player[0]->program[s];
-
-			for(s=0;s<MAX_LENGTH;s++)
+			{
+				Save[run]->program[s].order=player[0]->program[s].order; //??? War ohne '.' nach program[s]... vielleicht geht das besser... nae
 				Save[run]->program[s].time=player[0]->program[s].time;
+				Save[run]->program[s].need_Supply=player[0]->program[s].need_Supply;
+				Save[run]->program[s].have_Supply=player[0]->program[s].have_Supply;
+			}
 
 			Save[run]->pFitness=player[0]->pFitness;
 			Save[run]->timer=player[0]->timer;
@@ -376,6 +378,8 @@ int main(int argc, char* argv[])
 		{
 			Save[run]->program[s].order=player[0]->program[s].order;
 			Save[run]->program[s].time=player[0]->program[s].time;
+			Save[run]->program[s].have_Supply=player[0]->program[s].have_Supply;
+			Save[run]->program[s].need_Supply=player[0]->program[s].need_Supply;
 		}	
 		Save[run]->pFitness=player[0]->pFitness;
 		Save[run]->timer=player[0]->timer;
@@ -458,14 +462,14 @@ int main(int argc, char* argv[])
 		}
 		else
 		if((Save[t]->program[s].time<Save[t]->timer)&&(Build_Av[Save[t]->program[s].order]<building_types)&&((s==0)||(Save[t]->program[s].time>0)))
-				fprintf(pFile,"[%.2i:%.2i] %s\n",(Save[t]->program[s].time+0)/60,(Save[t]->program[s].time+0)%60,stats[race][Build_Av[Save[t]->program[s].order]].name);
+				fprintf(pFile,"[%.2i:%.2i] [%.2i/%.2i] %s\n",(Save[t]->program[s].time+0)/60,(Save[t]->program[s].time+0)%60,Save[t]->program[s].need_Supply,Save[t]->program[s].have_Supply,stats[race][Build_Av[Save[t]->program[s].order]].name);
 	}
 
 	printf("Build Order saved...\n");
 
 	for(s=0;s<building_types;s++)
 		if(Save[t]->force[s]>0)
-			fprintf(pFile,"%s : %i [Last one: %.2i:%.2i]\n",stats[race][s].name,Save[t]->force[s],Save[t]->ftime[s]/60,Save[t]->ftime[s]%60);
+			fprintf(pFile,"%35s : %2i [Last one: %.2i:%.2i]\n",stats[race][s].name,Save[t]->force[s],Save[t]->ftime[s]/60,Save[t]->ftime[s]%60);
 	fprintf(pFile,"Harvested Minerals : %i\n",(short)(Save[t]->harvested_mins));
 	fprintf(pFile,"Harvested Gas      : %i\n",(short)(Save[t]->harvested_gas));
 	fprintf(pFile,"Minerals at the end: %i\n",(short)(Save[t]->mins));
@@ -516,14 +520,14 @@ int main(int argc, char* argv[])
 		}
 		else
 		if((Save[u]->program[s].time<Save[u]->timer)&&(Build_Av[Save[u]->program[s].order]<building_types)&&((s==0)||(Save[u]->program[s].time>0)))
-				fprintf(pFile,"[%.2i:%.2i] %s\n",(Save[u]->program[s].time+0)/60,(Save[u]->program[s].time+0)%60,stats[race][Build_Av[Save[u]->program[s].order]].name);
+				fprintf(pFile,"[%.2i:%.2i] [%.2i/%.2i] %s\n",(Save[u]->program[s].time+0)/60,(Save[u]->program[s].time+0)%60,Save[u]->program[s].need_Supply,Save[u]->program[s].have_Supply,stats[race][Build_Av[Save[u]->program[s].order]].name);
 	}
 
 	printf("Build Order saved...\n");
 
 	for(s=0;s<building_types;s++)
 		if(Save[u]->force[s]>0)
-			fprintf(pFile,"%s : %i [Last one: %.2i:%.2i]\n",stats[race][s].name,Save[u]->force[s],Save[u]->ftime[s]/60,Save[u]->ftime[s]%60);
+			fprintf(pFile,"%35s : %3i [Last one: %.2i:%.2i]\n",stats[race][s].name,Save[u]->force[s],Save[u]->ftime[s]/60,Save[u]->ftime[s]%60);
 	fprintf(pFile,"Harvested Minerals : %i\n",(short)(Save[u]->harvested_mins));
 	fprintf(pFile,"Harvested Gas      : %i\n",(short)(Save[u]->harvested_gas));
 	fprintf(pFile,"Minerals at the end: %i\n",(short)(Save[u]->mins));

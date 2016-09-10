@@ -530,11 +530,12 @@ public:
 	
 	void Calculate()
 	{
-		unsigned char tt,i,j;
+		unsigned char tt,i,j,tSupply;
 		ready=0;
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
+		
 	//	gasready=0;
 	//	minsready=0;
 		Vespene_Av=setup.Vespene_Geysirs;		
@@ -543,16 +544,7 @@ public:
 		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{			
 			
-		/*	if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
-			{
-				scout=1;
-				if(peonmins>0)
-					peonmins--;
-				else peongas--;
-				Scout_Time=timer;
-			}*/
-
-
+			tSupply=Supply;// fuer Log
 			BuildingRunning=0;
 			ok=0;
 
@@ -605,7 +597,7 @@ public:
 							}
 							else if(building[j].type==WRAITH)
 								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
-							else if((building[j].type<SIEGE_TANK)||(building[j].type==MEDIC)||(building[j].type==VULTURE)||(building[j].type==SCV)||(building[j].type==GOLIATH)||(building[j].type==GHOST)||(building[j].type==VALKYRIE)||(building[j].type==SCIENCE_VESSEL))
+							else if((building[j].type<SIEGE_TANK)||(building[j].type==MEDIC)||(building[j].type==SCV)||(building[j].type==GOLIATH)||(building[j].type==GHOST)||(building[j].type==VALKYRIE)||(building[j].type==SCIENCE_VESSEL))
 								building[j].RB+=setup.Time_to_Enemy;
 							else if(building[j].type==BATTLE_CRUISER)
 								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
@@ -613,8 +605,8 @@ public:
 						switch(building[j].type)
 						{
 							case SCV:peonmins++;availible[COMMAND_CENTER]++;break;
-							case SUPPLY_DEPOT:Supply+=8;break;
-							case COMMAND_CENTER:Supply+=10;break;
+							case SUPPLY_DEPOT:Supply+=8;Max_Supply+=8;break;
+							case COMMAND_CENTER:Supply+=10;Max_Supply+=8;break;
 							case REFINERY:break;
 							case MARINE:
 							case FIREBAT:
@@ -705,6 +697,9 @@ public:
 			{
 				if(tt<=267) program[IP].time=timer;
 				else program[IP].time=20000;
+				program[IP].need_Supply=Max_Supply-tSupply;
+				// Warum nicht Supply statt tSupply? sonst 5/9 bei ersten drone z.B.
+				program[IP].have_Supply=Max_Supply;
 				tt=0;
 				IP++;
 			}
@@ -732,6 +727,7 @@ void InitRaceSpecific()
 	availible[COMMAND_CENTER]=1;
 	force[SCV]=4;
 	Supply=6;
+	Max_Supply=10;
 	peonbuilding=0;
 }
 

@@ -516,7 +516,7 @@ public:
 	
 	void Calculate()
 	{
-		unsigned char tt,i,j;
+		unsigned char tt,i,j,tSupply;
 		ready=0;
 		timer=0;
 		harvested_gas=0;
@@ -528,14 +528,7 @@ public:
 
 		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{			
-/*			if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
-			{
-				scout=1;
-				if(peonmins>0)
-					peonmins--;
-				else peongas--;
-				Scout_Time=timer;
-			}*/
+			tSupply=Supply;
 			BuildingRunning=0;
 			ok=0;
 
@@ -606,8 +599,8 @@ public:
 						switch(building[j].type)
 						{
 							case DRONE:peonmins++;break;
-							case OVERLORD:Supply+=8;break;
-							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;break;
+							case OVERLORD:Supply+=8;Max_Supply+=8;break;
+							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;Max_Supply++;break;
 							case EXTRACTOR:break;		
 							case LAIR:force[HATCHERY]--;availible[LAIR]++;break;
 							case HIVE:force[LAIR]--;availible[HIVE]++;break;
@@ -691,6 +684,8 @@ public:
 			{
 				if(tt<=267) program[IP].time=timer;
 				else program[IP].time=20000;
+				program[IP].need_Supply=Max_Supply-tSupply;
+				program[IP].have_Supply=Max_Supply;
 				tt=0;
 				IP++;
 			}
@@ -753,6 +748,7 @@ void InitRaceSpecific()
 	force[OVERLORD]=1;
 	larvacounter=1;
 	Supply=5;
+	Max_Supply=9;
 }
 
 };

@@ -2,69 +2,297 @@ StarCraft Evolution Chamber by ClawSoftware.de
 --------------------------------------------------
 
 Build Order of best Individual:
-Time used: 09:49
- minutesScouting unit after 02:40
- minutes[00:00] Probe
+Time used: 09:54 minutes
+Scouting unit after 02:40 minutes
+[00:00] Probe
+[00:20] Probe
+[00:40] Probe
+[01:00] Probe
+[01:11] Pylon
+[01:21] Probe
+[01:44] Probe
+[01:48] Assimilator
+[02:04] Probe
+[02:24] Probe
+[02:29] Gateway
+[02:44] Probe
+[02:45] Mineral Probe To Gas
+[02:46] Mineral Probe To Gas
+[02:53] Pylon
+[02:54] Gas Probe To Mineral
+[02:55] Mineral Probe To Gas
+[03:32] Cybernetics Core
+[03:50] Gateway
+[03:51] Mineral Probe To Gas
+[04:07] Pylon
+[04:35] Dragoon
+[04:53] Dragoon
+[05:25] Dragoon
+[05:43] Dragoon
+[06:15] Dragoon
+[06:33] Dragoon
+[07:05] Dragoon
+[07:06] Singularity Charge
+[07:23] Dragoon
+[07:55] Dragoon
+[08:13] Dragoon
+[08:17] Pylon
+[08:50] Dragoon
+[09:03] Dragoon
+[09:07] Probe
+[09:27] Probe
+[09:47] Probe
+[09:39] Dragoon
+                              Probe : 15 [Last one: 00:20]
+                            Dragoon : 12 [Last one: 05:25]
+                              Nexus :  1 [Last one: 00:00]
+                              Pylon :  4 [Last one: 01:44]
+                        Assimilator :  1 [Last one: 02:31]
+                            Gateway :  2 [Last one: 03:32]
+                   Cybernetics Core :  1 [Last one: 04:35]
+                 Singularity Charge :  1 [Last one: 09:52]
+Harvested Minerals : 3386
+Harvested Gas      : 947
+Minerals at the end: 186
+Gas at the end     : 197
+------------------------------
+
+Other possible solutions: 
+Time used: 09:04 minutes
+Scouting unit after 02:40 minutes
+[00:00] Probe
+[00:20] Probe
+[00:40] Probe
+[01:00] Assimilator
+[01:11] Probe
+[01:32] Pylon
+[01:41] Probe
+[01:43] Mineral Probe To Gas
+[02:05] Probe
+[02:25] Probe
+[02:45] Probe
+[02:46] Gateway
+[03:05] Probe
+[03:06] Mineral Probe To Gas
+[03:25] Probe
+[03:26] Gateway
+[03:53] Cybernetics Core
+[03:54] Gas Probe To Mineral
+[04:08] Pylon
+[04:09] Gas Probe To Mineral
+[04:10] Mineral Probe To Gas
+[04:11] Mineral Probe To Gas
+[04:56] Dragoon
+[04:57] Pylon
+[05:03] Dragoon
+[05:46] Dragoon
+[05:47] Mineral Probe To Gas
+[05:53] Dragoon
+[06:36] Dragoon
+[06:37] Mineral Probe To Gas
+[06:38] Gas Probe To Mineral
+[06:43] Dragoon
+[06:46] Singularity Charge
+[07:26] Dragoon
+[07:33] Dragoon
+[07:43] Pylon
+[08:16] Dragoon
+[08:23] Dragoon
+[08:32] Probe
+[09:06] Dragoon
+[09:13] Dragoon
+[09:19] Probe
+[09:39] Probe
+Probe : 17 [Last one: 00:20]
+Dragoon : 12 [Last one: 05:46]
+Nexus : 1 [Last one: 00:00]
+Pylon : 4 [Last one: 02:05]
+Assimilator : 1 [Last one: 01:43]
+Gateway : 2 [Last one: 03:49]
+Cybernetics Core : 1 [Last one: 04:56]
+Singularity Charge : 1 [Last one: 09:32]
+Harvested Minerals : 3486
+Harvested Gas      : 930
+Minerals at the end: 236
+Gas at the end     : 180
+------------------------------
+
+Time used: 09:00 minutes
+Scouting unit after 02:40 minutes
+[00:00] Probe
 [00:20] Probe
 [00:40] Probe
 [01:00] Probe
 [01:20] Probe
 [01:21] Pylon
 [01:40] Assimilator
-[01:54] Probe
+[02:05] Gateway
+[02:13] Probe
+[02:33] Probe
+[02:34] Mineral Probe To Gas
+[02:53] Probe
+[02:56] Gateway
+[03:13] Probe
+[03:14] Mineral Probe To Gas
+[03:38] Cybernetics Core
+[04:41] Dragoon
+[04:42] Mineral Probe To Gas
+[04:43] Pylon
+[04:44] Dragoon
+[05:31] Dragoon
+[05:34] Dragoon
+[05:35] Pylon
+[05:57] Singularity Charge
+[06:21] Dragoon
+[06:39] Dragoon
+[07:11] Dragoon
+[07:29] Dragoon
+[07:37] Pylon
+[08:01] Dragoon
+[08:19] Dragoon
+[08:27] Probe
+[08:51] Dragoon
+[09:09] Dragoon
+[09:17] Probe
+[09:37] Probe
+[09:57] Probe
+[09:58] Pylon
+[09:59] Gas Probe To Mineral
+[09:57] Probe
+Probe : 16 [Last one: 00:20]
+Dragoon : 12 [Last one: 05:31]
+Nexus : 1 [Last one: 00:00]
+Pylon : 4 [Last one: 01:54]
+Assimilator : 1 [Last one: 02:23]
+Gateway : 2 [Last one: 03:08]
+Cybernetics Core : 1 [Last one: 04:41]
+Singularity Charge : 1 [Last one: 08:43]
+Harvested Minerals : 3420
+Harvested Gas      : 919
+Minerals at the end: 70
+Gas at the end     : 169
+------------------------------
+
+Time used: 09:58 minutes
+Scouting unit after 02:40 minutes
+[00:00] Probe
+[00:20] Probe
+[00:40] Probe
+[01:00] Probe
+[01:11] Assimilator
+[01:21] Probe
+[01:40] Pylon
+[01:54] Mineral Probe To Gas
+[01:55] Gas Probe To Mineral
+[02:13] Gateway
 [02:14] Probe
-[02:21] Gateway
-[02:23] Mineral Probe To Gas
-[02:24] Mineral Probe To Gas
 [02:34] Probe
 [02:54] Probe
+[02:55] Mineral Probe To Gas
+[03:16] Cybernetics Core
+[03:17] Probe
+[03:18] Mineral Probe To Gas
+[03:19] Mineral Probe To Gas
+[03:20] Gas Probe To Mineral
+[03:37] Gateway
+[03:38] Mineral Probe To Gas
+[03:39] Gas Probe To Mineral
+[03:40] Gas Probe To Mineral
+[03:41] Mineral Probe To Gas
+[04:19] Dragoon
+[04:20] Pylon
+[04:21] Mineral Probe To Gas
+[04:40] Dragoon
+[04:50] Pylon
+[05:11] Dragoon
+[05:32] Dragoon
+[06:01] Dragoon
+[06:22] Dragoon
+[06:40] Singularity Charge
+[07:01] Dragoon
+[07:23] Dragoon
+[07:37] Pylon
+[07:38] Gas Probe To Mineral
+[07:57] Dragoon
+[08:17] Dragoon
+[08:25] Probe
+[08:26] Mineral Probe To Gas
+[08:47] Dragoon
+[09:07] Dragoon
+[09:14] Probe
+[09:34] Probe
+[09:39] Pylon
+[09:37] Assimilator
+Probe : 16 [Last one: 00:20]
+Dragoon : 12 [Last one: 05:09]
+Nexus : 1 [Last one: 00:00]
+Pylon : 4 [Last one: 02:13]
+Assimilator : 1 [Last one: 01:54]
+Gateway : 2 [Last one: 03:16]
+Cybernetics Core : 1 [Last one: 04:19]
+Singularity Charge : 1 [Last one: 09:26]
+Harvested Minerals : 3421
+Harvested Gas      : 879
+Minerals at the end: 121
+Gas at the end     : 129
+------------------------------
+
+Time used: 09:56 minutes
+Scouting unit after 02:40 minutes
+[00:00] Probe
+[00:20] Probe
+[00:40] Probe
+[01:00] Probe
+[01:11] Pylon
+[01:21] Probe
+[01:44] Probe
+[02:04] Probe
+[02:05] Assimilator
+[02:21] Gateway
+[02:29] Probe
+[02:48] Mineral Probe To Gas
+[02:49] Gas Probe To Mineral
+[02:50] Probe
+[02:51] Mineral Probe To Gas
 [03:24] Cybernetics Core
-[03:38] Gateway
+[03:25] Mineral Probe To Gas
+[03:26] Pylon
+[03:49] Gateway
+[03:50] Mineral Probe To Gas
+[03:51] Gas Probe To Mineral
+[03:52] Mineral Probe To Gas
 [04:27] Dragoon
 [04:28] Pylon
-[04:29] Mineral Probe To Gas
-[04:41] Dragoon
+[04:52] Dragoon
 [05:17] Dragoon
-[05:18] Pylon
-[05:19] Gas Probe To Mineral
-[05:33] Dragoon
+[05:42] Dragoon
 [06:07] Dragoon
-[06:23] Dragoon
-[06:37] Singularity Charge
-[06:58] Dragoon
-[06:59] Mineral Probe To Gas
-[07:18] Dragoon
-[07:48] Dragoon
-[08:08] Dragoon
-[08:17] Pylon
-[08:50] Dragoon
-[08:58] Dragoon
-[09:07] Probe
-[09:40] Dragoon
-Probe : 14 [20]
-Dragoon : 12 [317]
-Nexus : 1 [0]
-Pylon : 4 [114]
-Assimilator : 1 [143]
-Gateway : 2 [204]
-Cybernetics Core : 1 [267]
-Singularity Charge : 1 [563]
-Harvested Minerals : 3354
-Harvested Gas      : 900
-Minerals at the end: 129
-Gas at the end     : 100
-------------------------------
-
-Other possible solutions: 
-
-------------------------------
-
-
-------------------------------
-
-
-------------------------------
-
-
+[06:32] Dragoon
+[06:57] Dragoon
+[06:58] Singularity Charge
+[07:22] Dragoon
+[07:34] Pylon
+[07:55] Dragoon
+[07:56] Gas Probe To Mineral
+[08:15] Dragoon
+[08:23] Probe
+[08:24] Mineral Probe To Gas
+[08:45] Dragoon
+[09:05] Dragoon
+[09:12] Probe
+[09:32] Probe
+[09:52] Cybernetics Core
+Probe : 16 [Last one: 00:20]
+Dragoon : 12 [Last one: 05:17]
+Nexus : 1 [Last one: 00:00]
+Pylon : 4 [Last one: 01:44]
+Assimilator : 1 [Last one: 02:48]
+Gateway : 2 [Last one: 03:24]
+Cybernetics Core : 1 [Last one: 04:27]
+Singularity Charge : 1 [Last one: 09:44]
+Harvested Minerals : 3422
+Harvested Gas      : 898
+Minerals at the end: 22
+Gas at the end     : 148
 ------------------------------
 
