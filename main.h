@@ -3,70 +3,78 @@
 #define MAX_PLAYER 128
 
 #define MAX_BUILDINGS 10 // How many buildings can you built simultaneously?
-#define BUILDING_TYPES 55  // warum 64 und nicht 51??
+#define BUILDING_TYPES 60
 
-#define ZERGLING 0
-#define HYDRALISK 1
-#define ULTRALISK 2
-#define DRONE 3
-#define DEFILER 4
-#define LURKER 5
-#define OVERLORD 6
-#define MUTALISK 7
-#define GUARDIEN 8
-#define QUEEN 9
-#define SCOURGE 10
-#define DEVOURER 11
+#define MARINE 0
+#define GHOST 1
+#define VULTURE 2
+#define GOLIATH 3
+#define SIEGE_TANK 4
+#define SCV 5
+#define FIREBAT 6
+#define MEDIC  7
 
-#define HATCHERY 12
-#define LAIR 13
-#define HIVE 14
-#define NYDUS_CANAL 15
-#define HYDRALISK_DEN 16
-#define DEFILER_MOUND 17
-#define GREATER_SPIRE 18
-#define QUEENS_NEST 19
-#define EVOLUTION_CHAMBER 20
-#define ULTRALISK_CAVERN 21
-#define SPIRE 22
-#define SPAWNING_POOL 23
-#define CREEP_COLONY 24
-#define SPORE_COLONY 25
-#define SUNKEN_COLONY 26
-#define EXTRACTOR 27
+#define WRAITH 8
+#define SCIENCE_VESSEL 9
+#define DROPSHIP 10
+#define BATTLE_CRUISER 11
+#define VALKYRIE 12
 
-#define VENTRAL_SACKS 28
-#define ANTENNAE 29
-#define PNEUMATIZED_CARAPACE 30
-#define METABOLIC_BOOST 31
-#define ADRENAL_GLANDS 32
-#define MUSCULAR_AUGMENTS 33
-#define GROOVED_SPINES 34
-#define GAMETE_MEIOSIS 35
-#define METASYNAPTIC_NODE 36
-#define CHITINOUS_PLATING 37
-#define ANABOLIC_SYNTHESIS 38
+#define COMMAND_CENTER 13
+#define SUPPLY_DEPOT 14
+#define REFINERY 15
+#define BARRACKS 16
+#define ACADEMY 17
+#define FACTORY 18
+#define STARPORT 19
+#define SCIENCE_FACILITY 20
+#define ENGINEERING_BAY 21
+#define ARMORY 22
+#define MISSILE_TURRET 23
+#define BUNKER 24
 
-#define BURROWING 39
-#define SPAWN_BROODLING 40
-#define DARK_SWARM 41
-#define PLAGUE 42
-#define CONSUME 43
-#define ENSNARE 44
-#define PARASITE 45
-#define LURKER_ASPECT 46
+#define COMSAT_STATION 25
+#define NUCLEAR_SILO 26
+#define CONTROL_TOWER 27
+#define COVERT_OPS 28
+#define PHYSICS_LAB 29
+#define MACHINE_SHOP 30
 
-#define CARAPACE 47
-#define FLYER_CARAPACE 48
-#define MELEE_ATTACKS 49
-#define MISSILE_ATTACKS 50
-#define FLYER_ATTACKS 51
+#define STIM_PACKS 31
+#define LOCKDOWN 32
+#define EMP_SHOCKWAVE 33
+#define SPIDER_MINES 34
+#define TANK_SIEGE_MODE 35
+#define IRRADIATE 36
+#define YAMATO_GUN 37
+#define CLOAKING_FIELD 38
+#define PERSONNEL_CLOAKING 39
+#define RESTORATION 40
+#define OPTICAL_FLARE 41
 
-#define ONE_MINERAL_DRONE_TO_GAS 52
-#define ONE_GAS_DRONE_TO_MINERAL 53
+#define U238_SHELLS 42
+#define ION_THRUSTERS 43
+#define TITAN_REACTOR 44
+#define OCULAR_IMPLANTS 45
+#define MOEBIUS_REACTOR 46
+#define APOLLO_REACTOR 47
+#define COLOSSUS_REACTOR 48
+#define CADUCEUS_REACTOR 49
+#define CHARON_BOOSTER 50
 
-#define BREAK_UP_BUILDING 54
-#define LARVA_MAX 400
+#define INFANTRY_ARMOR 51
+#define INFANTRY_WEAPONS 52
+#define VEHICLE_PLATING 53
+#define VEHICLE_WEAPONS 54
+#define SHIP_PLATING 55
+#define SHIP_WEAPONS 56
+
+#define NUCLEAR_WARHEAD 57
+
+#define ONE_MINERAL_SCV_TO_GAS 58
+#define ONE_GAS_SCV_TO_MINERAL 59
+
+
 
 struct Stats
 {
@@ -74,9 +82,6 @@ struct Stats
 	unsigned short BT; // Build Time
 	unsigned short mins,gas;
 	unsigned char supply;
-	unsigned char need; // 0: nothing, 1: larvae, 2: drone
-	unsigned char extractor,lair,den,evo,queens,spire,hive,ultra,defiler,greaterspire;
-			// pool, den, evo, hatch, lair, hive, defiler, spire, greater spire, 
 };
 
 struct GOAL
@@ -88,130 +93,151 @@ struct GOAL
 //Abkuerzungen! ~ 10 Zeichen
 const Stats stats[BUILDING_TYPES]=
 {
-	{"Zergling",28,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
-	{"Hydralisk",28,75,0,1,1, 1,0,1,0,0,0,0,0,0,0},
-	{"Ultralisk",60,200,200,6,1, 1,1,0,0,1,0,1,1,0,0},
-	{"Drone",23,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
-	{"Defiler",50,50,150,2,1, 1,1,0,0,1,0,1,0,1,0},
-	{"Lurker",40,50,100,2,0, 1,1,1,0,0,0,0,0,0,0},
-	{"Overlord",40,100,0,0,1, 0,0,0,0,0,0,0,0,0,0},
-	{"Mutalisk",40,100,100,2,1, 1,1,0,0,0,1,0,0,0,0},
-	{"Guardien",40,50,100,2,0, 1,1,0,0,1,1,1,0,0,1},
-	{"Queen",50,100,100,2,1, 1,1,0,0,1,0,0,0,0,0},
-	{"Scourge",30,25,75,1,1, 1,1,0,0,0,1,0,0,0,0},
-	{"Devourer",40,100,50,2,0, 1,1,0,0,1,1,1,0,0,1},
+	{"Marine",24,50,0,1},
+	{"Ghost",50,25,75,1},
+	{"Vulture",30,75,0,2},
+	{"Goliath",40,100,50,2},
+	{"Siege Tank",50,150,100,2},
+	{"SCV",20,50,0,1},
+	{"Firebat",24,50,25,1},
+	{"Medic",30,50,25,1},
+	{"Wraith",60,150,100,2},
+	{"Science Vessel",80,100,225,2},
+	{"Dropship",50,100,100,2},
+	{"Battle Cruiser",133,400,300,6},
+	{"Valkyrie",50,250,125,3},
 
-	{"Hatchery",120,300,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Lair",100,150,100,0,0, 1,1,0,0,0,0,0,0,0,0},
-	{"Hive",120,200,150,0,0, 1,1,0,0,1,0,1,0,0,0},
-	{"Nydus Canal",40,150,0,0,2, 1,1,0,0,1,0,1,0,0,0},
-	{"Hydralisk den",40,100,50,0,2, 1,0,1,0,0,0,0,0,0,0},
-	{"Defiler mound",60,100,100,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Greater Spire",120,100,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Queen's Nest",60,150,100,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Evolution Chamber",40,75,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Ultralisk Cavern",80,150,200,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Spire",120,200,150,0,2, 1,1,0,0,0,0,0,0,0,0},
-	{"Spawning Pool",80,200,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Creep Colony",20,75,0,0,2, 0,0,0,0,0,0,0,0,0,0},
-	{"Spore Colony",20,50,0,0,0, 0,0,0,1,0,0,0,0,0,0},
-	{"Sunken Colony",20,50,0,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Extractor",40,50,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Command Center",120,400,0,0},
+	{"Supply Depot",40,100,0,0},
+	{"Refinery",40,100,0,0},
+	{"Barracks",80,150,0,0},
+	{"Academy",80,150,0,0},
+	{"Factory",80,200,100,0},
+	{"Starport",70,150,100,0},
+	{"Science Facility",60,100,150,0},
+	{"Engineering Bay",60,125,0,0},
+	{"Armory",80,100,50,0},
+	{"Missile Turret",30,75,0,0},
+	{"Bunker",30,100,0,0},
 
-	{"Ventral Sacs",160,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Antennae",133,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Pneumatized Carapace",133,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Metabolic Boost",100,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Adrenal Glands",100,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Muscular Augments",100,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Grooved Spines",100,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Gamete Meiosis",166,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Metasynaptic node",166,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Chitinous Plating",133,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Anabolic Synthesis",133,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"Comsat Station",40,50,50,0},
+	{"Nuclear Silo",40,100,100,0},
+	{"Control Tower",80,50,50,0},
+	{"Covert Ops",40,50,50,0},
+	{"Physics Lab",40,50,50,0},
+	{"Machine Shop",40,50,50,0},
 
-	{"Burrowing",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Spawn Broodling",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Dark Swarm",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Plague",100,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Consume",100,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Ensnare",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Parasite",80,100,100,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Lurker Aspect",120,200,200,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"Stim Packs",80,100,100,0},
+	{"Lockdown",100,200,200,0},
+	{"EMP Shockwave",120,200,200,0},
+	{"Spider Mines",80,100,100,0},
+	{"Siege Mode",80,150,150,0},
+	{"Irradiate",80,200,200,0},
+	{"Yamato Gun",120,100,100,0},
+	{"Cloaking Field",100,150,150,0},
+	{"Personnel Cloaking",80,100,100,0},
+	{"Restoration",80,100,100,0},
+	{"Optical Flare",120,100,100,0},
 
-	{"Carapace",266,150,150,0,0, 0,0,0,1,0,0,0,0,0,0},
-	{"Flyer Carapace",266,150,150,0,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Melee Attacks",266,100,100,0,0, 0,0,0,1,0,0,0,0,0,0},
-	{"Missile Attacks",266,100,100,0, 0,0,0,1,0,0,0,0,0,0},
-	{"Flyer Attacks",266,100,100,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Bring one Mineral Drone to Gas",330,200,200,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Bring one Gas Drone to Mineral",266,100,100,0, 0,0,0,0,0,0,0,0,0,0},
-	{"Break up Building",0,0,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"U-238 Shells",100,150,150,0},
+	{"Ion Thrusters",100,100,100,0},
+	{"Titan Reactor",166,150,150,0},
+	{"Ocular Implants",166,100,100,0},
+	{"Moebius Reactor",166,200,200,0},
+	{"Apollo Reactor",166,200,200,0},
+	{"Colossus Reactor",166,150,150,0},
+	{"Caduceus Reactor",166,150,150,0},
+	{"Charon Booster",133,100,100,0},
+
+	{"Infantry Armor",266,100,100,0},
+	{"Infantry Weapons",266,100,100,0},
+	{"Vehicle Plating",266,100,100,0},
+	{"Vehicle Weapons",266,100,100,0},
+	{"Ship Plating",266,150,150,0},
+	{"Ship Weapons",266,100,100,0},
+
+	{"Nuclear Warhead",100,200,200,1},
+
+	{"Bring one Mineral SCV to Gas",0,0,0,0},
+	{"Bring one Gas SCV to Mineral",0,0,0,0}
 };	
 
 struct Namen
 {
-	char b[6];
+	char b[5];
 };
 
 
 const Namen kurz[BUILDING_TYPES]=
 {
-	{"ZLing"},
-	{"Hydra"},
-	{"Ultra"},
-	{"Drone"},
-	{"Defil"},
-	{"Lurkr"},
-	{"Overl"},
-	{"Mutal"},
-	{"Guard"},
-	{"Queen"},
-	{"Scour"},
-	{"Devou"},
-	{"Hatch"},
-	{"Lair "},
-	{"Hive "},
-	{"Nydus"},
-	{"HyDen"},
-	{"DeMou"},
-	{"GSpir"},
-	{"QNest"},
-	{"EvoCh"},
-	{"UCave"},
-	{"Spire"},
-	{"SPool"},
-	{"Creep"},
-	{"Spore"},
-	{"Sunkn"},
-	{"Extra"},
-	{"VSacs"},
-	{"Anten"},
-	{"Pneum"},
-	{"Boost"},
-	{"Adren"},
-	{"Muscu"},
-	{"Groov"},
-	{"Gamet"},
-	{"MNode"},
-	{"Chiti"},
-	{"Anabo"},
-	{"Burro"},
-	{"Spawn"},
-	{"Swarm"},
-	{"Plagu"},
-	{"Consu"},
-	{"Ensna"},
-	{"Paras"},
-	{"LAspc"},
-	{"Carap"},
-	{"FCarp"},
-	{"Melee"},
-	{"Missl"},
-	{"FAtta"},
-	{"->Gas"},
-	{"->Min"},
-	{"Cancl"}
+	{"Mari"},
+	{"Ghos"},
+	{"Vult"},
+	{"Goli"},
+	{"Tank"},
+	{"SCV "},
+	{"FBat"},
+	{"Medi"},
+	{"Wrai"},
+	{"ScVe"},
+	{"Drop"},
+	{"BatC"},
+	{"Valk"},
+
+	{"ComC"},
+	{"Depo"},
+	{"Refi"},
+	{"Barr"},
+	{"Acad"},
+	{"Fact"},
+	{"Star"},
+	{"Scie"},
+	{"Engi"},
+	{"Armo"},
+	{"Miss"},
+	{"Bunk"},
+
+	{"Coms"},
+	{"NuSi"},
+	{"CoTo"},
+	{"CoOp"},
+	{"PhLa"},
+	{"MaSh"},
+
+	{"Stim"},
+	{"Lock"},
+	{"EMPS"},
+	{"Mine"},
+	{"Sieg"},
+	{"Irra"},
+	{"Yama"},
+	{"Cloa"},
+	{"Pers"},
+	{"Rest"},
+	{"Optc"},
+
+	{"U238"},
+	{"IonT"},
+	{"Tita"},
+	{"Ocul"},
+	{"Moeb"},
+	{"Apol"},
+	{"Colo"},
+	{"Cadu"},
+	{"Char"},
+
+	{"InAr"},
+	{"InWe"},
+	{"VeAr"},
+	{"VeWe"},
+	{"ShAr"},
+	{"ShWe"},
+
+	{"NuWa"},
+
+	{">gas"},
+	{">min"}
+
 };	
 
 
@@ -310,8 +336,8 @@ public:
 	unsigned char force[BUILDING_TYPES];
 	unsigned char availible[BUILDING_TYPES];
 
-	unsigned short mins,gas,larvae,IP,min,n;
-	unsigned char dronemins,dronegas,length,BuildingRunning;
+	unsigned short mins,gas,IP,min,n;
+	unsigned char scvmins,scvgas,scvbuilding,length,BuildingRunning;
 	short Supply;
 
 	unsigned char program[MAX_LENGTH];
@@ -324,8 +350,6 @@ public:
 	} building[MAX_BUILDINGS];
 
 	unsigned char nr,ok;
-	unsigned char larva[LARVA_MAX]; // larvacounter for producing larvas
-	unsigned char larvacounter;
 
 	unsigned short harvested_gas,harvested_mins;
 	unsigned short fitness,timer;
@@ -334,46 +358,36 @@ public:
 
 	void Produce(unsigned char who)
 	{
-		if((who>=CARAPACE)&&(who<=FLYER_ATTACKS))
+		if((who>=INFANTRY_ARMOR)&&(who<=SHIP_WEAPONS))
 		{
 			building[nr].RB=stats[who].BT+force[who]*32;
 			switch(who)
 			{
-				case CARAPACE:
-				case FLYER_CARAPACE:
-				case FLYER_ATTACKS:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
-
-				case MELEE_ATTACKS:
-				case MISSILE_ATTACKS:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
+				case INFANTRY_ARMOR:
+				case INFANTRY_WEAPONS:
+				case VEHICLE_PLATING:
+				case VEHICLE_WEAPONS:
+				case SHIP_PLATING:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
+				case SHIP_WEAPONS:mins-=stats[who].mins+force[who]*50;gas-=stats[who].gas+force[who]*50;break;
 				default:break;
 			}
 		}	
 		else
 		{
-			building[nr].RB=stats[who].BT+(stats[who].need==2)*3; // 3 Spielsekunden um zum Bauplatz zu fahren 
-			if(who==ZERGLING)
-			{
-				if(force[METABOLIC_BOOST]==1)
-					building[nr].RB+=30;
-				if(force[METABOLIC_BOOST]==1)
-					building[nr].RB+=50;
-			}
+			building[nr].RB=stats[who].BT+((who>=COMMAND_CENTER)&&(who<=BUNKER))*3; // 3 Spielsekunden um zum Bauplatz zu fahren 
 			mins-=stats[who].mins;
 		    gas-=stats[who].gas;
 		}
 		building[nr].type=who;
 		Supply-=stats[who].supply;
-		if(stats[who].need==1)
-			larvae--;
-		else
-	    if(stats[who].need==2)
+
+		if((who<=BUNKER)&&(who>=COMMAND_CENTER))
 		{
-			force[DRONE]--;
-			Supply++;
-			if(dronemins>0)
-				dronemins--;
-			else if(dronegas>0)
-				dronegas--;
+			if(scvmins>0)
+				scvmins--;
+			else if(scvgas>0)
+				scvgas--;
+			scvbuilding++;
 		}
 		ok=1;
 	}
@@ -384,235 +398,170 @@ public:
 	{
 		unsigned char m;
 		
-			if((what==ONE_MINERAL_DRONE_TO_GAS)&&(force[EXTRACTOR]>0)&&(dronemins>0))
+			if((what==ONE_MINERAL_SCV_TO_GAS)&&(force[REFINERY]>0)&&(scvmins>0))
 			{
 				ok=1;
-				dronemins--;
-				dronegas++;
+				scvmins--;
+				scvgas++;
 			}
 			else
-			if((what==ONE_GAS_DRONE_TO_MINERAL)&&(dronegas>0))
+			if((what==ONE_GAS_SCV_TO_MINERAL)&&(scvgas>0))
 			{
 				ok=1;
-				dronegas--;
-				dronemins++;
-			}
-			else
-			if((what==BREAK_UP_BUILDING)&&(BuildingRunning>0))
-			{
-				min=5000;
-				n=0;
-				for(i=0;i<MAX_BUILDINGS;i++)
-					if(building[i].RB>0)
-					{
-						if((stats[building[i].type].need==2) && (stats[building[i].type].BT-building[i].RB<min)) // warum need=2? nur bei gebaeuden sinnvoll!
-						{
-							min=stats[building[i].type].BT-building[i].RB;
-							n=i;
-						}
-					}
-
-					if(min<5000)
-					{
-						ok=1;
-						dronemins++;
-						mins+=stats[building[n].type].mins*0.75;
-						gas+=stats[building[n].type].gas*0.75;
-						Supply--;
-						force[DRONE]++;
-						if(building[n].type==EXTRACTOR)
-							Vespene_Av++;
-						building[n].type=255;
-						building[n].RB=0;
-					}
+				scvgas--;
+				scvmins++;
 			}
 			else
 			{
-		
-		nr=255;
-		for(m=0;m<MAX_BUILDINGS;m++)
-			if(building[m].RB==0)
-			{
-				nr=m;
-				m=MAX_BUILDINGS;			
-			}
+				nr=255;
+				for(m=0;m<MAX_BUILDINGS;m++)
+				if(building[m].RB==0)
+				{
+					nr=m;
+					m=MAX_BUILDINGS;			
+				}
 
 		if( ((Supply>=stats[what].supply) || (stats[what].supply==0)) &&
-			( mins>=stats[what].mins+((what==CARAPACE)||(what==FLYER_CARAPACE)||(what==FLYER_ATTACKS))*force[what]*75+((what==MELEE_ATTACKS)||(what==MISSILE_ATTACKS))*force[what]*50 ) &&
-			( gas>=stats[what].gas+((what==CARAPACE)||(what==FLYER_CARAPACE)||(what==FLYER_ATTACKS))*force[what]*75+((what==MELEE_ATTACKS)||(what==MISSILE_ATTACKS))*force[what]*50 ) &&
+			( mins>=stats[what].mins+((what>=INFANTRY_ARMOR)&&(what<=SHIP_PLATING))*force[what]*75+(what==SHIP_WEAPONS)*force[what]*50) &&
+			( gas>=stats[what].gas+((what>=INFANTRY_ARMOR)&&(what<=SHIP_PLATING))*force[what]*75+(what==SHIP_WEAPONS)*force[what]*50) &&
 			(nr<255) && 
-			(dronemins+dronegas>=1*(stats[what].need==2)) &&
-			(larvae>=1*(stats[what].need==1))
+			(scvmins+scvgas>=1*((what<=BUNKER)&&(what>=COMMAND_CENTER)))
 		  )
 
 		{
 			switch(what)
 			{
-				case ZERGLING:if(force[SPAWNING_POOL]>0) Produce(what);break;
-				case HYDRALISK:if(force[HYDRALISK_DEN]>0) Produce(what);break;
-				case ULTRALISK:if(force[ULTRALISK_CAVERN]>0) Produce(what);break;
-				case DRONE:Produce(what);break;
-				case DEFILER:if(force[DEFILER_MOUND]>0) Produce(what);break;
-				case LURKER:if((force[LURKER_ASPECT]>0)&&(force[HYDRALISK]>0))
+				case MARINE:if((force[BARRACKS]>0)&&(availible[BARRACKS]>0)) 
 							{
-								force[HYDRALISK]--;
 								Produce(what);
+								availible[BARRACKS]--;
 							};break;
-				case OVERLORD:Produce(what);break;
-				case MUTALISK:if(force[SPIRE]+force[GREATER_SPIRE]>0) Produce(what);break;
-				case GUARDIEN:if((force[GREATER_SPIRE]>0)&&(force[MUTALISK]>0))
-							  {
-								  force[MUTALISK]--;
-								  Produce(what);
-							  };break;
-				case QUEEN:if(force[QUEENS_NEST]>0) Produce(what);break;
-				case SCOURGE:if(force[SPIRE]+force[GREATER_SPIRE]>0) Produce(what);break;
-				case HATCHERY:Produce(what);break;
-				case LAIR:if((force[HATCHERY]>0)&&(force[SPAWNING_POOL]>0)&&(availible[HATCHERY]>0)) 
-						  {
-							  availible[HATCHERY]--;	  
-							  Produce(what);
-						  }
-							  break;
-				case HIVE:if((force[LAIR]>0)&&(force[QUEENS_NEST]>0)&&(availible[LAIR]>0))
-						  {
-							  availible[LAIR]--;
-							  Produce(what);
-						  }
-						  break;
-				case NYDUS_CANAL:if(force[HIVE]>0) Produce(what);break;
-				case HYDRALISK_DEN:if(force[SPAWNING_POOL]>0) Produce(what);break;
-				case DEFILER_MOUND:if(force[HIVE]>0) Produce(what);break;
-				case GREATER_SPIRE:if((force[SPIRE]>0)&&(availible[SPIRE]>0)&&(force[HIVE]>0)) 
-								   {
-									   availible[SPIRE]--;
-									   Produce(what);
-								   };break;
-				case QUEENS_NEST:if(force[LAIR]>0) Produce(what);break;
-				case EVOLUTION_CHAMBER:Produce(what);break;
-				case ULTRALISK_CAVERN:if(force[HIVE]>0) Produce(what);break;
-				case SPIRE:if(force[LAIR]>0) Produce(what);break;
-				case SPAWNING_POOL:Produce(what);break;
-				case CREEP_COLONY:Produce(what);break;
-				case SPORE_COLONY:if((force[EVOLUTION_CHAMBER]>0)&&(force[CREEP_COLONY]>0))
-								  {
-									  force[CREEP_COLONY]--;
-									  Produce(what);
-								  };break;
-				case SUNKEN_COLONY:if((force[SPAWNING_POOL]>0)&&(force[CREEP_COLONY]>0))
-								   {
-									   force[CREEP_COLONY]--;
-									   Produce(what);
-								   };break;
-				case EXTRACTOR:if(Vespene_Av>0) { Vespene_Av--;Produce(what);}break;//Fehler: wenn 2 extractoren gleichzeitig gebaut werden, gehts hier net richtig!
-				case VENTRAL_SACKS:if((force[VENTRAL_SACKS]==0)&&(force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
-								   {
-									   if(availible[LAIR]>0) availible[LAIR]--;
-									   else availible[HIVE]--;
-									   Produce(what);
-								   };break;
-				case ANTENNAE:if((force[ANTENNAE]==0)&&(force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
-							   {
-								   if(availible[LAIR]>0) availible[LAIR]--;
-								   else availible[HIVE]--;
-								   Produce(what);
-								};break;
-				case PNEUMATIZED_CARAPACE:if((force[PNEUMATIZED_CARAPACE]==0)&&(force[LAIR]+force[HIVE]>0)&&(availible[LAIR]+availible[HIVE]>0))
-											{
-												if(availible[LAIR]>0) availible[LAIR]--;
-												else availible[HIVE]--;
-												Produce(what);
-											};break;
-				case METABOLIC_BOOST:if((force[METABOLIC_BOOST]==0)&&(force[SPAWNING_POOL]>0)&&(availible[SPAWNING_POOL]>0))
-									 {
-										 availible[SPAWNING_POOL]--;
-										 Produce(what);
-									 }
-					break;
-				case ADRENAL_GLANDS:if((force[ADRENAL_GLANDS]==0)&&(force[HIVE]>0)&&(force[SPAWNING_POOL]>0)&&(availible[SPAWNING_POOL]>0))
-									{
-									availible[SPAWNING_POOL]--;
-									Produce(what);
-								}
-								break;
-			case MUSCULAR_AUGMENTS:
-			case GROOVED_SPINES:if((force[what]==0)&&(force[HYDRALISK_DEN]>0)&&(availible[HYDRALISK_DEN]>0))
-									 {
-										availible[HYDRALISK_DEN]--;
-										Produce(what);
-									 };break;
-			case GAMETE_MEIOSIS:break;
-			case METASYNAPTIC_NODE:break;
-			case CHITINOUS_PLATING:if( (force[CHITINOUS_PLATING]==0)&&(force[ULTRALISK_CAVERN]>0)&&(availible[ULTRALISK_CAVERN]>0)) 
-								   {
-									   availible[ULTRALISK_CAVERN]--;
-									   Produce(what);
-								   }
-									break;
-			case ANABOLIC_SYNTHESIS:if( (force[ANABOLIC_SYNTHESIS]==0)&&(force[ULTRALISK_CAVERN]>0)&&(availible[ULTRALISK_CAVERN]>0)) 
-								   {
-									   availible[ULTRALISK_CAVERN]--;
-									   Produce(what);
-								   }
-								break;
-			case BURROWING:if((force[ANTENNAE]==0)&&(force[HATCHERY]+force[LAIR]+force[HIVE]>0)&&(availible[HATCHERY]+availible[LAIR]+availible[HIVE]>0)) 
-						   {
-							   if(availible[HATCHERY]>0)
-								   availible[HATCHERY]--;
-							   else if(availible[LAIR]>0)
-								   availible[LAIR]--;
-							   else availible[HIVE]--;
-							   Produce(what);
-						   }
-							   break;
-			case SPAWN_BROODLING:if((force[SPAWN_BROODLING]==0)&&(force[QUEENS_NEST]>0)&&(availible[QUEENS_NEST]>0))
-								 {
-									 availible[QUEENS_NEST]--;
-									 Produce(what);
-								 }
-									 break;
-			case DARK_SWARM:
-			case PLAGUE:
-			case CONSUME:if((force[what]==0)&&(force[DEFILER_MOUND]>0)&&(availible[DEFILER_MOUND]>0))
-						 {
-								availible[DEFILER_MOUND]--;
+				case GHOST:if((force[BARRACKS]>0)&&(force[ACADEMY]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[COVERT_OPS]>0)&&(availible[BARRACKS]>0))
+							{
 								Produce(what);
-							}
-							 break;
+								availible[BARRACKS]--;
+							};break;
+				case VULTURE:if((force[FACTORY]>0)&&(availible[FACTORY]>0)) 
+							{
+								Produce(what);
+								availible[FACTORY]--;
+							};break;
+				case GOLIATH:if((force[FACTORY]>0)&&(force[ARMORY]>0)&&(availible[FACTORY]>0)) 
+							{
+								Produce(what);
+								availible[FACTORY]--;
+							};break;
+				case SIEGE_TANK:if((force[FACTORY]>0)&&(force[MACHINE_SHOP]>0)&&(availible[FACTORY]>0)&&(availible[MACHINE_SHOP]>0)) 
+							{
+								Produce(what);
+								availible[FACTORY]--;
+								availible[MACHINE_SHOP]--;
+							};break;
+				case SCV:if((force[COMMAND_CENTER]>0)&&(availible[COMMAND_CENTER]>0)) 
+							{
+								Produce(what);
+								availible[COMMAND_CENTER]--;
+							};break;
+				case FIREBAT:
+				case MEDIC:if((force[BARRACKS]>0)&&(force[ACADEMY]>0)&&(availible[BARRACKS]>0)) 
+							{
+								Produce(what);
+								availible[BARRACKS]--;
+							};break;
+				case WRAITH:if((force[STARPORT]>0)&&(availible[STARPORT]>0)) 
+							{
+								Produce(what);
+								availible[STARPORT]--;
+							};break;
+				case SCIENCE_VESSEL:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[SCIENCE_FACILITY]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+							{
+								Produce(what);
+								availible[STARPORT]--;
+								availible[CONTROL_TOWER]--;
+							};break;
+				case DROPSHIP:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+							{
+								Produce(what);
+								availible[STARPORT]--;
+								availible[CONTROL_TOWER]--;
+							};break;
+				case BATTLE_CRUISER:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[PHYSICS_LAB]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+							{
+								Produce(what);
+								availible[STARPORT]--;
+								availible[CONTROL_TOWER]--;
+							};break;
+				case VALKYRIE:if((force[STARPORT]>0)&&(force[CONTROL_TOWER]>0)&&(force[ARMORY]>0)&&(availible[CONTROL_TOWER]>0)&&(availible[STARPORT]>0))
+							{
+								Produce(what);
+								availible[STARPORT]--;
+								availible[CONTROL_TOWER]--;
+							};break;
+				case COMMAND_CENTER:
+				case SUPPLY_DEPOT:Produce(what);break;
+				case REFINERY:if(Vespene_Av>0) { Vespene_Av--;Produce(what);};break;
+				case BARRACKS:Produce(what);break;
+				case ACADEMY:
+				case FACTORY:if(force[BARRACKS]>0) Produce(what);break;
+				case STARPORT:if(force[FACTORY]>0) Produce(what);break;
+				case SCIENCE_FACILITY:if(force[FACTORY]>0) Produce(what);break;
+				case ENGINEERING_BAY:Produce(what);break;
+				case ARMORY:if(force[FACTORY]>0) Produce(what);break;
+				case MISSILE_TURRET:if(force[ENGINEERING_BAY]>0) Produce(what);break;
+				case BUNKER:if(force[BARRACKS]>0) Produce(what);break;
 
+				case COMSAT_STATION:if((force[COMMAND_CENTER]>force[COMSAT_STATION]+force[NUCLEAR_SILO])&&(availible[COMMAND_CENTER]>0)) Produce(what);break;
+				case NUCLEAR_SILO:if((force[COMMAND_CENTER]>force[COMSAT_STATION]+force[NUCLEAR_SILO])&&(availible[COMMAND_CENTER]>0)&&(force[SCIENCE_FACILITY]>0)&&(force[COVERT_OPS]>0)) Produce(what);break;
+				case CONTROL_TOWER:if((force[STARPORT]>force[CONTROL_TOWER])&&(availible[STARPORT]>0)) Produce(what);break;
+				case COVERT_OPS:
+				case PHYSICS_LAB:if((force[SCIENCE_FACILITY]>force[COVERT_OPS]+force[PHYSICS_LAB])&&(availible[SCIENCE_FACILITY]>0)) Produce(what);break;
+				case MACHINE_SHOP:if((force[FACTORY]>force[MACHINE_SHOP])&&(availible[FACTORY]>0)) Produce(what);break;
 
-			case ENSNARE:
-			case PARASITE:if((force[what]==0)&&(force[QUEENS_NEST]>0)&&(availible[QUEENS_NEST]>0))
-						  {
-							  availible[QUEENS_NEST]--;
-							  Produce(what);
-						  }
-							  break;
+				
+				
+				case CHARON_BOOSTER:
+				case SPIDER_MINES:
+				case TANK_SIEGE_MODE:
+				case ION_THRUSTERS:if(force[MACHINE_SHOP]>0) Produce(what);break; //da stimmt was net :\ ... 
 
-			case LURKER_ASPECT:if((force[LURKER_ASPECT]==0)&&(force[HYDRALISK_DEN]>0)&&(force[LAIR]>0)&&(availible[HYDRALISK_DEN]>0))
-							   {
-								   availible[HYDRALISK_DEN]--;
-								   Produce(what);
-							   }
-								   break;
-			case CARAPACE:
-			case MELEE_ATTACKS:
-			case MISSILE_ATTACKS:if((force[what]<3)&&(force[EVOLUTION_CHAMBER]>0)&&(availible[EVOLUTION_CHAMBER]>0)&&(force[HATCHERY+force[what]]>0))
-									 {
-									  availible[EVOLUTION_CHAMBER]--;
-									  Produce(what);
-									  }
-									 break;
-			case FLYER_CARAPACE:
-			case FLYER_ATTACKS:if((force[what]<3)&&(force[SPIRE]>0)&&(availible[SPIRE]>0)&&(force[HATCHERY+force[what]]>0))
-						 {
-							  if(availible[SPIRE]>0)
-								  availible[SPIRE]--;
-							  else availible[GREATER_SPIRE]--;
-							  Produce(what);
-						  }
-							   break;
+				case TITAN_REACTOR:
+				case EMP_SHOCKWAVE:
+				case IRRADIATE:if((force[SCIENCE_FACILITY]>0)&&(availible[SCIENCE_FACILITY]>0)) Produce(what);break;
+				
+				case OCULAR_IMPLANTS:
+				case LOCKDOWN:
+				case MOEBIUS_REACTOR:
+				case PERSONNEL_CLOAKING:if((force[COVERT_OPS]>0)&&(availible[COVERT_OPS]>0)) Produce(what);break;
+				
+				case CADUCEUS_REACTOR:
+				case U238_SHELLS:
+				case STIM_PACKS:
+				case RESTORATION:
+				case OPTICAL_FLARE:if((force[ACADEMY]>0)&&(availible[ACADEMY]>0)) Produce(what);break;
 
+				case COLOSSUS_REACTOR:
+				case YAMATO_GUN:if(force[PHYSICS_LAB]>0) Produce(what);break;
+
+				case APOLLO_REACTOR:
+				case CLOAKING_FIELD:if(force[CONTROL_TOWER]>0) Produce(what);break;
+
+				case INFANTRY_ARMOR:
+				case INFANTRY_WEAPONS:if((force[ENGINEERING_BAY]>0)&&(availible[ENGINEERING_BAY]>0)) 
+									   {
+										   if((force[what]==0)||( (force[what]>0)&&(force[SCIENCE_FACILITY]>0)))
+											   Produce(what);
+									   };break;
+
+				case VEHICLE_PLATING:
+				case VEHICLE_WEAPONS:
+				case SHIP_PLATING:
+				case SHIP_WEAPONS:if((force[ARMORY]>0)&&(availible[ARMORY]>0)) 
+								  {
+										   if((force[what]==0)||( (force[what]>0)&&(force[SCIENCE_FACILITY]>0)))
+											   Produce(what);
+								  };break;
+				case NUCLEAR_WARHEAD:if(force[NUCLEAR_SILO]>0) Produce(what);
+									 
 				default:break;
 			}	
 		}
@@ -635,20 +584,20 @@ public:
 			BuildingRunning=0;
 			ok=0;
 
-			if(dronemins<56)
+			if(scvmins<56)
 			{
-				mins+=mining[dronemins]; //~~~~~~~double wegmachen
-				harvested_mins+=mining[dronemins];
+				mins+=mining[scvmins]; //~~~~~~~double wegmachen
+				harvested_mins+=mining[scvmins];
 			}
 			else 
 			{
 				mins+=mining[56];
 				harvested_mins+=mining[56];
 			}
-			if(dronegas<5)
+			if(scvgas<5)
 			{
-				gas+=gasing[dronegas];
-				harvested_gas+=gasing[dronegas];
+				gas+=gasing[scvgas];
+				harvested_gas+=gasing[scvgas];
 			}
 			else
 			{
@@ -667,56 +616,45 @@ public:
 					{
 						force[building[j].type]++;
 						availible[building[j].type]++;
+						if((building[j].type>=COMMAND_CENTER)&&(building[j].type<=BUNKER)) 
+						{
+							scvmins++;
+							scvbuilding--;
+						}
 
 						switch(building[j].type)
 						{
-							case DRONE:dronemins++;break;
-							case OVERLORD:Supply+=8;break;
-							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;break;
-							case EXTRACTOR:break;		
-							case LAIR:force[HATCHERY]--;availible[LAIR]++;break;
-							case HIVE:force[LAIR]--;availible[HIVE]++;break;
-							case GREATER_SPIRE:force[SPIRE]--;break;
-							case VENTRAL_SACKS:
-							case ANTENNAE:
-							case PNEUMATIZED_CARAPACE:
-  								   if(availible[LAIR]<force[LAIR])
-										availible[LAIR]++;
-								   else availible[HIVE]++;
-								   break;
-							case METABOLIC_BOOST:
-							case ADRENAL_GLANDS:availible[SPAWNING_POOL]++;break;
-							case MUSCULAR_AUGMENTS:
-							case GROOVED_SPINES:availible[HYDRALISK_DEN]++;break;
-							case GAMETE_MEIOSIS:break;
-							case METASYNAPTIC_NODE:break;
-							case CHITINOUS_PLATING:
-							case ANABOLIC_SYNTHESIS:availible[ULTRALISK_CAVERN]++;break;
-
-							case BURROWING:
-							   if(availible[HATCHERY]<force[HATCHERY])
-								   availible[HATCHERY]++;
-							   else if(availible[LAIR]<force[LAIR])
-								   availible[LAIR]++;
-							   else availible[HIVE]++;
-							   break;
-							case SPAWN_BROODLING:availible[QUEENS_NEST]++;break;
-							case DARK_SWARM:
-							case PLAGUE:
-							case CONSUME:availible[DEFILER_MOUND]++;break;
-							case ENSNARE:
-							case PARASITE:availible[QUEENS_NEST]++;break;
-							case LURKER_ASPECT:availible[HYDRALISK_DEN]++;break;
+							case SCV:scvmins++;availible[COMMAND_CENTER]++;break;
+							case SUPPLY_DEPOT:Supply+=8;break;
+							case COMMAND_CENTER:Supply+=10;break;
+							case REFINERY:break;
+							case MARINE:
+							case FIREBAT:
+							case MEDIC:
+							case GHOST:availible[BARRACKS]++;break;
 							
-							case CARAPACE:
-							case MELEE_ATTACKS:
-							case MISSILE_ATTACKS:availible[EVOLUTION_CHAMBER]++;break;
+							case SIEGE_TANK:availible[MACHINE_SHOP]++;
+							case VULTURE:
+							case GOLIATH:availible[FACTORY]++;break;
 
-							case FLYER_CARAPACE:
-							case FLYER_ATTACKS:
-								if(availible[SPIRE]<force[SPIRE])
-									availible[SPIRE]++;
-								else availible[GREATER_SPIRE]++;break;
+							case SCIENCE_VESSEL:
+							case BATTLE_CRUISER:
+							case DROPSHIP:
+							case VALKYRIE:availible[CONTROL_TOWER]++;
+							case WRAITH:availible[STARPORT]++;break;
+
+			
+
+				case INFANTRY_ARMOR:
+				case INFANTRY_WEAPONS:availible[ENGINEERING_BAY]++;break;
+
+				case VEHICLE_PLATING:
+				case VEHICLE_WEAPONS:
+				case SHIP_PLATING:
+				case SHIP_WEAPONS:availible[ARMORY]++;break;
+
+
+					//UPGRADES SIND FALSCH, AVAILIBLE CHECKEN!
 							default:break;
 						}
 						ready=1;
@@ -725,17 +663,6 @@ public:
 					}
 				}
 			}
-
-			for(i=0;i<larvacounter;i++)
-				if(larvae<(force[HATCHERY]+force[LAIR]+force[HIVE])*3)
-				{
-					larva[i]--;
-					if(larva[i]==0)
-					{
-						larvae++;
-						larva[i]=20;
-					}
-				}
 
 			Build(Build_Av[program[IP]]);
 			tt++;
@@ -764,33 +691,8 @@ public:
 		if(goal[i].what>0)
 		{
 			if(goal[i].what>force[i])
-					fitness+=((force[i]*100)/goal[i].what);
-					else fitness+=100;
-			switch(i)
-			{
-				case LURKER:if(goal[HYDRALISK].what<force[HYDRALISK])
-							{
-								if(goal[LURKER].what>force[HYDRALISK]-goal[HYDRALISK].what)
-									fitness+=(((force[HYDRALISK]-goal[HYDRALISK].what)*50)/goal[LURKER].what);
-								else fitness+=50;
-							};break;
-				case SPORE_COLONY:
-				case SUNKEN_COLONY:if(goal[CREEP_COLONY].what<force[CREEP_COLONY])
-							{
-								if(goal[i].what>force[CREEP_COLONY]-goal[CREEP_COLONY].what)
-									fitness+=(((force[CREEP_COLONY]-goal[CREEP_COLONY].what)*25)/goal[i].what);
-								else fitness+=25;
-							};break;
-
-				case GUARDIEN:
-				case DEVOURER:if(goal[MUTALISK].what<force[MUTALISK])
-							{
-								if(goal[i].what>force[MUTALISK]-goal[MUTALISK].what)
-									fitness+=(((force[MUTALISK]-goal[MUTALISK].what)*25)/goal[i].what);
-								else fitness+=25;
-							};break;
-				default:break;
-			}
+				fitness+=((force[i]*100)/goal[i].what);
+			else fitness+=100;
 		}
 			
 
@@ -804,7 +706,6 @@ public:
 		if(Goal_Harvested_Mins>harvested_mins)
 			fitness+=(harvested_mins*100)/Goal_Harvested_Mins;
 		else fitness+=100;
-		//!!!!!!!!!!!!!!!!!
 
 	}
 	else
@@ -880,25 +781,18 @@ void Init()
 		building[i].type=255;
 	}
 
-	for(i=0;i<LARVA_MAX;i++)
-		larva[i]=20;
-
 	fitness=0;
-
 	mins=50;
 	gas=0;
-	larvae=3;
-	force[HATCHERY]=1;
-	availible[HATCHERY]=1;
-	force[DRONE]=4;
-	force[OVERLORD]=1;
-	larvacounter=1;
-	Supply=5;
-	dronemins=4;
-	dronegas=0;
+	force[COMMAND_CENTER]=1;
+	availible[COMMAND_CENTER]=1;
+	force[SCV]=4;
+	Supply=6;
+	scvmins=4;
+	scvgas=0;
+	scvbuilding=0;
 	IP=0;
 }
-
 
 	void Restart()
 	{
@@ -906,7 +800,6 @@ void Init()
 			program[i]=rand()%Max_Build_Types;
 		timer=Max_Time;
 		IP=0;
-		fitness=0;
 		length=MAX_LENGTH;
 		afit=0;
 	}
