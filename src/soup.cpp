@@ -1,29 +1,20 @@
 #include "soup.h"
-SOUP::SOUP()
-{
-	for(int i=MAX_PLAYER-1;i--;) player[i]=new RACE;
-	for(int i=RUNNINGS-1;i--;) statistics[i]=new STATISTICS;
-	settings=new SETTINGS;
-}
-~SOUP::SOUP()
-{
-	for(int i=MAX_PLAYER-1;i--;) delete player[i];
-	for(int i=RUNNINGS-1;i--;) delete statistics[i];
-	delete settings;
-}
+#include "settings.h"
+#include "race.h"
 
-void SOUP::init()
+SOUP::SOUP(SETTINGS *set)
 {
-	settings.init();
-	player::init();
-	player[0]->Set_Goals(&settings);
-        player[0]->AdjustMining();
-        player[0]->generateBasicBuildorder();
-        for(int i=MAX_PLAYER;i--;)
-	        player[i]->Restart();
-}
+	for(int i=MAX_PLAYER-1;i--;) player[i]=new RACE(set);
+//	for(int i=RUNNINGS-1;i--;) statistics[i]=new STATISTICS;
+	settings=set;
+};
+
+SOUP::~SOUP()
+{
+	delete [] player;
+//	delete [] statistics;
+};
 
 void SOUP::run()
 {
-
-}
+};
