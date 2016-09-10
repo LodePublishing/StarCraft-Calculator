@@ -1,446 +1,648 @@
-// Protoss Templar Archive
+// Einmalige Updates auch nur einmal rein! Nur ueber austauschen rein !
+// Todo: Debug messages in eigene Funktion!
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <conio.h>
-#include <math.h>
-#include <windows.h>
-#include <iostream.h>
-#include <fstream.h>
 #include <time.h>
-#include <malloc.h>
-#include "main.h"
 
-unsigned short run,rfit;
-Player *player[MAX_PLAYER];
-Player *tempp;
-Player *Save[RUNNINGS];
+#include "terra.h"
+#include "zerg.h"
+#include "protoss.h"
 
-const COORD coord={0,0},coord2={25,22},c11={3,8},c12={3,9},c13={3,10},c14={3,11},c15={3,12},c21={12,8},c22={12,9},c23={12,10},c24={12,11},c25={12,12},c31={22,8},c32={22,9},c33={22,10},c34={22,11},c35={22,12};
+using namespace std;
+
+#define clrscr() printf("\033[2J") /* Bildschirm löschen */      
+#define gotoxy(x,y) printf("\033[%d;%dH",(y),(x))
+
+RACE * player[MAX_PLAYER];
+
+
 int main(int argc, char* argv[])
-{
-	unsigned char l;
-	unsigned short k,n,pos;
-	unsigned char * buffer;
+{	
+	unsigned short run,rfit,afit;
+	unsigned char race,counter,Detailed_Info,calc;
+	char I[11],O[9],R[7];
+	unsigned short old_time,old_fit,old,s,t,u,generation;
+	char * buffer;
 	long size;
-
-	generation=0;
-	for(i=0;i<BUILDING_TYPES;i++)
+	unsigned char a,verbose,h1,h2;
+	signed char calc_i,error;
+	unsigned char timetmp;
+	srand(time(NULL));
+	clrscr();	
+	Init();
+	race=5;
+	verbose=0;
+	h1=argv[1][0];
+	h2=argv[2][0];
+	
+	if(argc>1)
 	{
-		goal[i].what=0;
-		goal[i].time=0;
-		Ziel[i]=0;
-
+	if((h1=='T')||(h1=='t'))
+		race=0;
+	else if((h1=='P')||(h1=='p'))
+		race=1;
+	else if((h1=='Z')||(h1=='z'))
+		race=2;
+	if((h2=='V')||(h2=='v')||(h1=='V')||(h1=='v'))
+		verbose=1;
 	}
-	Goal_Harvested_Mins=0;
-	Goal_Harvested_Gas=0;
+	
+	if(race==5)
+	{
+		printf("Press 1 for Terra, 2 for Protoss or 3 for Zerg.\n");
+		printf("You could also call the program directly with a parameter (t,p,z).\n");
+		
+		while(race==5)
+		{
+			a=getchar();		
+				switch(a-48)
+				{
+					case 1:race=0;break;
+					case 2:race=1;break;
+					case 3:race=2;break;
+				}
+		}
+	}
 
-	n=1;
-	pos=0;
-	Max_Time=0;
-	Max_Generations=0;
-	Max_Vespene=0;
-	Mutations=0;
-	Mut_Rate=0;
-	Max_Build_Types=0;
+	printf("Setting Race ... ");
+	
+	switch(race)
+	{
+		case 0:sprintf(I,"goal_t.txt");sprintf(O,"bo_t.txt");sprintf(R,"Terran");break;
+		case 1:sprintf(I,"goal_p.txt");sprintf(O,"bo_p.txt");sprintf(R,"Protoss");break;
+		case 2:sprintf(I,"goal_z.txt");sprintf(O,"bo_z.txt");sprintf(R,"Zerg");break;
+		default:printf("not enough arguments");return 0;break;
+	}
+	printf("[%s] OK\n",R);
+	printf("Checking input file [%s]:\n",I);
+	generation=0;
+	for(s=0;s<60;s++)
+	{
+		goal[s].what=0;
+		goal[s].time=0;
+		Ziel[s]=0;
+	}
+	
+
 	run=0;
 	afit=0;
 	rfit=0;
 
-	HANDLE hStdOut=GetStdHandle(STD_OUTPUT_HANDLE);
-	srand(time(NULL));  
-	ifstream file ("goal_p.txt", ios::in|ios::binary|ios::ate);
-	ofstream out_file("bo_p.txt");
-	size = file.tellg();
-	file.seekg (0, ios::beg);
-	buffer = new unsigned char [size];
-	file.read (buffer, size);
-	file.close();
+	FILE * pFileI;
+        pFileI = fopen (I,"rb");
+	// Auf Error checken! Evtl nciht da!
+	
+	printf("File opened... reading...");
+	
+	fseek (pFileI, 0, SEEK_END);
+	size = ftell (pFileI);
+	buffer = new char [size];
+	fseek (pFileI, 0, SEEK_SET);
+	fread(buffer,1,size,pFileI);
+	fclose(pFileI);
+	printf("File closed, data saved.\n");
+	printf("Checking data:\n");
+	
+	Detailed_Info=20;
+	
+	s=0;t=0;u=0;
+	timetmp=0;
 
-	while(n<size)
+	// auf 3 oder mehr Zahlen checken!
+	
+	while(s<size)
 	{
-		if((buffer[n]>=48)&&(buffer[n]<58))
+		if((buffer[s]>=48)&&(buffer[s]<58))
 		{
 			if(Max_Time==0)
 			{
-				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
 				{
-					Max_Time=(buffer[n]-48)*600+(buffer[n+1]-48)*60;
-					n++;
+					Max_Time=(buffer[s]-48)*600+(buffer[s+1]-48)*60;
+					s++;
 				}
 				else
-					Max_Time=(buffer[n]-48)*60;
+					Max_Time=(buffer[s]-48)*60;
+				printf("Max Time initialized: %i\n",Max_Time);
 			}
 			else if(Max_Generations==0)
-				Max_Generations=(buffer[n]-48)*50+50;
-			else if(Max_Vespene==0)
-				Max_Vespene=(buffer[n]-48);
-			else if(Mutations==0)
 			{
-				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				if((buffer[s+2]>=48)&&(buffer[s+2]<58))
 				{
-					Mutations=(buffer[n]-48)*10+(buffer[n+1]-48);
-					n++;
+					Max_Generations=(buffer[s]-48)*100+(buffer[s+1]-48)*10+(buffer[s+2]-48);
+					s+=2;
+				} else
+				
+				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
+				{
+					Max_Generations=(buffer[s]-48)*10+(buffer[s+1]-48);
+					s++;
 				}
 				else
-					Mutations=(buffer[n]-48);
+					Max_Generations=(buffer[s]-48);
+				printf("Max Generations initialized: %i\n",Max_Generations);
+			}
+			else if(Max_Vespene==0)
+			{
+				Max_Vespene=(buffer[s]-48);
+				printf("Max Vespene Geysirs initialized %i\n", Max_Vespene);
+			}
+			else if(Mutations==0)
+			{
+				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
+				{
+					Mutations=(buffer[s]-48)*10+(buffer[s+1]-48);
+					s++;
+				}
+				else
+					Mutations=(buffer[s]-48);
+				printf("Mutations initialized %i\n", Mutations);
 			}
 			else if(Mut_Rate==0)
 			{
-				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
 				{
-					Mut_Rate=(buffer[n]-48)*10+(buffer[n+1]-48);
-					n++;
+					Mut_Rate=(buffer[s]-48)*10+(buffer[s+1]-48);
+					s++;
 				}
 				else
-					Mut_Rate=(buffer[n]-48);
+					Mut_Rate=(buffer[s]-48);
+				printf("Mutation rate initalized: %i\n",Mut_Rate);
 			}
-			else
+			else if(Detailed_Info==20)
 			{
-				if((buffer[n+1]>=48)&&(buffer[n+1]<58))
+				Detailed_Info=(buffer[s]-48);
+				printf("Detailed informations initialized: %i\n",Detailed_Info);
+			}
+			else if(Attack==20)
+			{
+				Attack=(buffer[s]-48);
+				printf("Attack initialized: %i\n", Attack);
+			}
+			else if(Time_to_Enemy==9999)
+			{
+				if((buffer[s+2]>=48)&&(buffer[s+2]<58))
 				{
-					goal[pos].what=(buffer[n]-48)*10+(buffer[n+1]-48);
-					n++;
+					Time_to_Enemy=(buffer[s]-48)*100+(buffer[s+1]-48)*10+(buffer[s+2]-48);
+					s+=2;
+				} else
+				
+				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
+				{
+					Time_to_Enemy=(buffer[s]-48)*10+(buffer[s+1]-48);
+					s++;
+				}
+
+				else
+					Time_to_Enemy=(buffer[s]-48);
+				printf("Time to Enemy initialized: %i\n",Time_to_Enemy);
+				printf("Reading goals\n");
+			}
+			else if(timetmp==0)
+			{
+				printf(".");
+				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
+				{
+					goal[u].what=(buffer[s]-48)*10+(buffer[s+1]-48);
+					s++;
 				}
 				else
-					goal[pos].what=buffer[n]-48;
-				pos++;
+					goal[u].what=buffer[s]-48;
+				timetmp=1;
+			}
+			else if(timetmp==1)
+			{		
+			      		
+			      if((buffer[s+1]>=48)&&(buffer[s+1]<58))
+                              {
+                                        goal[u].time=(buffer[s]-48)*10+(buffer[s+1]-48);
+                                        s++;
+                              }
+                              else
+	                              goal[u].time=buffer[s]-48;
+			      u++;
+			      timetmp=0;
 			}
 		}
-		n++;
+		s++;
+	}
+	free(buffer);
+	printf("\nAll data initialized, buffer freed, starting analyzing data:\n");
+	error=0;
+
+
+	for(s=0;s<60;s++)
+	{
+		if((stats[race][s].type==3)&&(goal[s].what>1))
+		{
+			printf("- Error in %s (Entry %s): Set researches to 1 at maximum.\n",I,stats[race][s].name);
+			printf("               Taking ""1"" instead of %i...\n",goal[s].what);
+			goal[s].what=1;
+			error=1;
+		}
 	}
 
+	if((Max_Time==0)||(Max_Time>2700))
+	{
+		printf(" - Max_Time out of Range, please check ""%s"", first number in file.\n",I);
+			printf("               Taking ""45"" (maximum) instead of %i...\n",Max_Time);
+		Max_Time=2700;
+	}
 
+	if(error==1)
+	{
+		printf("\n");
+		printf("Press any key to continue . . .\n");
+	}
+
+	printf("Initializing player models...\n");
+	Player_Terra playert[MAX_PLAYER];
+	Player_Terra Savet[RUNNINGS];
+	Player_Protoss playerp[MAX_PLAYER];
+	Player_Protoss Savep[RUNNINGS];
+	Player_Zerg playerz[MAX_PLAYER];
+	Player_Zerg Savez[RUNNINGS];
+	
+	RACE * Save[RUNNINGS];
+	RACE * tempp; 	
+	
+	if(race==0)
+	{
+		for(s=0;s<MAX_PLAYER;s++)
+			player[s]=&playert[s];
+		for(s=0;s<RUNNINGS;s++)
+			Save[s]=&Savet[s];
+	}
+	else if(race==1)
+	{
+		for(s=0;s<MAX_PLAYER;s++)
+			player[s]=&playerp[s];
+		for(s=0;s<RUNNINGS;s++)
+			Save[s]=&Savep[s];
+	}
+	else 
+	{
+		for(s=0;s<MAX_PLAYER;s++)
+			player[s]=&playerz[s];
+		for(s=0;s<RUNNINGS;s++)
+			Save[s]=&Savez[s];
+	}
+
+	Max_Build_Types=0;
+	player[0]->Set_Goals();//~~~~ vielleicht 3 eigene funktionen machen :| braucht ja net jeder player
+	
+	
 //Air Defense, Ground Defense faktor noch rein
 
-	for(i=0;i<BUILDING_TYPES;i++)
+	printf("Done. Rechecking data.\n");
+	for(s=0;s<Max_Build_Types;s++)
+		Build_Bv[Build_Av[s]]=s;
+
+	if(u<building_types-2-(race==2))
 	{
-		Goal_Harvested_Gas+=(goal[i].what*stats[i].gas);
-		Goal_Harvested_Mins+=(goal[i].what*stats[i].mins);
-	}
+		printf("Error: %s is damaged. Please reread the specifications / reload the file.\n",I);
+		printf("Reason: You probably deleted one entry or mixed up count/time in the data file...\n");
+		printf("Expected data length: %i\nData length found: %i\n",building_types-2-(race==2),u);
+	} else printf("OK. Press Enter to continue.\n");
+	a=getchar();	
+	for(s=0;s<MAX_PLAYER;s++)
+		player[s]->Restart(); //player[0] !???
 
-	for(i=0;i<BUILDING_TYPES;i++)
-		if(goal[i].what>0)
-			Ziel[i]=1;	
-
-	Ziel[PYLON]=1;
-	Ziel[PROBE]=1;
-	Ziel[NEXUS]=1;
-	Ziel[GATEWAY]=1;
-	if(Goal_Harvested_Gas>0)
-	{
-		Ziel[ASSIMILATOR]=1;
-		Ziel[ONE_MINERAL_PROBE_TO_GAS]=1;
-		Ziel[ONE_GAS_PROBE_TO_MINERAL]=1;
-	}
-
-
-if((goal[ARBITER].what>0)||(goal[RECALL].what>0)||(goal[STASIS_FIELD].what>0)||(goal[KHAYDARIN_CORE].what>0))
-{
-	Ziel[CYBERNETICS_CORE]=1;
-	Ziel[STARGATE]=1;
-	Ziel[CITADEL_OF_ADUN]=1;
-	Ziel[TEMPLAR_ARCHIVES]=1;
-	Ziel[ARBITER_TRIBUNAL]=1;
-}
-if((goal[DARK_TEMPLAR].what>0)||(goal[HIGH_TEMPLAR].what>0)||(goal[PSIONIC_STORM].what>0)||(goal[HALLUCINATION].what>0)||(goal[ARGUS_TALISMAN].what>0)||(goal[KHAYDARIN_AMULET].what>0)||(goal[MIND_CONTROL].what>0)||(goal[MAELSTROM].what>0))
-{
-	Ziel[CYBERNETICS_CORE]=1;
-	Ziel[CITADEL_OF_ADUN]=1;
-	Ziel[TEMPLAR_ARCHIVES]=1;
-}
-if((goal[DRAGOON].what>0)||(goal[STARGATE].what>0)||(goal[ROBOTICS_FACILITY].what>0)||(goal[CITADEL_OF_ADUN].what>0)||(goal[AIR_WEAPONS].what>0)||(goal[PLATING].what>0)||(goal[SINGULARITY_CHARGE].what>0))
-	Ziel[CYBERNETICS_CORE]=1;
-
-if((goal[LEG_ENHANCEMENTS].what>0)||(goal[TEMPLAR_ARCHIVES].what>0))
-{
-	Ziel[CYBERNETICS_CORE]=1;
-	Ziel[CITADEL_OF_ADUN]=1;
-}
-
-if(goal[DARK_ARCHON].what>0)
-{
-	Ziel[DARK_TEMPLAR]=1;
-	Ziel[TEMPLAR_ARCHIVES]=1;
-	Ziel[CITADEL_OF_ADUN]=1;
-	Ziel[CYBERNETICS_CORE]=1;
-}
-
-
-if(goal[ARCHON].what>0)
-{
-	Ziel[HIGH_TEMPLAR]=1;
-	Ziel[TEMPLAR_ARCHIVES]=1;
-	Ziel[CITADEL_OF_ADUN]=1;
-	Ziel[CYBERNETICS_CORE]=1;
-}
-
-if((goal[REAVER].what>0)||(goal[SCARAB_DAMAGE].what>0)||(goal[REAVER_CAPACITY].what>0)||(goal[GRAVITIC_DRIVE].what>0))
-{
-	Ziel[ROBOTICS_FACILITY]=1;
-	Ziel[ROBOTICS_SUPPORT_BAY]=1;
-	Ziel[CYBERNETICS_CORE]=1;
-}
-if((goal[OBSERVER].what>0)||(goal[SENSOR_ARRAY].what>0)||(goal[GRAVITIC_BOOSTERS].what>0))
-{
-	Ziel[ROBOTICS_FACILITY]=1;
-	Ziel[OBSERVATORY]=1;
-	Ziel[CYBERNETICS_CORE]=1;
-}
-if((goal[CARRIER].what>0)||(goal[ARGUS_JEWEL].what>0)||(goal[APIAL_SENSORS].what>0)||(goal[GRAVITIC_THRUSTERS].what>0)||(goal[DISRUPTION_WEB].what>0)||(goal[CARRIER_CAPACITY].what>0))
-{
-	Ziel[STARGATE]=1;
-	Ziel[FLEET_BEACON]=1;
-	Ziel[CYBERNETICS_CORE]=1;
-}
-if((goal[CORSAIR].what>0)||(goal[SCOUT].what>0)||(goal[FLEET_BEACON].what>0))
-{
-	Ziel[STARGATE]=1;
-	Ziel[CYBERNETICS_CORE]=1;
-}
-if((goal[SHUTTLE].what>0)||(goal[OBSERVATORY].what>0)||(goal[ROBOTICS_SUPPORT_BAY].what>0))
-{
-	Ziel[CYBERNETICS_CORE]=1;
-	Ziel[ROBOTICS_FACILITY]=1;
-}
 	
-if(goal[ARBITER_TRIBUNAL].what>0)
-{
-	Ziel[CYBERNETICS_CORE]=1;
-	Ziel[STARGATE]=1;
-	Ziel[CITADEL_OF_ADUN]=1;
-	Ziel[TEMPLAR_ARCHIVES]=1;
-}
+	afit=0;
 
-if((goal[ARMOR].what>0)||(goal[GROUND_WEAPONS].what>0)||(goal[PLASMA_SHIELDS].what>0)||(goal[PHOTON_CANNON].what>0))
-	Ziel[FORGE]=1;
 
-	for(i=0;i<BUILDING_TYPES;i++)
-		if(Ziel[i]==1)
+	clrscr();
+	gotoxy(0,0);
+
+	printf("Welcome to the StarCraft Evolution Chamber v1.01a!\n");
+	printf("Check the ""%s"" file to change goals of the BO\n",I);
+	printf("If you are new to this program, try to read the readme.txt\n");
+	printf("Oh and remember: all times are that of a speed 5 game...\n");
+	printf("The program will need to run through all 5 runnings to get a good result.\n");
+	if(Detailed_Info==1)
+		printf("Detailed Information will be in the ""%s"" file.\n",O);
+	if(Attack==1)
+	{
+		printf("Units will be send directly to the enemy (i.e. higher build time).\n");
+		printf("A unit need %i seconds to reach the enemy.\n",Time_to_Enemy);
+	}
+	
+
+	printf("\n");
+	printf("Goals (as stated in ""%s"")\n",I);
+	for(s=0;s<building_types;s++)
+		if(goal[s].what>0)
+			printf("- %20s : %i   (%s) \n",stats[race][s].name,goal[s].what,kurz[race][s].b);
+
+	calc=176;
+	calc_i=1;
+	printf("\n\nPress Enter to start calculation\n");
+	printf("Please note: this may take a while.\n");
+	a=getchar();
+	clrscr();
+	gotoxy(0,22);	
+	
+	printf("Evolution Chamber v1.02BETA - Brought to you by clawsoftware.de\n");
+	printf("                 Press any key to cancel calculation.");
+	gotoxy(0,0);
+	old_time=Max_Time;
+	old_fit=0;
+
+	while( (run<RUNNINGS))
+	{
+		gotoxy(0,0);
+
+		for(s=0;s<MAX_PLAYER;s++)
+			player[s]->Init();
+		for(s=1;s<MAX_PLAYER;s++)
+			player[s]->Mutate();
+		for(s=0;s<MAX_PLAYER;s++)
+			player[s]->Calculate();
+
+		for(s=1;s<MAX_PLAYER-1;s++)
+			if(player[s]->pFitness>player[0]->pFitness)
+			{
+				tempp=player[s];
+				player[s]=player[0];
+				player[0]=tempp;
+			}
+			else if((player[s]->pFitness==player[0]->pFitness)&&(player[s]->sFitness>player[0]->sFitness))
+			 {
+				 tempp=player[s];
+				 player[s]=player[0];
+				 player[0]=tempp;
+			 }
+				
+		// eigentlich brauch ich ja nur player[0] ...
+
+		printf("Calculating [%c]         Status:",(calc+0));
+		if(player[0]->timer<Max_Time)
 		{
-			Build_Av[Max_Build_Types]=i;
-			Max_Build_Types++;
+			if(old_time>player[0]->timer)
+			printf(" found better solution . . .          \n");
+			else	
+			printf(" optimizing build order . . .         \n");
 		}
-
-	for(i=0;i<Max_Build_Types;i++)
-		Build_Bv[Build_Av[i]]=i;
-
-		for(l=0;l<MAX_PLAYER;l++)
-	{
-		player[l]=(Player*)malloc(sizeof(Player));
-		player[l]->Restart();
-	}
-	for(l=0;l<RUNNINGS;l++)
-	{
-		Save[l]=(Player*)malloc(sizeof(Player));
-		Save[l]->Restart();
-	}
-
-
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
-	SetConsoleCursorPosition(hStdOut,coord);
-
-	printf("Welcome to the StarCraft Templar Archives!\n");
-	printf("May the BO be with you ;-)\n");
-	printf("Check the ""goal_p.txt"" file to change goals of the BO\n");
-	if((Max_Time==0)||(Max_Time>1800))
-	{
-		printf("Max_Time out of Range, please check ""goal_p.txt"", first number in file (use at maximum 30 minutes))\n");
-		printf("... Continuing using 30 minutes as maximum\n");
-		Max_Time=1800;
-	}
-	else
-	printf("Max Time        : %i   \n",Max_Time);
-	printf("Max Generations : %i   \n",Max_Generations);
-	printf("Max Vespene     : %i   \n",Max_Vespene);
-	printf("Mutations       : %i   \n",Mutations);
-	printf("Mutation Rate   : %i   \n",Mut_Rate);
-	printf("\n");
-	printf("Goals (as stated in ""goal_p.txt"")\n");
-	for(i=0;i<BUILDING_TYPES;i++)
-		if(goal[i].what>0)
-			printf("- %s : %i    \n",stats[i].name,goal[i].what);
-	printf("\n");
-	printf(" Let the calculation begin . . . \n");
-	printf(" (Please read the ""readme.txt"" for help)\n");
-
-	l=getch();
-
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
-
-	SetConsoleCursorPosition(hStdOut,coord2);
-	printf("This is Freeware. Brought to you by clawsoftware.de\n");
-	printf("Press any key to cancel calculation. You will find then a solution in bo_terra.txt.");
-	SetConsoleCursorPosition(hStdOut,coord);
-
-	printf("Calculating [");
-	for(l=0;l<MAX_PLAYER/4;l++)
-		printf("%c",176);
-	printf("]\n");
-
-	while( (kbhit()==0) && (run<RUNNINGS))
-	{
-		SetConsoleCursorPosition(hStdOut,coord);
-		Fitness_All=0;
-		printf("Calculating [");
-		x=0;
-
-		for(l=0;l<MAX_PLAYER;l++)
-			player[l]->Init();
-
-		for(l=0;l<MAX_PLAYER;l++)
-			player[l]->Mutate();
-	
+		else			
+		{
+			if((old_fit/100)<(player[0]->pFitness/100))
+			printf(" another goal completed . . .		  \n");
+				else
+			printf(" searching for possible solution . . .\n");
+		}
 		
-		for(l=0;l<MAX_PLAYER;l++)
+		old_time=player[0]->timer;
+		old_fit=player[0]->pFitness;
+		calc+=calc_i;
+		if(calc>178)
 		{
-			player[l]->Calculate();
-			if(l%4==0) printf("%c",rand()%3+176);
+			calc=177;
+			calc_i=-calc_i;
 		}
-		printf("]\n");
-
-		for(i=0;i<MAX_PLAYER-3;i++)
-			for(j=0;j<MAX_PLAYER-i-1;j++)
-				if(player[j]->fitness<player[j+1]->fitness)
-				{
-					tempp=player[j];
-					player[j]=player[j+1];
-					player[j+1]=tempp;
-				}	
-
-		for(i=0;i<MAX_PLAYER;i++)
-			Fitness_All+=player[i]->fitness*(MAX_PLAYER-i);
-		Fitness_Average=2*Fitness_All/(MAX_PLAYER*MAX_PLAYER);
-		if(Fitness_Average>afit)
+		if(calc<176)
 		{
-			afit=Fitness_Average;
+			calc=177;
+			calc_i=-calc_i;
+		}
+
+
+		if(player[0]->pFitness>afit)
+		{
+			afit=player[0]->pFitness;
 			rfit=0;
+//			Mut_Rate=MRate;
 		}
 		
 		generation++;
 		rfit++;
-		printf("\n");
-		printf("%i runs remaining (this run at minimum %i generations remaining)   \n",RUNNINGS-run,Max_Generations-rfit);
-		printf("\n");
-		printf("Overview Generation %i / Average Fitness: %i  (Best: %i)  :         \n",generation,Fitness_Average,afit);
-		printf("   \n");
-
-		printf("[fitness]  [time]  [position]\n");
-		printf("----------------------------------------\n");
-
-		SetConsoleCursorPosition(hStdOut,c11);printf("%4.4i",player[0]->fitness);
-		SetConsoleCursorPosition(hStdOut,c12);printf("%4.4i",player[MAX_PLAYER/16]->fitness);
-		SetConsoleCursorPosition(hStdOut,c13);printf("%4.4i",player[MAX_PLAYER/8]->fitness);
-		SetConsoleCursorPosition(hStdOut,c14);printf("%4.4i",player[MAX_PLAYER/4]->fitness);
-		SetConsoleCursorPosition(hStdOut,c15);printf("%4.4i",player[MAX_PLAYER/2]->fitness);
-
-		SetConsoleCursorPosition(hStdOut,c21);printf("%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);
-		SetConsoleCursorPosition(hStdOut,c22);printf("%.2i:%.2i",player[MAX_PLAYER/16]->timer/60,player[MAX_PLAYER/16]->timer%60);
-		SetConsoleCursorPosition(hStdOut,c23);printf("%.2i:%.2i",player[MAX_PLAYER/8]->timer/60,player[MAX_PLAYER/8]->timer%60);
-		SetConsoleCursorPosition(hStdOut,c24);printf("%.2i:%.2i",player[MAX_PLAYER/4]->timer/60,player[MAX_PLAYER/4]->timer%60);
-		SetConsoleCursorPosition(hStdOut,c25);printf("%.2i:%.2i",player[MAX_PLAYER/2]->timer/60,player[MAX_PLAYER/2]->timer%60);	
-
-		SetConsoleCursorPosition(hStdOut,c31);printf("#1");
-		SetConsoleCursorPosition(hStdOut,c32);printf("#%i",MAX_PLAYER/16);
-		SetConsoleCursorPosition(hStdOut,c33);printf("#%i",MAX_PLAYER/8);
-		SetConsoleCursorPosition(hStdOut,c34);printf("#%i",MAX_PLAYER/4);
-		SetConsoleCursorPosition(hStdOut,c35);printf("#%i",MAX_PLAYER/2);
-
-		printf("\n");
-		printf("   [Build Order of the best individual]");
-		//printf("\n");
-
-		x=0;
-		for(i=0;i<MAX_LENGTH;i++)
+//		if(Mut_Rate>10)
+//			Mut_Rate--;
+		
+//clrscr();
+		printf("\n%i runs remaining (this run %i+ generations remaining)   \n",RUNNINGS-run,Max_Generations-rfit);
+		if(verbose==1) 
 		{
-			COORD c={((x/8)*10),14+x%8};
-			x++;
-			SetConsoleCursorPosition(hStdOut,c);
-			if((Build_Av[player[0]->program[i]]<BUILDING_TYPES)&&((player[0]->timep[i]>0)||(i==0))&&(player[0]->timep[i]<player[0]->timer))
-				printf("%2i.%s",x,kurz[Build_Av[player[0]->program[i]]].b);
-			else printf("        ");
-
+		printf("                           Overview Generation %i \n",generation);
+		printf("[resources] [time]\n");
+		printf("----------------\n");
+		gotoxy(2,7);printf("  %5.4i",(int)(player[0]->harvested_mins+player[0]->harvested_gas));
+		gotoxy(12,7);if(player[0]->timer<Max_Time) printf("%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);else printf(" ---- ");
+		printf("\n\n");
+		printf("   [Build Order of the best individual]");
+	
+		t=0;
+		
+		for(s=0;s<player[0]->length;s++)
+		{
+			gotoxy((t/10)*10,12+t%10);
+			t++;
+			if((Build_Av[player[0]->program[s].order]<building_types)&&(player[0]->program[s].time<player[0]->timer))
+			printf("%2i.%s ",t,kurz[race][Build_Av[player[0]->program[s].order]].b);
+			else printf("         ");
 		}
 
-// besser machen, mehr von relativer Fitness abhaengen lassen -> schnellere Evolution (mei... lokale Minima, was solls)
-//		Bei den einzelnen Einheiten noch einen konstanten Faktor bei der Buildtime dazuzaehlen, abhaengig von Wegstrecke zum Gegner und Geschwindigkeit!
-		for(k=1;k<MAX_PLAYER;k++)
-			if(player[k]->fitness<player[0]->fitness)
-				for(i=0;i<MAX_LENGTH;i++)
-					player[k]->program[i]=player[0]->program[i];
+		for(s=0;s<15;s++)
+		{
+			gotoxy(60,s+5);
+			printf("         ");
+		}
+		t=0;
+		for(s=0;s<building_types;s++)
+			if((player[0]->force[s]>0)&&(goal[s].what>0)) 
+			{
+				gotoxy(60,t+5);				
+				printf("%s:%2i  ",kurz[race][s].b,player[0]->force[s]);
+				t++;
+			}
+		
+		
+
+		
+		}
+//wheee das abaendern!!!
+		for(s=1;s<MAX_PLAYER/5;s++)
+		{
+			t=rand()%(MAX_PLAYER-1)+1;
+			for(u=0;u<MAX_LENGTH;u++)
+				player[t]->program[u]=player[0]->program[u];
+		}
+		for(s=1;s<MAX_PLAYER;s++)
+		{
+			t=rand()%MAX_PLAYER;
+			if((player[s]->pFitness<player[t]->pFitness)||((player[s]->pFitness==player[t]->pFitness)&&(player[s]->sFitness<player[t]->sFitness)))	
+				for(u=0;u<MAX_LENGTH;u++)		                                        player[s]->program[u]=player[t]->program[u];
+		}
 	
 	    if(rfit>=Max_Generations)
 		{
+//			Mut_Rate=MRate;
 			rfit=0;
 			generation=0;
-			for(i=0;i<MAX_LENGTH;i++)
-				Save[run]->program[i]=player[0]->program[i];
+			for(s=0;s<MAX_LENGTH;s++)
+				Save[run]->program[s]=player[0]->program[s];
 
-			for(i=0;i<MAX_LENGTH;i++)
-				Save[run]->timep[i]=player[0]->timep[i];
+			for(s=0;s<MAX_LENGTH;s++)
+				Save[run]->program[s].time=player[0]->program[s].time;
 
-			Save[run]->fitness=player[0]->fitness;
+			Save[run]->pFitness=player[0]->pFitness;
 			Save[run]->timer=player[0]->timer;
 			Save[run]->harvested_mins=player[0]->harvested_mins;
 			Save[run]->harvested_gas=player[0]->harvested_gas;
+			Save[run]->mins=player[0]->mins;
+			Save[run]->gas=player[0]->gas;
+			Save[run]->length=player[0]->length;
 
-			for(i=0;i<BUILDING_TYPES;i++)
-				Save[run]->force[i]=player[0]->force[i];
+			for(s=0;s<building_types;s++)
+				Save[run]->force[s]=player[0]->force[s];
 
-			for(l=0;l<MAX_PLAYER;l++)
-				player[l]->Restart();
+			for(s=0;s<MAX_PLAYER;s++)
+				player[s]->Restart();
+			afit=0;
+			old_time=Max_Time;
+			old_fit=0;
 			run++;
 		}
 	} // end while...
 
 	//Output
 
-	if(run==0)
+	if(run<RUNNINGS)
 	{
-		for(i=0;i<MAX_LENGTH;i++)
+		for(s=0;s<MAX_LENGTH;s++)
 		{
-			Save[run]->program[i]=player[0]->program[i];
-			Save[run]->timep[i]=player[0]->timep[i];
+			Save[run]->program[s].order=player[0]->program[s].order;
+			Save[run]->program[s].time=player[0]->program[s].time;
 		}	
-		Save[run]->fitness=player[0]->fitness;
+		Save[run]->pFitness=player[0]->pFitness;
 		Save[run]->timer=player[0]->timer;
 		Save[run]->harvested_mins=player[0]->harvested_mins;
 		Save[run]->harvested_gas=player[0]->harvested_gas;	
-	
-		for(i=0;i<BUILDING_TYPES;i++)
-			Save[run]->force[i]=player[0]->force[i];
+		Save[run]->mins=player[0]->mins;
+		Save[run]->gas=player[0]->gas;
+		Save[run]->length=player[0]->length;
+
+		for(s=0;s<building_types;s++)
+			Save[run]->force[s]=player[0]->force[s];
 	}
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
-	printf("Calculating completed.\n");
-	printf(" You can find the Protoss Build Order in the ""bo_prot.txt""\n");
+	
+	clrscr();
+	printf("Calculating completed.\n\n");
+	printf(" The build order was saved in the file ""%s"".\n\n",O);
 	printf(" Brought to you by clawsoftware.de\n");
-	printf("\n\n\n\n\n\n\n\n");
+	printf("\n\n\n\n\n\n\n\n\n\n");
 
-	//Alle runs ausgeben!
-	for(x=0;x<RUNNINGS;x++)
-		if(Save[x]->timer<Max_Time)
+	t=0;
+	if(run>0)
+	{
+		afit=0;
+		for(s=0;s<RUNNINGS;s++)
+			if((Save[s]->pFitness>afit)&&(Save[s]->timer<Max_Time))
+			{
+				afit=Save[s]->pFitness;
+				t=s;
+			}
+	}
+	clrscr();
+	
+	FILE * pFile;
+	pFile = fopen(O,"w");
+	fprintf(pFile,"StarCraft Evolution Chamber by ClawSoftware.de\n");
+	fprintf(pFile,"--------------------------------------------------\n\n");
+	fprintf(pFile,"Build Order of best Individual:\n");
+	fprintf(pFile,"Time used: %.2i:%.2i\n",Save[t]->timer/60,Save[t]->timer%60);	
+
+	printf("Header saved...\n");
+	
+	old=200;
+	counter=1;
+	for(s=0;s<=Save[t]->length;s++)
+	{
+		if(Detailed_Info==0)
 		{
-			out_file<<"Fitness: "<<Save[x]->fitness<<"\n";
-			out_file<<"Time used: "<<Save[x]->timer/60<<":"<<Save[x]->timer%60<<"\n";	
-
-			for(i=0;i<MAX_LENGTH;i++)
-				if((Save[x]->timep[i]<Save[x]->timer)&&(Build_Av[Save[x]->program[i]]<BUILDING_TYPES)&&((Save[x]->timep[i]>0)||(i==0)))
-						out_file<<"["<<(Save[x]->timep[i]+0)/60<<":"<<(Save[x]->timep[i]+0)%60<<"] "<<stats[Build_Av[Save[x]->program[i]]].name<<"\n";
-
-			for(i=0;i<BUILDING_TYPES;i++)
-				if(Save[x]->force[i]>0)
-					out_file<<stats[i].name<<" : "<<(Save[x]->force[i]+0)<<"\n";
-
-			out_file<<"Harvested Minerals: "<<(Save[x]->harvested_mins+0)<<"\n";
-			out_file<<"Harvested Gas: "<<(Save[x]->harvested_gas+0)<<"\n";	
+			while(((Save[t]->program[s].time>=Save[t]->timer)||(Build_Av[Save[t]->program[s].order]>=building_types))&&(s<MAX_LENGTH-1))
+				s++;
+			if(old==Build_Av[Save[t]->program[s].order]) counter++;
+			else if(old<200)
+			{
+				fprintf(pFile,"%.2i x %s\n",counter,stats[race][old].name);
+				counter=1;
+				old=Build_Av[Save[t]->program[s].order];
+			}
+			else
+				old=Build_Av[Save[t]->program[s].order];
 		}
-	out_file.close();
+		else
+		if((Save[t]->program[s].time<Save[t]->timer)&&(Build_Av[Save[t]->program[s].order]<building_types)&&((s==0)||(Save[t]->program[s].time>0)))
+				fprintf(pFile,"[%.2i:%.2i] %s\n",(Save[t]->program[s].time+0)/60,(Save[t]->program[s].time+0)%60,stats[race][Build_Av[Save[t]->program[s].order]].name);
+	}
 
-	for(i=0;i<MAX_PLAYER;i++)
-		free(player[i]);
-	for(i=0;i<RUNNINGS;i++)
-		free(Save[i]);
-	tempp=NULL;
-	x=getch();
+	printf("Build Order saved...\n");
+
+	for(s=0;s<building_types;s++)
+		if(Save[t]->force[s]>0)
+			fprintf(pFile,"%s : %i\n",stats[race][s].name,Save[t]->force[s]);
+	fprintf(pFile,"Harvested Minerals : %i\n",(short)(Save[t]->harvested_mins));
+	fprintf(pFile,"Harvested Gas      : %i\n",(short)(Save[t]->harvested_gas));
+	fprintf(pFile,"Minerals at the end: %i\n",(short)(Save[t]->mins));
+	fprintf(pFile,"Gas at the end     : %i\n",(short)(Save[t]->gas));
+	printf("First Solution succesfully saved...\n");
+/*	out_file<<"Other possible solutions: \n";
+	if(run>0)
+	//Alle runs ausgeben!
+	for(x=0;x<run;x++)
+		if((Save[x]->timer<Max_Time)&&(y!=x)&&(Save[x]->timer!=Save[y]->timer))			
+		{
+			out_file<<"\n";
+			out_file<<"\n----------------------------------------------------------\n\n";
+			out_file<<"Time used: "<<Save[x]->timer/60<<":"<<Save[x]->timer%60<<"\n";	
+			printf("Start saving %i. Solution...\n",x);
+			printf("%i\n",Save[x]->length);
+			old=200;
+			counter=1;
+			for(i=0;i<=Save[x]->length;i++)
+			{
+				printf("XXX\n");
+				if(Detailed_Info==0)
+				{
+					while(((Save[x]->program[i].time>=Save[x]->timer)||(Build_Av[Save[x]->program[i].order]>=building_types))&&(i<MAX_LENGTH-1))
+						i++;
+					if(old==Build_Av[Save[x]->program[i].order]) counter++;
+					else if(old<200)
+					{
+						printf("writing name...\n");
+						out_file<<counter+0<<" "<<stats[race][old].name<<"\n";
+						counter=1;
+						old=Build_Av[Save[x]->program[i].order];
+					}
+					else
+						old=Build_Av[Save[x]->program[i].order];
+				}
+				else
+				if((Save[x]->program[i].time<Save[x]->timer)&&(Build_Av[Save[x]->program[i].order]<building_types)&&((i==0)||(Save[x]->program[i].time>0)))
+					printf("writing time...\n");
+					out_file<<"["<<(Save[x]->program[i].time+0)/60<<":"<<(Save[x]->program[i].time+0)%60<<"] "<<stats[race][Build_Av[Save[x]->program[i].time]].name<<"\n";
+			}
+			printf("Saving Force List\n");
+			for(i=0;i<building_types;i++)
+				if(Save[x]->force[i]>0)
+					out_file<<stats[race][i].name<<" : "<<(Save[x]->force[i]+0)<<"\n";
+ 			printf("Saving additional Data\n");
+			out_file<<"Harvested Minerals: "<<(unsigned short)(Save[x]->harvested_mins+0)<<"\n";
+			out_file<<"Harvested Gas: "<<(unsigned short)(Save[x]->harvested_gas+0)<<"\n";	
+			out_file<<"Minerals after completing last task: "<<(unsigned short)(Save[x]->mins+0)<<"\n";
+			out_file<<"Gas after completing last task: "<<(unsigned short)(Save[x]->gas+0)<<"\n";
+		}*/
+       
+	fclose (pFile);
+	printf("File closed. All Data were saved.\n Thank you for using StarCalc!\n");
+
+	for(s=0;s<MAX_PLAYER;s++)
+		player[s]=NULL;
+	for(s=0;s<RUNNINGS;s++)
+		Save[s]=NULL;
 	return 0;
-}
+};
+
+

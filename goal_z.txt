@@ -1,61 +1,70 @@
-Max Time 30
-Max Generations 4 // = twohundredfifty generations
+Max Time 45
+Max Generations 250
 Max Vespene 1
-Mutations 25
+Mutations 50
 Mutation Rate 50
+Detailed Output 1
+Attack 0
+Time to Enemy 80
 
-Zergling 6
-Hydralisk 12
-Ultralisk 0
-Drone 0
-Defiler 0
-Lurker 0
-Overlord 0
-Mutalisk 0
-Guardien 0
-Queen 0
-Scourge 0
-Devourer 0
+Remember: The numbers mean how many the program should build of this unit
+>at least<. And: You don't have to enter all the tech buildings, they will
+added automaticly. (i.e. the program will build a templar archive if you
+set Dark Templars to for example two and left everything else at zero)
 
-Hatchery 2
-Lair 0
-Hive 0
-Nydus Canal 0
-Hydralisk den 1
-Defiler mound 0
-Greater Spire 0
-Queen's Nest 0
-Evolution Chamber 0
-Ultralisk Cavern 0
-Spire 0
-Spawning Pool 1
-Creep Colony 0
-Spore Colony 0
-Sunken Colony 0
-Extractor 1
+Units
+            Zergling 24         // one zergling actually means one egg with two zerglings
+           Hydralisk 0
+           Ultralisk 0
+               Drone 0
+             Defiler 0
+              Lurker 0
+            Overlord 0
+            Mutalisk 0
+            Guardien 0
+               Queen 0
+             Scourge 0        // one scourge actually means one egg with two scourges
+            Devourer 0
+Buildings                      
+            Hatchery 2 
+                Lair 0
+                Hive 0
+         Nydus Canal 0
+       Hydralisk den 0
+       Defiler mound 0
+       Greater Spire 0
+        Queen's Nest 0
+   Evolution Chamber 0
+    Ultralisk Cavern 0
+               Spire 0
+       Spawning Pool 0
+        Creep Colony 0
+        Spore Colony 0
+       Sunken Colony 0
+           Extractor 0
 
-Ventral Sacs 0
-Antennae 0
-Pneumatized Carapace 0
-Metabolic Boost 1
-Adrenal Glands 0
-Muscular Augments 1
-Grooved Spines 0
-Gamete Meiosis 0
-Metasynaptic node 0
-Chitinous Plating 0
-Anabolic Synthesis 0
-Burrowing 0
-Spawn Broodling 0
-Dark Swarm 0
-Plague 0
-Consume 0
-Ensnare 0
-Parasite 0
-Lurker Aspect 0
+Researches
+        Ventral Sacs 0       (Overlord drop)
+            Antennae 0       (Overlord sight range)
+Pneumatized Carapace 0       (Overlord speed)
+     Metabolic Boost 1       (Zergling speed)
+      Adrenal Glands 0  
+   Muscular Augments 0       (Hydralisk speed)
+      Grooved Spines 0       (Hydralisk range)
+      Gamete Meiosis 0       (Queen energy)
+   Metasynaptic node 0       (Defiler energy)
+   Chitinous Plating 0       (Ultralisk armor)
+  Anabolic Synthesis 0       (Ultralisk speed)
+           Burrowing 0
+     Spawn Broodling 0
+              Plague 0       (Blood bath)
+             Consume 0       (Defiler ability)
+             Ensnare 0       (Queen ability)
+       Lurker Aspect 0
 
-Carapace 0
-Flyer Carapace 0
-Melee Attacks 0
-Missile Attacks 0
-Flyer Attacks 0
+Upgrades
+            Carapace 1
+      Flyer Carapace 0
+       Melee Attacks 0
+     Missile Attacks 0
+       Flyer Attacks 0

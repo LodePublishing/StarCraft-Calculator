@@ -1,69 +1,83 @@
-Max Time 30
-Max Generations 4 // = twohundredfifty generations
-Max Vespene 1
-Mutations 25
-Mutation Rate 50
+Max Time 45
+Max Generations 250
+Max Vespene 2
+Mutations 50
+Mutation Rate 50 
+Detailed Output 1
+Attack 0
+Time to Enemy 60
 
-Marine 8
-Ghost 0
-Vulture 0
-Goliath 0
-Siege Tank 0
-SCV 0
-Firebat 4
-Medic 4
-Wraith 0
-Science Vessel 0
-Dropship 0
-Battle Cruiser 0
-Valkyrie 0
+Remember: The numbers mean how many the program should build of this unit
+>at least<. And: You don't have to enter all the tech buildings, they will
+added automaticly. (i.e. the program will build a templar archive if you
+set Dark Templars to for example two and left everything else at zero)
 
-Command Center 0
-Supply Depot 0
-Refinery 1
-Barracks 1
-Academy 1
-Factory 0
-Starport 0
-Science Facility 0
-Engineering Bay 0
-Armory 0
-Missile Turret 0
-Bunker 0
+Units
+            Marine 0
+             Ghost 1
+           Vulture 0
+           Goliath 0
+        Siege Tank 0
+               SCV 0
+           Firebat 0
+             Medic 2
+            Wraith 0
+    Science Vessel 1
+          Dropship 1
+    Battle Cruiser 0
+          Valkyrie 0
 
-Comsat Station 0
-Nuclear Silo 0
-Control Tower 0
-Covert Ops 0
-Physics Lab 0
-Machine Shop 0
+Buildings
+    Command Center 0
+      Supply Depot 0
+          Refinery 0 
+          Barracks 0 
+           Academy 0
+           Factory 0
+          Starport 0
+  Science Facility 0
+   Engineering Bay 0
+            Armory 0
+    Missile Turret 0
+            Bunker 0
 
-Stim Packs 1
-Lockdown 0
-EMP Shockwave 0
-Spider Mines 0
-Tank Siege Mode 0
-Irradiate 0
-Yamato Gun 0
-Cloaking Field 0
-Personnel Cloaking 0
-Restoration 0
-Optical Flare 0
-UTwoThreeEight Shells 1
-Ion Thrusters 0
-Titan Reactor 0
-Ocular Implants 0
-Moebius Reactor 0
-Apollo Reactor 0
-Colossus Reactor 0
-Caduceus Reactor 0
-Charon Booster 0
+Addons
+    Comsat Station 0
+      Nuclear Silo 0
+     Control Tower 0
+        Covert Ops 0
+       Physics Lab 0
+      Machine Shop 0
 
-Infantry Armor 0
-Infantry Weapons 0
-Vehicle Plating 0
-Vehicle Weapons 0
-Ship Plating 0
-Ship Weapons 0
+Researches
+        Stim Packs 0	   (Marine/Firebat ability)
+          Lockdown 0       (Ghost ability)
+     EMP Shockwave 0
+      Spider Mines 0	   (Vulture ability)
+   Tank Siege Mode 0
+         Irradiate 0	   (Science Vessel ability)       
+        Yamato Gun 0
+    Cloaking Field 0       (Wraith ability)
+Personnel Cloaking 1       (Ghost ability)
+       Restoration 0       (Medic ability)
+     Optical Flare 1       (Medic ability)
+          U Shells 0       (Marine range)
+     Ion Thrusters 0       (Vultures speed)
+     Titan Reactor 0       (Science Vessel energy)
+   Ocular Implants 0       (Ghost sight range)
+   Moebius Reactor 0       (Ghost energy)
+    Apollo Reactor 0       (Wraith energy)
+  Colossus Reactor 0       (Battle Cruiser energy)
+  Caduceus Reactor 0       (Medic energy)
+    Charon Booster 0       (Goliath range)
 
-Nuclear Warhead 0
+Upgrades
+    Infantry Armor 0
+  Infantry Weapons 0
+   Vehicle Plating 0
+   Vehicle Weapons 0
+      Ship Plating 0
+      Ship Weapons 0
+
+Special
+   Nuclear Warhead 1

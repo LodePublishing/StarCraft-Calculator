@@ -1,760 +1,406 @@
-#define MAX_LENGTH 50
-#define RUNNINGS 10
-#define MAX_PLAYER 128
-
-#define MAX_BUILDINGS 10 // How many buildings can you built simultaneously?
-#define BUILDING_TYPES 58
-
-#define DARK_TEMPLAR 0
-#define DARK_ARCHON 1
-#define PROBE 2
-#define ZEALOT 3
-#define DRAGOON 4
-#define HIGH_TEMPLAR 5
-#define ARCHON 6
-#define REAVER 7
-//scarab? ^^ ne... nur auf raeuber draufschlagen
-#define CORSAIR 8
-#define SHUTTLE 9
-#define SCOUT 10
-#define ARBITER 11
-#define CARRIER 12
-//interceptor? ^^ ne... nur auf Carrier draufschlagen mmmh... naja, mal guggn
-#define OBSERVER 13
-
-#define NEXUS 14
-#define ROBOTICS_FACILITY 15
-#define PYLON 16
-#define ASSIMILATOR 17
-#define OBSERVATORY 18
-#define GATEWAY 19
-#define PHOTON_CANNON 20
-#define CYBERNETICS_CORE 21
-#define CITADEL_OF_ADUN 22
-#define TEMPLAR_ARCHIVES 23
-#define FORGE 24
-#define STARGATE 25
-#define FLEET_BEACON 26
-#define ARBITER_TRIBUNAL 27
-#define ROBOTICS_SUPPORT_BAY 28
-#define SHIELD_BATTERY 29
+//jedem Gebaeude eine Position zuweisen (Entfernung zum Gegner)
 
 
-#define PSIONIC_STORM 30
-#define HALLUCINATION 31
-#define RECALL 32
-#define STASIS_FIELD 33
-#define DISRUPTION_WEB 34
-#define MIND_CONTROL 35
-#define MAELSTROM 36
+#ifndef MAIN_H
+#define MAIN_H
+#define MAX_LENGTH 100
+#define RUNNINGS 5
+#define MAX_PLAYER 100
+#define LARVA_MAX 200
+#define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
+#define MAX_GOALS 60
+struct Namen
+{
+	char b[6];
+};
 
-#define SINGULARITY_CHARGE 37
-#define LEG_ENHANCEMENTS 38
-#define SCARAB_DAMAGE 39
-#define REAVER_CAPACITY 40
-#define GRAVITIC_DRIVE 41
-#define SENSOR_ARRAY 42
-#define GRAVITIC_BOOSTERS 43
-#define KHAYDARIN_AMULET 44
-#define APIAL_SENSORS 45
-#define GRAVITIC_THRUSTERS 46
-#define CARRIER_CAPACITY 47
-#define KHAYDARIN_CORE 48
-#define ARGUS_JEWEL 49
-#define ARGUS_TALISMAN 50
+const Namen kurz[3][60]=
+{
+	{
+	{"Marin"},{"Ghost"},{"Vultu"},{"Golia"},{"STank"},{"SCV  "},{"FiBat"},{"Medic"},{"Wrait"},
+	{"SciVe"},{"Drops"},{"BCrui"},{"Valky"},{"CommC"},{"Depot"},{"Refin"},{"Barra"},{"Acade"},
+	{"Facto"},{"StarP"},{"SciLa"},{"Engin"},{"Armor"},{"MisTu"},{"Bunke"},{"ComSa"},{"NucSi"},
+	{"ConTo"},{"CovOp"},{"PhyLa"},{"MasSh"},{"StimP"},{"LockD"},{"EMPSw"},{"SMine"},{"SiegM"},
+	{"Irrad"},{"YamaG"},{"Cloak"},{"PersC"},{"Resto"},{"OptcF"},{"U238S"},{"IonTh"},{"TitaR"},
+	{"OculI"},{"MoebR"},{"ApolR"},{"ColoR"},{"CaduR"},{"CharB"},{"InfAr"},{"InfWe"},{"VehAr"},
+	{"VehWe"},{"ShpAr"},{"ShpWe"},{"NucWa"},{">>Gas"},{">>Min"}
+	},
 
-#define ARMOR 51
-#define PLATING 52
-#define GROUND_WEAPONS 53
-#define AIR_WEAPONS 54
-#define PLASMA_SHIELDS 55
 
-#define ONE_MINERAL_PROBE_TO_GAS 56
-#define ONE_GAS_PROBE_TO_MINERAL 57
+	{
+	{"DarkT"},{"DarkA"},{"Probe"},{"Zealo"},{"Drago"},{"HighT"},{"Archo"},{"Reave"},{"Corsa"},
+	{"Shutt"},{"Scout"},{"Arbit"},{"Carri"},{"Obser"},{"Nexus"},{"RobFa"},{"Pylon"},{"Assim"},
+	{"ObsTy"},{"GateW"},{"Photo"},{"Cyber"},{"Citad"},{"TempA"},{"Forge"},{"StarG"},{"Fleet"},
+	{"ArbTr"},{"RobBy"},{"Shiel"},{"PsiSt"},{"Hallu"},{"Recal"},{"Stasi"},{"Disru"},{"MindC"},
+	{"Maels"},{"Singu"},{"LegEn"},{"ScrbD"},{"ReavC"},{"GraDr"},{"Senso"},{"GraBo"},{"KhaAm"},
+	{"ApiaS"},{"GraTh"},{"CarCa"},{"KhaCo"},{"ArgJe"},{"ArgTa"},{"Armor"},{"Plati"},{"Groun"},
+	{"AirWe"},{"PShie"},{">>Gas"},{">>Min"},{"NULL!"},{"NULL!"}
+	},
+		
+	{
+	{"ZLing"},{"Hydra"},{"Ultra"},{"Drone"},{"Defil"},{"Lurkr"},{"Overl"},{"Mutal"},{"Guard"},
+	{"Queen"},{"Scour"},{"Devou"},{"Hatch"},{"Lair "},{"Hive "},{"Nydus"},{"HyDen"},{"DeMou"},
+	{"GSpir"},{"QNest"},{"EvoCh"},{"UCave"},{"Spire"},{"SPool"},{"Creep"},{"Spore"},{"Sunkn"},
+	{"Extra"},{"VSacs"},{"Anten"},{"Pneum"},{"Boost"},{"Adren"},{"Muscu"},{"Groov"},{"Gamet"},
+	{"MNode"},{"Chiti"},{"Anabo"},{"Burro"},{"Spawn"},{"Plagu"},{"Consu"},{"Ensna"},{"LAspc"},
+	{"Carap"},{"FCarp"},{"Melee"},{"Missl"},{"FAtta"},{">>Gas"},{">>Min"},{"Cancl"},{"NULL!"},
+	{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"}
+	}
+};	
+
+
+struct GOAL
+{
+	unsigned short time,what;
+};
+
+unsigned short Ziel[60],Build_Av[60],Build_Bv[60]; 
+unsigned char Vespene_Av,Max_Build_Types,Max_Vespene;
+unsigned short Max_Time,Max_Generations,Mut_Rate,Mutations;
+unsigned short total_goals,building_types;
+unsigned char num,Attack;
+GOAL goal[MAX_GOALS];
+double Goal_Harvested_Gas,Goal_Harvested_Mins;
+unsigned short Time_to_Enemy;
 
 struct Stats
 {
 	char name[35];
-	unsigned short BT; // Build Time
+	unsigned short BT;
 	unsigned short mins,gas;
 	unsigned char supply;
-};
-
-struct GOAL
-{
-	unsigned char what;
-	unsigned short time;
-};
-
-//Abkuerzungen! ~ 10 Zeichen
-const Stats stats[BUILDING_TYPES]=
-{
-	{"Dark Templar",50,125,100,2},
-	{"Dark Archon",20,0,0,0},
-	{"Probe",20,50,0,1},
-	{"Zealot",40,100,0,2},
-	{"Dragoon",50,125,50,2},
-	{"High Templar",50,50,150,2},
-	{"Archon",20,0,0,0},
-	{"Reaver",70,200,100,4},
-	{"Corsair",40,150,100,2},
-	{"Shuttle",60,200,0,2},
-	{"Scout",80,275,125,3},
-	{"Arbiter",160,100,350,4},
-	{"Carrier",140,350,250,6},
-	{"Observer",40,25,75,1},
-	{"Nexus",120,400,0,0},
-	{"Robotics Facility",80,200,200,0},
-	{"Pylon",30,100,0,0},
-	{"Assimilator",40,100,0,0},
-	{"Observatory",30,50,100,0},
-	{"Gateway",60,150,0,0},
-	{"Photon Cannon",50,150,0,0},
-	{"Cybernetics Core",60,200,0,0},
-	{"Citadel Of Adun",60,150,100,0},
-	{"Templar Archives",60,150,200,0},
-	{"Forge",40,150,0,0},
-	{"Stargate",70,150,150,0},
-	{"Fleet Beacon",60,300,200,0},
-	{"Arbiter Tribunal",60,200,150,0},
-	{"Robotics Support Bay",30,150,100,0},
-	{"Shield Battery",30,100,0,0},
-	{"Psionic Storm",120,200,200,0},
-	{"Hallucination",80,150,150,0},
-	{"Recall",120,150,150,0},
-	{"Stasis Field",100,150,150,0},
-	{"Disruption Web",80,200,200,0},
-	{"Mind Control",120,200,200,0},
-	{"Maelstrom",100,100,100,0},
-	{"Singularity Charge",166,150,150,0},
-	{"Leg Enhancements",133,150,150,0},
-	{"Scarab Damage",166,200,200,0},
-	{"Reaver Capacity",166,200,200,0},
-	{"Gravitic Drive",166,200,200,0},
-	{"Sensor Array",133,150,150,0},
-	{"Gravitic Boosters",133,150,150,0},
-	{"Khaydarin Amulet",166,150,150,0},
-	{"Apial Sensors",166,100,100,0},
-	{"Gravitic Thrusters",166,200,200,0},
-	{"Carrier Capacity",100,100,100,0},
-	{"Khaydarin Core",166,150,150,0},
-	{"Argus Jewel",166,100,100,0},
-	{"Argus Talisman",166,150,150,0},
-	{"Armor",266,100,100,0},
-	{"Plating",266,150,150,0},
-	{"Ground Weapons",266,100,100,0},
-	{"Air Weapons",266,100,100,0},
-	{"Plasma Shields",266,200,200,0},
-	{"One Mineral Probe To Gas",0,0,0,0},
-	{"One Gas Probe To Mineral",0,0,0,0}
-};	
-
-struct Namen
-{
-	char b[5];
+	unsigned short type; // 0: nothing, 1: unit, 2: building (primarily for zerg!), 3: Research, 4: Upgrade (schild, waffen etc. bis 3)
+	unsigned char tech[10];
+	//Zerg:  0: extractor,lair,Hden,evoC,queenN,spire,hive,ultraC,defilerM,greaterspire
 };
 
 
-const Namen kurz[BUILDING_TYPES]=
+const Stats stats[3][60]=
 {
-	{"Dark"},
-	{"Dark"},
-	{"Prob"},
-	{"Zeal"},
-	{"Drag"},
-	{"High"},
-	{"Arch"},
-	{"Reav"},
-	{"Cors"},
-	{"Shut"},
-	{"Scou"},
-	{"Arbi"},
-	{"Carr"},
-	{"Obse"},
-	{"Nexu"},
-	{"Robo"},
-	{"Pylo"},
-	{"Assi"},
-	{"Obse"},
-	{"Gate"},
-	{"Phot"},
-	{"Cybe"},
-	{"Cita"},
-	{"Temp"},
-	{"Forg"},
-	{"Star"},
-	{"Flee"},
-	{"Arbi"},
-	{"Robo"},
-	{"Shie"},
-	{"Psio"},
-	{"Hall"},
-	{"Reca"},
-	{"Stas"},
-	{"Disr"},
-	{"Mind"},
-	{"Mael"},
-	{"Sing"},
-	{"Leg_"},
-	{"Scar"},
-	{"Reav"},
-	{"Grav"},
-	{"Sens"},
-	{"Grav"},
-	{"Khay"},
-	{"Apia"},
-	{"Grav"},
-	{"Carr"},
-	{"Khay"},
-	{"Argu"},
-	{"Argu"},
-	{"Armo"},
-	{"Plat"},
-	{"Grou"},
-	{"AirW"},
-	{"Plas"},
-	{">gas"},
-	{">min"}
-};	
+	{
+	{"Marine",24,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
+	{"Ghost",50,25,75,1,1, 1,0,1,0,0,0,1,1,0,1},
+	{"Vulture",30,75,0,2,1, 1,0,0,0,0,0,0,0,0,0},
+	{"Goliath",40,100,50,2,1, 1,0,0,0,0,1,0,0,0,0},
+	{"Siege Tank",50,150,100,2,1, 1,1,0,0,0,0,0,0,0,0},
+	{"SCV",20,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
+	{"Firebat",24,50,25,1,1, 0,0,0,0,0,0,0,0,0,1},
+	{"Medic",30,50,25,1,1, 0,0,0,0,0,0,0,0,0,1},
+	{"Wraith",60,150,100,2,1, 1,0,1,0,0,0,0,0,0,0},
+	{"Science Vessel",80,100,225,2,1, 1,0,1,1,0,0,1,0,0,0},
+	{"Dropship",50,100,100,2,1, 1,0,1,1,0,0,0,0,0,0},
+	{"Battle Cruiser",133,400,300,6,1, 1,0,1,1,0,0,1,0,1,0},
+	{"Valkyrie",50,250,125,3,1, 1,0,1,1,0,1,0,0,0,0},
+	{"Command Center",120,400,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Supply Depot",40,100,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Refinery",40,100,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Barracks",80,150,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Academy",80,150,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Factory",80,200,100,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Starport",70,150,100,0,2, 1,0,0,0,0,0,0,0,0,0},
+	{"Science Facility",60,100,150,0,2, 1,0,1,0,0,0,0,0,0,0},
+	{"Engineering Bay",60,125,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Armory",80,100,50,0,2, 1,0,0,0,0,0,0,0,0,0},
+	{"Missile Turret",30,75,0,0,2, 0,0,0,0,1,0,0,0,0,0},
+	{"Bunker",30,100,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Comsat Station",40,50,50,0,0, 0,0,0,0,0,0,0,0,0,1},
+	{"Nuclear Silo",40,100,100,0,0, 1,0,1,0,0,0,1,1,0,0},
+	{"Control Tower",80,50,50,0,0, 1,0,1,0,0,0,0,0,0,0},
+	{"Covert Ops",40,50,50,0,0, 1,0,1,0,0,0,1,0,0,0},
+	{"Physics Lab",40,50,50,0,0, 1,0,1,0,0,0,1,0,0,0},
+	{"Machine Shop",40,50,50,0,0, 1,0,0,0,0,0,0,0,0,0},
+	{"Stim Packs",80,100,100,0,3, 0,0,0,0,0,0,0,0,0,1},
+	{"Lockdown",100,200,200,0,3, 1,0,1,0,0,0,1,1,0,0},
+	{"EMP Shockwave",120,200,200,0,3, 1,0,1,0,0,0,1,0,0,0},
+	{"Spider Mines",80,100,100,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Siege Mode",80,150,150,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Irradiate",80,200,200,0,3, 1,0,1,0,0,0,1,0,0,0},
+	{"Yamato Gun",120,100,100,0,3, 1,0,1,0,0,0,1,0,1,0},
+	{"Cloaking Field",100,150,150,0,3, 1,0,1,1,0,0,0,0,0,0},
+	{"Personnel Cloaking",80,100,100,0,3, 1,0,1,0,0,0,1,1,0,0},
+	{"Restoration",80,100,100,0,3, 0,0,0,0,0,0,0,0,0,1},
+	{"Optical Flare",120,100,100,0,3, 0,0,0,0,0,0,0,0,0,1},
+	{"U-238 Shells",100,150,150,0,3, 0,0,0,0,0,0,0,0,0,1},
+	{"Ion Thrusters",100,100,100,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Titan Reactor",166,150,150,0,3, 1,0,1,0,0,0,1,0,0,0},
+	{"Ocular Implants",166,100,100,0,3, 1,0,1,0,0,0,1,1,0,0},
+	{"Moebius Reactor",166,200,200,0,3, 1,0,1,0,0,0,1,1,0,0},
+	{"Apollo Reactor",166,200,200,0,3, 1,0,1,1,0,0,0,0,0,0},
+	{"Colossus Reactor",166,150,150,0,3, 1,0,1,0,0,0,1,0,1,0},
+	{"Caduceus Reactor",166,150,150,0,3, 0,0,0,0,0,0,0,0,0,1},
+	{"Charon Booster",133,100,100,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Infantry Armor",266,100,100,0,4, 0,0,0,0,1,0,0,0,0,0},
+	{"Infantry Weapons",266,100,100,0,4, 0,0,0,0,1,0,0,0,0,0},
+	{"Vehicle Plating",266,100,100,0,4, 0,0,0,0,0,1,0,0,0,0},
+	{"Vehicle Weapons",266,100,100,0,4, 0,0,0,0,0,1,0,0,0,0},
+	{"Ship Plating",266,150,150,0,4, 0,0,0,0,0,1,0,0,0,0},
+	{"Ship Weapons",266,100,100,0,4, 0,0,0,0,0,1,0,0,0,0},
+	{"Nuclear Warhead",100,200,200,8,0, 1,0,1,0,0,0,1,1,0,0},
+	{"Mineral SCV to Gas",0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"Gas SCV to Mineral",0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0}
+	},
 
+	{
+	{"Dark Templar",50,125,100,2 ,1 ,1,1,1,0,0,0,0,0,0,0},
+	{"Dark Archon",20,0,0,0,1 ,1,1,1,0,0,0,0,0,0,0},
+	{"Probe",20,50,0,1,1 ,0,0,0,0,0,0,0,0,0,0},
+	{"Zealot",40,100,0,2,1 ,0,0,0,0,0,0,0,0,0,0},
+	{"Dragoon",50,125,50,2,1 ,1,0,0,0,0,0,0,0,0,0},
+	{"High Templar",50,50,150,2,1 ,1,1,1,0,0,0,0,0,0,0},
+	{"Archon",20,0,0,0,1 ,1,1,1,0,0,0,0,0,0,0},
+	{"Reaver",70,200,100,4,1 ,1,0,0,0,1,0,1,0,0,0},
+	{"Corsair",40,150,100,2,1 ,1,0,0,1,0,0,0,0,0,0},
+	{"Shuttle",60,200,0,2,1 ,1,0,0,0,1,0,0,0,0,0},
+	{"Scout",80,275,125,3,1 ,1,0,0,1,0,0,0,0,0,0},
+	{"Arbiter",160,100,350,4,1 ,1,1,1,1,0,0,0,0,1,0},
+	{"Carrier",140,350,250,6,1 ,1,0,0,1,0,0,0,0,0,1},
+	{"Observer",40,25,75,1,1 ,1,0,0,0,1,1,0,0,0,0},
+	{"Nexus",120,400,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Robotics Facility",80,200,200,0,2 ,1,0,0,0,0,0,0,0,0,0},
+	{"Pylon",30,100,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Assimilator",40,100,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Observatory",30,50,100,0,2 ,1,0,0,0,1,0,0,0,0,0},
+	{"Gateway",60,150,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Photon Cannon",50,150,0,0,2 ,0,0,0,0,0,0,0,1,0,0},
+	{"Cybernetics Core",60,200,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Citadel Of Adun",60,150,100,0,2 ,1,0,0,0,0,0,0,0,0,0},
+	{"Templar Archives",60,150,200,0,2 ,1,1,0,0,0,0,0,0,0,0},
+	{"Forge",40,150,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Stargate",70,150,150,0,2 ,1,0,0,0,0,0,0,0,0,0},
+	{"Fleet Beacon",60,300,200,0,2 ,1,0,0,1,0,0,0,0,0,0},
+	{"Arbiter Tribunal",60,200,150,0,2 ,1,1,1,1,0,0,0,0,0,0},
+	{"Robotics Support Bay",30,150,100,0,2 ,1,0,0,0,1,0,0,0,0,0},
+	{"Shield Battery",30,100,0,0,2 ,0,0,0,0,0,0,0,0,0,0},
+	{"Psionic Storm",120,200,200,0,3 ,1,1,1,0,0,0,0,0,0,0},
+	{"Hallucination",80,150,150,0,3 ,1,1,1,0,0,0,0,0,0,0},
+	{"Recall",120,150,150,0,3 ,1,1,1,1,0,0,0,0,0,0},
+	{"Stasis Field",100,150,150,0,3 ,1,1,1,1,0,0,0,0,0,0},
+	{"Disruption Web",80,200,200,0,3 ,1,0,0,1,0,0,0,0,0,1},
+	{"Mind Control",120,200,200,0,3 ,1,1,1,0,0,0,0,0,0,0},
+	{"Maelstrom",100,100,100,0,3 ,1,1,1,0,0,0,0,0,0,0},
+	{"Singularity Charge",166,150,150,0,3 ,0,0,0,0,0,0,0,0,0,0},//??
+	{"Leg Enhancements",133,150,150,0,3 ,1,1,0,0,0,0,0,0,0,0},
+	{"Scarab Damage",166,200,200,0,3 ,1,0,0,0,1,0,1,0,0,0},
+	{"Reaver Capacity",166,200,200,0,3 ,1,0,0,0,1,0,1,0,0,0},
+	{"Gravitic Drive",166,200,200,0,3 ,1,0,0,0,1,0,1,0,0,0},
+	{"Sensor Array",133,150,150,0,3 ,1,0,0,0,1,1,0,0,0,0},
+	{"Gravitic Boosters",133,150,150,0,3 ,1,0,0,0,1,1,0,0,0,0},
+	{"Khaydarin Amulet",166,150,150,0,3 ,1,1,1,0,0,0,0,0,0,0},
+	{"Apial Sensors",166,100,100,0,3 ,1,0,0,1,0,0,0,0,0,1},
+	{"Gravitic Thrusters",166,200,200,0,3 ,1,0,0,1,0,0,0,0,0,1},
+	{"Carrier Capacity",100,100,100,0,3 ,1,0,0,1,0,0,0,0,0,1},
+	{"Khaydarin Core",166,150,150,0,3 ,1,1,1,1,0,0,0,0,1,0},
+	{"Argus Jewel",166,100,100,0,3 ,1,0,0,1,0,0,0,0,0,1},
+	{"Argus Talisman",166,150,150,0,3 ,1,1,1,0,0,0,0,0,0,0},
+	{"Armor",266,100,100,0,4 ,0,0,0,0,0,0,0,1,0,0},
+	{"Plating",266,150,150,0,4 ,1,0,0,0,0,0,0,0,0,0},
+	{"Ground Weapons",266,100,100,0,4 ,0,0,0,0,0,0,0,1,0,0},
+	{"Air Weapons",266,100,100,0,4 ,1,0,0,0,0,0,0,0,0,0},
+	{"Plasma Shields",266,200,200,0,4 ,0,0,0,0,0,0,0,1,0,0},
+	{"Mineral Probe To Gas",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"Gas Probe To Mineral",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0}
+	},
 
+	//Zerg:  0: extractor,lair,Hden,evoC,queenN,spire,hive,ultraC,defilerM,greaterspire
 
+	{
+	{"Zergling",28,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
+	{"Hydralisk",28,75,25,1,1, 1,0,1,0,0,0,0,0,0,0},
+	{"Ultralisk",60,200,200,6,1, 1,1,0,0,1,0,1,1,0,0},
+	{"Drone",23,50,0,1,1, 0,0,0,0,0,0,0,0,0,0},
+	{"Defiler",50,50,150,2,1, 1,1,0,0,1,0,1,0,1,0},
+	{"Lurker",40,50,100,2,0, 1,1,1,0,0,0,0,0,0,0},
+	{"Overlord",40,100,0,0,1, 0,0,0,0,0,0,0,0,0,0},
+	{"Mutalisk",40,100,100,2,1, 1,1,0,0,0,1,0,0,0,0},
+	{"Guardien",40,50,100,2,0, 1,1,0,0,1,1,1,0,0,1},
+	{"Queen",50,100,100,2,1, 1,1,0,0,1,0,0,0,0,0},
+	{"Scourge",30,25,75,1,1, 1,1,0,0,0,1,0,0,0,0},
+	{"Devourer",40,100,50,2,0, 1,1,0,0,1,1,1,0,0,1},
 
+	{"Hatchery",120,300,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Lair",100,150,100,0,0, 1,0,0,0,0,0,0,0,0,0},
+	{"Hive",120,200,150,0,0, 1,1,0,0,1,0,1,0,0,0},
+	{"Nydus Canal",40,150,0,0,2, 1,1,0,0,1,0,1,0,0,0},
+	{"Hydralisk den",40,100,50,0,2, 1,0,0,0,0,0,0,0,0,0},
+	{"Defiler mound",60,100,100,0,2, 1,1,0,0,1,0,1,0,0,0},
+	{"Greater Spire",120,100,150,0,0, 1,1,0,0,1,1,1,0,0,0},
+	{"Queen's Nest",60,150,100,0,2, 1,1,0,0,0,0,0,0,0,0},
+	{"Evolution Chamber",40,75,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Ultralisk Cavern",80,150,200,0,2, 1,1,0,0,1,0,0,0,0,0},
+	{"Spire",120,200,150,0,2, 1,1,0,0,0,0,0,0,0,0},
+	{"Spawning Pool",80,200,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Creep Colony",20,75,0,0,2, 0,0,0,0,0,0,0,0,0,0},
+	{"Spore Colony",20,50,0,0,0, 0,0,0,1,0,0,0,0,0,0},
+	{"Sunken Colony",20,50,0,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"Extractor",40,50,0,0,2, 0,0,0,0,0,0,0,0,0,0},//27
 
-const double gasing[5]=
-{
-	0,
-	0.89,
-	1.76,
-	2.30,
-	2.45
+	{"Ventral Sacs",160,200,200,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Antennae",133,150,150,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Pneumatized Carapace",133,150,150,0,3, 1,1,0,0,0,0,0,0,0,0},
+	{"Metabolic Boost",100,100,100,0,3, 1,0,0,0,0,0,0,0,0,0},
+	{"Adrenal Glands",100,200,200,0,3, 1,1,0,0,1,0,1,0,0,0},
+	{"Muscular Augments",100,150,150,0,3, 1,0,1,0,0,0,0,0,0,0},
+	{"Grooved Spines",100,150,150,0,3, 1,0,1,0,0,0,0,0,0,0},
+	{"Gamete Meiosis",166,150,150,0,3, 1,1,0,0,1,0,0,0,0,0},
+	{"Metasynaptic node",166,150,150,0,3, 1,1,0,0,1,0,1,0,1,0},
+	{"Chitinous Plating",133,150,150,0,3, 1,1,0,0,1,0,1,1,0,0},
+	{"Anabolic Synthesis",133,200,200,0,3, 1,1,0,0,1,0,1,1,0,0},
+
+	{"Burrowing",80,100,100,0,3, 1,0,0,0,0,0,0,0,0,0},
+	{"Spawn Broodling",80,100,100,0,3, 1,1,0,0,1,0,0,0,0,0},
+	{"Plague",100,200,200,0,3, 1,1,0,0,1,0,1,0,1,0},
+	{"Consume",100,100,100,0,3, 1,1,0,0,1,0,1,0,1,0},
+	{"Ensnare",80,100,100,0,3, 1,1,0,0,1,0,0,0,0,0},
+	{"Lurker Aspect",120,200,200,0,3, 1,1,1,0,0,0,0,0,0,0},
+
+	{"Carapace",266,150,150,0,4, 1,0,0,1,0,0,0,0,0,0},//45
+	{"Flyer Carapace",266,150,150,0,4, 1,1,0,0,0,1,0,0,0,0},
+	{"Melee Attacks",266,100,100,0,4, 1,0,0,1,0,0,0,0,0,0},
+	{"Missile Attacks",266,100,100,0,4, 1,0,0,1,0,0,0,0,0,0},
+	{"Flyer Attacks",266,100,100,0,4, 1,1,0,0,0,1,0,0,0,0},
+	{"Mineral Drone to Gas",0,0,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"Gas Drone to Mineral",0,0,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"Break up Building",0,0,0,0, 0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0}
+	}
 };
 
-const double mining[57]=
-{
-	0,
-	0.66,
-	1.33,
-	2,
-	2.66,
-	3.34,
-	4.01,
-	4.67,
-	5.35,
-	6, //9
-	6.19,
-	6.37,
-	6.53,
-	6.67,
-	6.78, //14
-	7.02,
-	7.24,
-	7.44,
-	7.58, //18
-	7.78,
-	7.96,
-	8.12,
-	8.26,
-	8.37, //23
-	8.41,
-	8.45,
-	8.49,
-	8.52,
-	8.55, //28
-	8.58,
-	8.60,
-	8.62,
-	8.64,
-	8.66, //33
-	8.81,
-	8.96,
-	9.13,
-	9.30,
-	9.49,
-	9.69,
-	9.87, //40
-	10.94,
-	11,
-	11.06,
-	11.12,
-	11.17,
-	11.22,
-	11.27,
-	11.32,
-	11.37,
-	11.42,
-	11.47,
-	11.51,
-	11.55,
-	11.59,
-	10.63,//55
-	11
-};
-
-
-
-unsigned char Ziel[BUILDING_TYPES],Build_Av[BUILDING_TYPES],Build_Bv[BUILDING_TYPES]; 
-unsigned char Vespene_Av,Max_Build_Types;
-unsigned long Fitness_All;
-unsigned short Fitness_Average;
-unsigned short Max_Time,Max_Generations,Mut_Rate,Mutations,Max_Vespene;
-unsigned short afit;
-unsigned short generation;
-unsigned char num;
-unsigned short x,y,i,j,A,B;
-GOAL goal[BUILDING_TYPES];
-unsigned short Goal_Harvested_Gas,Goal_Harvested_Mins; 
-
-
-
-class Player
+class RACE
 {
 public:
-	unsigned char force[BUILDING_TYPES];
-	unsigned char availible[BUILDING_TYPES];
+	unsigned char force[60];
+	unsigned char availible[60];
 
-	unsigned short mins,gas,IP,min,n;
-	unsigned char probemins,probegas,length,BuildingRunning;
+	double mins,gas;
+	unsigned short larvae,IP,min,n;
+	unsigned short peonmins,peongas, peonbuilding, length,BuildingRunning;
 	short Supply;
 
-	unsigned char program[MAX_LENGTH];
-	unsigned short timep[MAX_LENGTH];
-	
+	unsigned char av_starport,av_factory;
+	//hacked: man kann sonst in nem kompletten Starport sowohl erforschen, als auch valkyries baun etc.
+
+	unsigned char ready;
+	struct Program
+	{
+		unsigned char order,location,supply;//supply noch aendern... Verbrauch/Verfuegbar
+		unsigned short time,mins,gas,temp;
+	} program[MAX_LENGTH];
 	struct Building
 	{
 		unsigned short RB; // Remaining Buildtime
-		unsigned char type; // Type of Building
+		unsigned short type; // Type of Building
+		unsigned char on_the_run; //unit that is running towards the enemy
+		unsigned char location;
+		// Main, Front, Enemy Front, Enemy Main, Drop(?), Expansion(?)
 	} building[MAX_BUILDINGS];
 
 	unsigned char nr,ok;
 
-	unsigned short harvested_gas,harvested_mins;
-	unsigned short fitness,timer;
+	unsigned char larva[LARVA_MAX]; // larvacounter for producing larvas
+	unsigned char larvacounter;
 
+	double harvested_gas,harvested_mins;
+	unsigned short pFitness,sFitness,timer,gasready,minsready;
 
+	virtual void Set_Goals() {};
+	virtual inline void Produce() {};
+	virtual void Build() {};
+	virtual void Calculate() {};
+	virtual void InitRaceSpecific() {};
 
-	void Produce(unsigned char who)
+	void CalculateFitness()
 	{
-		if((who>=ARMOR)&&(who<=PLASMA_SHIELDS))
-		{
-			building[nr].RB=stats[who].BT+force[who]*32;
-			switch(who)
-			{
-				case PLATING:
-				case ARMOR:
-				case AIR_WEAPONS:mins-=stats[who].mins+force[who]*75;gas-=stats[who].gas+force[who]*75;break;
-				case GROUND_WEAPONS:mins-=stats[who].mins+force[who]*50;gas-=stats[who].gas+force[who]*50;break;
-				case PLASMA_SHIELDS:mins-=stats[who].mins+force[who]*100;gas-=stats[who].gas+force[who]*100;break;
-				default:break;
-			}
-		}	
-		else
-		{
-			building[nr].RB=stats[who].BT+((who>=NEXUS)&&(who<=SHIELD_BATTERY))*5; // 3 Spielsekunden um zum Bauplatz zu fahren 
-//			if(who==ZERGLING)
-//			{
-//				if(force[METABOLIC_BOOST]==1)
-//					building[nr].RB+=30;
-//				if(force[METABOLIC_BOOST]==1)
-//					building[nr].RB+=50;
-//			}
-			mins-=stats[who].mins;
-		    gas-=stats[who].gas;
-		}
-		building[nr].type=who;
-		Supply-=stats[who].supply;
-
-		if((who<=SHIELD_BATTERY)&&(who>=NEXUS))
-		{
-			if(probemins>0)
-				probemins--;
-			else if(probegas>0)
-				probegas--;
-		}
-		ok=1;
-	}
-
+		unsigned char i;
+		pFitness=0;
+		sFitness=0;
+		sFitness=(unsigned short)(harvested_mins+harvested_mins+harvested_gas);
+		 if(ready==0)
+	         {
+	                 timer=Max_Time;
+	         //Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
+		// HAEE??? WARUM HIER MAX_BUILD_TYPES!?
+			 for(i=0;i<building_types;i++)
+                                if(goal[i].what>0)
+	        	             {
+	                              if(goal[i].what>force[i])
+	                                    pFitness+=((force[i]*100)/goal[i].what);
+                                         else pFitness+=100;
+                                    }
+		//if(Goal_Harvested_Gas>harvested_gas)
+                  //      fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
+             //   else
+	//	{
+	//		fitness+=100;
+	//		fitness+=gasready;
+	//	};
 	
-	
-	void Build(unsigned char what)
-	{
-		unsigned char m;
-
-		if((what>=NEXUS)&&(what<=SHIELD_BATTERY)&&(what!=PYLON)&&(force[PYLON]==0))
-			return;
-	
-			if((what==ONE_MINERAL_PROBE_TO_GAS)&&(force[ASSIMILATOR]>0)&&(probemins>0))
-			{
-				ok=1;
-				probemins--;
-				probegas++;
-			}
-			else
-			if((what==ONE_GAS_PROBE_TO_MINERAL)&&(probegas>0))
-			{
-				ok=1;
-				probegas--;
-				probemins++;
-			}
-			else
-			{
-				nr=255;
-				for(m=0;m<MAX_BUILDINGS;m++)
-				if(building[m].RB==0)
-				{
-					nr=m;
-					m=MAX_BUILDINGS;			
-				}
-
-		if( ((Supply>=stats[what].supply) || (stats[what].supply==0)) &&
-			( mins>=stats[what].mins+((what==ARMOR)||(what==PLATING)||(what==AIR_WEAPONS))*force[what]*75+(what==GROUND_WEAPONS)*force[what]*50)+(what==PLASMA_SHIELDS)*force[what]*100 &&
-			(  gas>=stats[what].gas +((what==ARMOR)||(what==PLATING)||(what==AIR_WEAPONS))*force[what]*75+(what==GROUND_WEAPONS)*force[what]*50)+(what==PLASMA_SHIELDS)*force[what]*100 &&
-			(nr<255) && 
-			(probemins+probegas>=1*((what<=SHIELD_BATTERY)&&(what>=NEXUS)))
-		  )
-
-		{
-			switch(what)
-			{
-				case DARK_TEMPLAR:
-				case HIGH_TEMPLAR:if((force[GATEWAY]>0)&&(availible[GATEWAY]>0)&&(force[TEMPLAR_ARCHIVES]>0)) 
-							{
-								Produce(what);
-								availible[GATEWAY]--;
-							};break;
-				case DRAGOON:if((force[GATEWAY]>0)&&(force[CYBERNETICS_CORE]>0)&&(availible[GATEWAY]>0))
-							{
-								Produce(what);
-								availible[GATEWAY]--;
-							};break;
-				case ZEALOT:if((force[GATEWAY]>0)&&(availible[GATEWAY]>0)) 
-							{
-								Produce(what);
-								availible[GATEWAY]--;
-							};break;
-				case REAVER:if((force[ROBOTICS_SUPPORT_BAY]>0)&&(force[ROBOTICS_FACILITY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
-							{
-								Produce(what);
-								availible[ROBOTICS_FACILITY]--;
-							};break;
-				case SHUTTLE:if((force[ROBOTICS_FACILITY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
-							{
-								Produce(what);
-								availible[ROBOTICS_FACILITY]--;
-							};break;
-				case PROBE:if((force[NEXUS]>0)&&(availible[NEXUS]>0)) 
-							{
-								Produce(what);
-								availible[NEXUS]--;
-							};break;
-				case OBSERVER:
-							if((force[ROBOTICS_FACILITY]>0)&&(force[OBSERVATORY]>0)&&(availible[ROBOTICS_FACILITY]>0)) 
-							{
-								Produce(what);
-								availible[ROBOTICS_FACILITY]--;
-							};break;
-				case SCOUT:
-				case CORSAIR:if((force[STARGATE]>0)&&(availible[STARGATE]>0)) 
-							{
-								Produce(what);
-								availible[STARGATE]--;
-							};break;
-				case ARBITER:if((force[STARGATE]>0)&&(availible[STARGATE]>0)&&(force[TEMPLAR_ARCHIVES]>0)&&(force[ARBITER_TRIBUNAL]>0)) 
-							{
-								Produce(what);
-								availible[STARGATE]--;
-							};break;
-				case CARRIER:if((force[STARGATE]>0)&&(availible[STARGATE]>0)&&(force[FLEET_BEACON]>0)) 
-							{
-								Produce(what);
-								availible[STARGATE]--;
-							};break;
-				case ARCHON:if(force[HIGH_TEMPLAR]>1)
-							{
-								Produce(what);
-								force[HIGH_TEMPLAR]-=2;
-							};break;
-				case DARK_ARCHON:if(force[DARK_TEMPLAR]>1)
-							{
-								Produce(what);
-								force[DARK_TEMPLAR]-=2;
-							};break;
-				case FORGE:
-				case NEXUS:
-				case PYLON:Produce(what);break;
-				case ASSIMILATOR:if(Vespene_Av>0) { Vespene_Av--;Produce(what);};break;
-				case GATEWAY:Produce(what);break;
-				case CYBERNETICS_CORE:
-				case SHIELD_BATTERY:if(force[GATEWAY]>0) Produce(what);break;
-				case ROBOTICS_FACILITY:
-				case CITADEL_OF_ADUN:
-				case STARGATE:if(force[CYBERNETICS_CORE]>0) Produce(what);break;
-				case PHOTON_CANNON:if(force[FORGE]>0) Produce(what);break;
-				
-				case TEMPLAR_ARCHIVES:if(force[CITADEL_OF_ADUN]>0) Produce(what);break;
-
-				case OBSERVATORY:
-				case ROBOTICS_SUPPORT_BAY:if(force[ROBOTICS_FACILITY]>0) Produce(what);break;
-				
-				case ARBITER_TRIBUNAL:if((force[STARGATE]>0)&&(force[TEMPLAR_ARCHIVES]>0))
-										  Produce(what);break;
-				case FLEET_BEACON:if(force[STARGATE]>0)
-									 Produce(what);break;
-				
-				case ARGUS_TALISMAN:
-				case KHAYDARIN_AMULET:
-				case PSIONIC_STORM:
-				case HALLUCINATION:
-				case MIND_CONTROL:
-				case MAELSTROM:if((force[TEMPLAR_ARCHIVES]>0)&&(availible[TEMPLAR_ARCHIVES]>0))
-							   {
-								   Produce(what);
-								   availible[TEMPLAR_ARCHIVES]--;
-							   };break;
-
-
-				case KHAYDARIN_CORE:
-				case RECALL:
-				case STASIS_FIELD:if((force[ARBITER_TRIBUNAL]>0)&&(availible[ARBITER_TRIBUNAL]>0))
-							   {
-								   Produce(what);
-								   availible[ARBITER_TRIBUNAL]--;
-							   };break;
-
-				case ARGUS_JEWEL:
-				case APIAL_SENSORS:
-				case GRAVITIC_THRUSTERS:				
-				case DISRUPTION_WEB:
-				case CARRIER_CAPACITY:if((force[FLEET_BEACON]>0)&&(availible[FLEET_BEACON]>0))
-							   {
-								   Produce(what);
-								   availible[FLEET_BEACON]--;
-							   };break;
-
-				case LEG_ENHANCEMENTS:if((force[CITADEL_OF_ADUN]>0)&&(availible[CITADEL_OF_ADUN]>0))
-							   {
-								   Produce(what);
-								   availible[CITADEL_OF_ADUN]--;
-							   };break;
-
-				
-
-				case GRAVITIC_DRIVE:
-				case SCARAB_DAMAGE:
-				case REAVER_CAPACITY:if((force[ROBOTICS_SUPPORT_BAY]>0)&&(availible[ROBOTICS_SUPPORT_BAY]>0))
-									 {
-										 Produce(what);
-										 availible[ROBOTICS_SUPPORT_BAY]--;
-									 };break;
-
-
-
-
-				case SENSOR_ARRAY:
-				case GRAVITIC_BOOSTERS:if((force[OBSERVATORY]>0)&&(availible[OBSERVATORY]>0))
-									 {
-										 Produce(what);
-										 availible[OBSERVATORY]--;
-									 };break;
-
-
-
-				case SINGULARITY_CHARGE:
-				case PLATING:
-				case AIR_WEAPONS:if((force[CYBERNETICS_CORE]>0)&&(availible[CYBERNETICS_CORE]>0)&&((force[what]==0)||(force[FLEET_BEACON]>0))) 
-								 {
-									 Produce(what);
-									 availible[CYBERNETICS_CORE]--;
-								 };break;
-
-				case ARMOR:
-				case GROUND_WEAPONS:
-				case PLASMA_SHIELDS:if((force[FORGE]>0)&&(availible[FORGE]>0)) 
-									{
-										Produce(what);
-										availible[FORGE]--;										
-									};break;								 
-				default:break;
-			}	
-		}
-	}
-	}
-
-	
-	void Calculate()
-	{
-		unsigned char ready,tt;
-		ready=0;
-		timer=0;
-		harvested_gas=0;
-		harvested_mins=0;
-		Vespene_Av=Max_Vespene;		
-		tt=0;
-
-		while((timer<Max_Time) && (ready==0) && (IP<MAX_LENGTH))
-		{			
-			BuildingRunning=0;
-			ok=0;
-
-			if(probemins<56)
-			{
-				mins+=mining[probemins]; //~~~~~~~double wegmachen
-				harvested_mins+=mining[probemins];
-			}
-			else 
-			{
-				mins+=mining[56];
-				harvested_mins+=mining[56];
-			}
-			if(probegas<5)
-			{
-				gas+=gasing[probegas];
-				harvested_gas+=gasing[probegas];
-			}
-			else
-			{
-				gas+=gasing[4];
-				harvested_gas+=gasing[4];
-			}
-
-
-			for(j=0;j<MAX_BUILDINGS;j++)
-			{
-				if(building[j].RB>0)
-				{
-					BuildingRunning=1;
-					building[j].RB--;
-					if(building[j].RB==0)
-					{
-						force[building[j].type]++;
-						availible[building[j].type]++;
-
-						switch(building[j].type)
-						{
-							case PROBE:probemins++;availible[NEXUS]++;break;
-							case PYLON:Supply+=7;break;
-							case NEXUS:Supply+=10;break;
-							case ASSIMILATOR:break;
-							case ZEALOT:
-							case DRAGOON:
-							case DARK_TEMPLAR:
-							case HIGH_TEMPLAR:availible[GATEWAY]++;break;
-							
-							case REAVER:
-							case SHUTTLE:
-							case OBSERVER:availible[ROBOTICS_FACILITY]++;break;
-
-							case SCOUT:
-							case CORSAIR:
-							case ARBITER:
-							case CARRIER:availible[STARGATE]++;
-
-				
-							case PLASMA_SHIELDS:
-							case ARMOR:
-							case GROUND_WEAPONS:availible[FORGE]++;break;
-
-							case PLATING:
-							case AIR_WEAPONS:
-							case SINGULARITY_CHARGE:availible[CYBERNETICS_CORE]++;break;
-
-							default:break;
-						}
-						ready=1;
-						for(i=0;i<BUILDING_TYPES;i++)
-							ready&=((goal[i].what<=force[i])&&((goal[i].time>timer)||(goal[i].time==0)));
-					}
-				}
-			}
-
-			Build(Build_Av[program[IP]]);
-			tt++;
-			if((ok==1)||(tt>100))
-			{
-				if(tt<=100) timep[IP]=timer;
-				else timep[IP]=0;
-				tt=0;
-				IP++;
-			}
-
-
-		timer++;
-	}
-
-	fitness=0;
-
-	length=IP;
-
-	if(ready==0)
-	{
-		timer=Max_Time;
-		//Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
+     	//	if(Goal_Harvested_Mins>harvested_mins)
+          //              fitness+=(unsigned short)(harvested_mins*100/Goal_Harvested_Mins);
+            //    else 
+	//	{
+	//		fitness+=100;
+	//		fitness+=minsready;
+	//	};
+//Problem hier: wenn Programm viele nichtfertige Gebaeude kurz vor Ende hat wirds nicht abgefangen...
+/*		for(i=0;i<MAX_BUILDINGS;i++)
+                        if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type]))
+	                          fitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[2][building[i].type].BT));*/
+	       }
+	        else
+		 {
+		            pFitness=Max_Time-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
+		            
+			    // pFitness+=400;//mins, gas
+		            // Warum hier Max_Build_Types!? 
+			     for(i=0;i<building_types;i++)
+	                      if(goal[i].what>0)
+		                   pFitness+=100;
+		   }
 		
-		for(i=0;i<BUILDING_TYPES;i++)		
-		if(goal[i].what>0)
-		{
-			if(goal[i].what>force[i])
-				fitness+=((force[i]*100)/goal[i].what);
-			else fitness+=100;
-		}
-			
-
-	// Ziele unterschiedlich bewerten!
-			// sqrt nochmal ueberlegen mmmh :| programm muss halt schritt fuer schritt belohnt werden ^^ vielleicht je nach techstufe, also z.B. pool: 1, lair: 2, spire: 3~~~~
-
-		if(Goal_Harvested_Gas>harvested_gas)
-			fitness+=(harvested_gas*100)/Goal_Harvested_Gas;
-		else fitness+=100;
-
-		if(Goal_Harvested_Mins>harvested_mins)
-			fitness+=(harvested_mins*100)/Goal_Harvested_Mins;
-		else fitness+=100;
-
 	}
-	else
-	{
-		fitness=Max_Time-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
-		fitness+=200;//mins, gas
-		for(i=0;i<BUILDING_TYPES;i++)
-	 		if(goal[i].what>0)
-				fitness+=100;
-	}
-}
-
-
-void Mutate()
+	
+	void Mutate()
 {
-	unsigned char ttt,ta,tb;
+	unsigned char ttt,ta,tb,i,x,y;
 //loeschen, einfuegen, veraendern
 	for(i=0;i<Mutations;i++)
 	{
-	if(rand()%Mutations==0)
+	if(rand()%Mut_Rate==0)
 	{
 		x=rand()%MAX_LENGTH;
 		for(y=x;y<MAX_LENGTH-1;y++)
-			program[y]=program[y+1];
+			program[y].order=program[y+1].order;
 	}
 	
 	if(rand()%Mut_Rate==0)
 	{
 		x=rand()%MAX_LENGTH;
 		for(y=MAX_LENGTH-1;y>x;y--)
-			program[y]=program[y-1];
-		program[x]=rand()%Max_Build_Types;
+			program[y].order=program[y-1].order;
+		program[x].order=rand()%Max_Build_Types;
 	}
 
 	if(rand()%Mut_Rate==0)
 	{
 		x=rand()%MAX_LENGTH;
-		program[x]=rand()%Max_Build_Types;
+		program[x].order=rand()%Max_Build_Types;
 	}
 	if(rand()%Mut_Rate==0)
 	{
 		ta=rand()%MAX_LENGTH;
 		tb=rand()%MAX_LENGTH;
-		ttt=program[ta];
-		program[ta]=program[tb];
-		program[tb]=ttt;
+		ttt=program[ta].order;
+		program[ta].order=program[tb].order;
+		program[tb].order=ttt;
 	}
 	if(rand()%(Mut_Rate/2)==0)
 	{
@@ -762,10 +408,10 @@ void Mutate()
 		tb=rand()%MAX_LENGTH;
 		if(ta>tb)
 		{
-		ttt=program[ta];
+		ttt=program[ta].order;
 		for(i=ta;i<tb;i++)
-			program[i]=program[i+1];
-		program[tb]=ttt;
+			program[i].order=program[i+1].order;
+		program[tb].order=ttt;
 		}
 	}
 	}
@@ -773,36 +419,76 @@ void Mutate()
 
 void Init()
 {
-	for(i=0;i<BUILDING_TYPES;i++)
-	{
-		force[i]=0;
-		availible[i]=0;
+	unsigned char i;
+	for(i=0;i<building_types;i++)
+        {
+               force[i]=0;
+               if(stats[2][i].type<3)
+	               availible[i]=0;
+	       else
+	               availible[i]=1;
 	}
 	for(i=0;i<MAX_BUILDINGS;i++)
 	{
-		building[i].RB=0;
-		building[i].type=255;
+	       building[i].RB=0;
+	       building[i].type=255;
 	}
-
-	fitness=0;
-	mins=50;
-	gas=0;
-	force[NEXUS]=1;
-	availible[NEXUS]=1;
-	force[PROBE]=4;
-	Supply=5;
-	probemins=4;
-	probegas=0;
+        pFitness=0;
+	sFitness=0;
+        mins=50;
+        gas=0;
+	peonmins=4;
+	peongas=0;
 	IP=0;
+	InitRaceSpecific();
 }
-
+	
+	
 	void Restart()
 	{
+		unsigned char i;
+		/*unsigned char randliste[100],xxx,xy,i;
+		xxx=0;xy=0;
+		for(i=0;i<building_types;i++)
+		{
+			xy=0;
+			while(Ziel[i]-xy>0)
+			{
+				randliste[xxx]=Build_Av[i];
+				xxx++;xy++;
+			}
+		}*/
 		for(i=0;i<MAX_LENGTH;i++)
-			program[i]=rand()%Max_Build_Types;
+		{
+			program[i].order=rand()%Max_Build_Types;
+			//evtl ganzes Programm hier rein...
+			//Liste erstellen 
+			program[i].time=20000;
+			program[i].temp=0;
+//			program[i].loc=
+		}
 		timer=Max_Time;
 		IP=0;
 		length=MAX_LENGTH;
-		afit=0;
+		av_starport=0;
+		av_factory=0;
 	}
 };
+
+void Init()
+{
+	Attack=20;
+	Time_to_Enemy=9999;
+	Goal_Harvested_Mins=0;
+	Goal_Harvested_Gas=0;
+        Max_Time=0;
+        Max_Generations=0;
+        Max_Vespene=0;
+        Mutations=0;
+        Mut_Rate=0;
+        Max_Build_Types=0;
+}
+
+
+#endif
+
