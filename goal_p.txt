@@ -1,0 +1,65 @@
+Max Time 30
+Max Generations 4 // = twohundredfifty generations
+Max Vespene 1
+Mutations 25
+Mutation Rate 50
+
+Dark Templar 0
+Dark Archon 0
+Probe 0
+Zealot 0
+Dragoon 8
+High Templar 0
+Archon 0
+Reaver 0
+Corsair 0
+Shuttle 0
+Scout 0
+Arbiter 0
+Carrier 0
+Observer 0
+
+Nexus 0
+Robotics Facility 0
+Pylon 1
+Assimilator 1
+Observatory 0
+Gateway 1
+Photon Cannon 0
+Cybernetics Core 1
+Citadel Of Adun 0
+Templar Archives 0
+Forge 0
+Stargate 0
+Fleet Beacon 0
+Arbiter Tribunal 0
+Robotics Support Bay 0
+Shield Battery 0
+
+Psionic Storm 0
+Hallucination 0
+Recall 0
+Stasis Field 0
+Disruption Web 0
+Mind Control 0
+Maelstrom 0
+Singularity Charge 0
+Leg Enhancements 0
+Scarab Damage 0
+Reaver Capacity 0
+Gravitic Drive 0
+Sensor Array 0
+Gravitic Boosters 0
+Khaydarin Amulet 0
+Apial Sensors 0
+Gravitic Thrusters 0
+Carrier Capacity 0
+Khaydarin Core 0
+Argus Jewel 0
+Argus Talisman 0
+
+Armor 0
+Plating 0
+Ground Weapons 0
+Air Weapons 0
+Plasma Shields 0
