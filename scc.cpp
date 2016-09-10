@@ -11,34 +11,37 @@
 #include <time.h>
 #include <malloc.h>
 
-#define MAX_NODES 100
+//#define MAX_NODES 100
+
+#define HIDDEN 64
+
 #define INPUTS 23
 #define OUTPUTS 5
 
 #define MAX_ORDERS 200
 
-#define MAX_NODE_DEPTH 3
+//#define MAX_NODE_DEPTH 3
 
 #define RUNNINGS 10
 
-#define MAX_PARENTS 4
+#define MAX_PARENTS 2
 
-#define MAX_PLAYER 64
+#define MAX_PLAYER 128
 #define MAX_BUILDINGS 10 // How many buildings can you built simultaneously?
 #define BUILDING_TYPES 64  // warum 64 und nicht 51??
 
-#define MAX_TIME 200
+#define MAX_TIME 300
 
-#define MAX_GENERATIONS 25
+#define MAX_GENERATIONS 50
 #define MAX_VESPENE 1
 
 //#define MUTATION_FACTOR MAX_NODES*MAX_NODES*2
-#define MUTATIONS MAX_NODES*4
+#define MUTATIONS HIDDEN*INPUTS/2
 
 
-#define MAX_CHILDREN 4
+#define MAX_CHILDREN 12
 
-#define CROSS_OVER_EVENT MAX_NODES*MAX_NODES
+#define CROSS_OVER_EVENT 200
 
 #define ZERGLING 0
 #define HYDRALISK 1
@@ -140,8 +143,8 @@ const Stats stats[BUILDING_TYPES]=
 	{"Evolution Chamber",40,75,0,0,2},
 	{"Ultralisk Cavern",80,150,200,0,2},
 	{"Spire",120,200,150,0,2},
-	{"Spawning Pool",80,50,0,0,2},
-	{"Creep Colony",20,50,0,0,2},
+	{"Spawning Pool",80,200,0,0,2},
+	{"Creep Colony",20,75,0,0,2},
 	{"Spore Colony",20,50,0,0,0},
 	{"Sunken Colony",20,50,0,0,0},
 	{"Extractor",40,50,0,0,2},
@@ -254,30 +257,26 @@ unsigned char run,y,rfit;
 unsigned short afit;
 
 
-class NODES
+
+struct HIDDEN_NODES
 {
-	public:
-		short input;
-		unsigned char Output,out;
-		signed short CON[MAX_NODES];
-
-		void Reset()
-		{
-			out=Output;
-			if(input>0)
-				Output=1;
-			else
-				Output=0;
-		}
-
+		short Input;
+		signed short CON[OUTPUTS];
 };
 
+struct INPUT_NODES
+{
+		unsigned char Input;
+		signed short CON[HIDDEN];
+};
 
-
+struct OUTPUT_NODES
+{
+		short Input;
+};
 
 unsigned short generation;
 unsigned char num;
-
 
 unsigned short x,i,j,A,B;
 
@@ -312,8 +311,11 @@ public:
 	unsigned char nr,ok;
 	unsigned char larva[LARVA_MAX]; // larvacounter for producing larvas
 	unsigned char NewBuildingReady,LastBuildingReady,larvacounter;
-	
-	NODES Node[MAX_NODES];
+
+	INPUT_NODES INode[INPUTS];
+	OUTPUT_NODES ONode[OUTPUTS];
+	HIDDEN_NODES HNode[HIDDEN];
+
 	unsigned short harvested_gas,harvested_mins;
 	unsigned short fitness,timer;
 
@@ -323,102 +325,104 @@ public:
 //		inputs... Situation, Buildings, To build etc., jede Menge :\
 //		Gas,Mins, Dronesmins,Dronesgas, Anzahl der Gebaeude, ...
 
+		//erstmal weniger input
+		// evtl techtree speichern und nur fuer die bo notwendige Gebaeude zulassen . . .
+
 		unsigned short m,g;
 		m=mins/50;
 		g=gas/50;
 	
 		if(m<750)
 		{
-			Node[0].out=(g%2>0);
-			Node[1].out=(g%4>1);
-			Node[2].out=(g%8>3);
-			Node[3].out=(g%16>7);
+			INode[0].Input=(m%2>0);
+			INode[1].Input=(m%4>1);
+			INode[2].Input=(m%8>3);
+			INode[3].Input=(m%16>7);
 		}
 		else
 		{
-			Node[0].out=1;Node[1].out=1;Node[2].out=1;Node[3].out=1;
+			INode[0].Input=1;INode[1].Input=1;INode[2].Input=1;INode[3].Input=1;
 		}
 		
 		if(g<750)
 		{
-			Node[4].out=(g%2>0);
-			Node[5].out=(g%4>1);
-			Node[6].out=(g%8>3);
-			Node[7].out=(g%16>7);
+			INode[4].Input=(g%2>0);
+			INode[5].Input=(g%4>1);
+			INode[6].Input=(g%8>3);
+			INode[7].Input=(g%16>7);
 		}
 		else
 		{
-			Node[4].out=1;Node[5].out=1;Node[6].out=1;Node[7].out=1;
+			INode[4].Input=1;INode[5].Input=1;INode[6].Input=1;INode[7].Input=1;
 		}
 		
 		if(Supply<16)
 		{
-			Node[8].out=(Supply%2>0);
-			Node[9].out=(Supply%4>1);
-			Node[10].out=(Supply%8>3);
-			Node[11].out=(Supply%16>7);
+			INode[8].Input=(Supply%2>0);
+			INode[9].Input=(Supply%4>1);
+			INode[10].Input=(Supply%8>3);
+			INode[11].Input=(Supply%16>7);
 		}
 		else
 		{
-			Node[8].out=1;Node[9].out=1;Node[10].out=1;Node[11].out=1;
+			INode[8].Input=1;INode[9].Input=1;INode[10].Input=1;INode[11].Input=1;
 		}
 		
 		if(dronemins<32)
 		{
-			Node[12].out=(dronemins%2>0);
-			Node[13].out=(dronemins%4>1);
-			Node[14].out=(dronemins%8>3);
-			Node[15].out=(dronemins%16>7);
-			Node[16].out=(dronemins%32>15);
+			INode[12].Input=(dronemins%2>0);
+			INode[13].Input=(dronemins%4>1);
+			INode[14].Input=(dronemins%8>3);
+			INode[15].Input=(dronemins%16>7);
+			INode[16].Input=(dronemins%32>15);
 		}	
 		else
 		{
-			Node[12].out=1;Node[13].out=1;Node[14].out=1;Node[15].out=1;Node[16].out=1;
+			INode[12].Input=1;INode[13].Input=1;INode[14].Input=1;INode[15].Input=1;INode[16].Input=1;
 		}
 		
 	
 		if(dronegas<8)
 		{
-			Node[17].out=(dronegas%2>0);
-			Node[18].out=(dronegas%4>1);
-			Node[19].out=(dronegas%8>3);
+			INode[17].Input=(dronegas%2>0);
+			INode[18].Input=(dronegas%4>1);
+			INode[19].Input=(dronegas%8>3);
 		}
 		else
 		{
-			Node[17].out=1;Node[18].out=1;Node[19].out=1;
+			INode[17].Input=1;INode[18].Input=1;INode[19].Input=1;
 		}
 		
 		if(larvae<8)
 		{
-			Node[20].out=(larvae%2>0);
-			Node[21].out=(larvae%4>1);
-			Node[22].out=(larvae%8>3);
+			INode[20].Input=((larvae%2)>0);
+			INode[21].Input=((larvae%4)>1);
+			INode[22].Input=((larvae%8)>3);
 		}
 		else
 		{
-			Node[20].out=1;Node[21].out=1;Node[22].out=1;
+			INode[20].Input=1;INode[21].Input=1;INode[22].Input=1;
 		}
-		
-		//Nodes checken
 
-		//hey... des is ja noch die alte struktur :) nochmal hier ruebergehen
 
-			for(i=INPUTS;i<MAX_NODES;i++)
-				Node[i].Reset();
-	
-			for(i=0;i<INPUTS;i++)
-				for(j=INPUTS;j<MAX_NODES-OUTPUTS;j++)
-					Node[j].input+=Node[i].out*Node[i].CON[j];
-// inputs nochmals einbeziehen? mmmh
-		for(x=0;x<MAX_NODE_DEPTH;x++)
-		{
-			for(i=INPUTS;i<MAX_NODES;i++)
-				for(j=INPUTS;j<MAX_NODES;j++)
-					Node[j].input+=Node[i].out*Node[i].CON[j];
-		}
+
+		for(j=0;j<HIDDEN;j++)
+			HNode[j].Input=0;
+		for(j=0;j<OUTPUTS;j++)
+			ONode[j].Input=0;
 		
-				return(Node[MAX_NODES-1].Output*32+Node[MAX_NODES-2].Output*16+Node[MAX_NODES-3].Output*8+Node[MAX_NODES-4].Output*4+Node[MAX_NODES-5].Output*2+Node[MAX_NODES-6].Output);//1..128
+		for(i=0;i<INPUTS;i++)
+			for(j=0;j<HIDDEN;j++)
+				HNode[j].Input+=(INode[i].Input>0)*(INode[i].CON[j]);
 		
+		for(i=0;i<HIDDEN;i++)
+			for(j=0;j<OUTPUTS;j++)
+					ONode[j].Input+=(HNode[i].Input>0)*(HNode[i].CON[j]);
+
+	//		return(y);
+			//return((ONode[0].Input>0)+(ONode[1].Input>0)*2+(ONode[2].Input>0)*4);
+
+			return((ONode[0].Input>0)*32+(ONode[1].Input>0)*16+(ONode[2].Input>0)*8+(ONode[3].Input>0)*4+(ONode[4].Input>0)*2+(ONode[5].Input>0));//1..128
 	}
 
 
@@ -675,12 +679,12 @@ public:
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
+		New_Event=1; // nur fuer erste Aktvierung!
 		
 		while((timer<MAX_TIME) && (ready==0))
 		{			
 			NewBuildingReady=0;
 			BuildingRunning=0;
-			New_Event=0;
 			ok=0;
 
 
@@ -731,6 +735,18 @@ public:
 							case DRONE:dronemins++;break;
 							case OVERLORD:Supply+=8;break;
 							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;break;
+							case EXTRACTOR:
+									   if(dronemins>0)
+										  {
+											  dronemins--;
+											  dronegas++;
+										  };
+								   if(dronemins>0)
+										  {
+											  dronemins--;
+											  dronegas++;
+										  };break;
+		
 							case LAIR:force[HATCHERY]--;break;
 							case HIVE:force[LAIR]--;break;
 							case GREATER_SPIRE:force[SPIRE]--;break;
@@ -781,25 +797,26 @@ public:
 			}
 
 			for(i=0;i<larvacounter;i++)
-			{
-				if(larva[i]==1)
+				if(larvae<(force[HATCHERY]+force[LAIR]+force[HIVE])*3)
 				{
-					larvae++;
-					larva[i]=20;
-					New_Event=1;
+					larva[i]--;
+					if(larva[i]==0)
+					{
+						larvae++;
+						larva[i]=20;
+						New_Event=1;
+					}
 				}
-				else larva[i]--;
-				if(larvae>=(force[HATCHERY]+force[LAIR]+force[HIVE])*3) larva[i]=20;
-			}
 
 //			Wann isses ueberhaupt notwendig neuralnetwork aufzurufen?
 //			Gebaeude fertig
 //			50 Mineralien/Gas gesammelt 
 //			Neue Larve
-			
+
 			if(New_Event==1)
 			{
 				program=RunNeuralNetwork();
+//				printf("%i.",program);
 
 				if((program>ONE_GAS_DRONE_TO_MINERAL)&&(program<=BREAK_UP_BUILDING_LAST)&&(BuildingRunning==1))
 				{
@@ -873,7 +890,7 @@ public:
 			}
 			
 			timer++;
-
+			New_Event=0;
 		}
 
 		
@@ -884,23 +901,23 @@ public:
 
 
 
-	fitness=0;
+	fitness=4000;
 
 	if(ready==0)
 	{
 		timer=MAX_TIME;
 		for(i=0;i<BUILDING_TYPES;i++)
 	 		if(goal[i]>force[i])
-				fitness+=goal[i]-force[i];//*(goal[i]-force[i]);
+				fitness-=force[i];//*(goal[i]-force[i]);
 
 	// Ziele unterschiedlich bewerten!
 			// sqrt nochmal ueberlegen mmmh :| programm muss halt schritt fuer schritt belohnt werden ^^ vielleicht je nach techstufe, also z.B. pool: 1, lair: 2, spire: 3~~~~
 
-		if(Goal_Harvested_Gas>harvested_gas/50)
-			fitness+=Goal_Harvested_Gas-harvested_gas/50;
+//		if(Goal_Harvested_Gas>harvested_gas/50)
+//			fitness+=Goal_Harvested_Gas-harvested_gas/50;
 
-		if(Goal_Harvested_Mins>harvested_mins/50)
-			fitness+=Goal_Harvested_Mins-harvested_mins/50;
+//		if(Goal_Harvested_Mins>harvested_mins/50)
+//			fitness+=Goal_Harvested_Mins-harvested_mins/50;
 	}
 	fitness+=timer/2;
 }
@@ -908,12 +925,14 @@ public:
 
 void Mutate()
 {
-	for(i=0;i<MUTATIONS;i++)
-//		if(rand()%MUTATION_FACTOR==0)
-//		{
-			Node[rand()%MAX_NODES].CON[rand()%MAX_NODES]++;
-			Node[rand()%MAX_NODES].CON[rand()%MAX_NODES]--;
-//		}
+	for(j=0;j<MUTATIONS;j++)
+	{
+		INode[rand()%INPUTS].CON[rand()%HIDDEN]++;
+		INode[rand()%INPUTS].CON[rand()%HIDDEN]--;
+
+		HNode[rand()%HIDDEN].CON[rand()%OUTPUTS]++;
+		HNode[rand()%HIDDEN].CON[rand()%OUTPUTS]--;
+	}
 }
 
 void Init()
@@ -930,7 +949,7 @@ void Init()
 	}
 
 	for(i=0;i<LARVA_MAX;i++)
-		larva[i]=0;
+		larva[i]=20;
 
 	fitness=5000;
 	order_num=0;
@@ -943,34 +962,39 @@ void Init()
 	force[DRONE]=4;
 	force[OVERLORD]=1;
 	larvacounter=1;
-	larva[0]=20;
 	Supply=5;
 	dronemins=4;
 	dronegas=0;
 	NewBuildingReady=0;
 
-	for(i=0;i<MAX_NODES;i++)
-	{
-		Node[i].out=0;
-		Node[i].input=0;
-		Node[i].Output=0;
-	}
-
-
+	for(i=0;i<INPUTS;i++)
+		INode[i].Input=0;
+	for(i=0;i<HIDDEN;i++)
+		HNode[i].Input=0;
+	for(i=0;i<OUTPUTS;i++)
+		ONode[i].Input=0;
 }
 
 
 void Restart()
 {
-	for(i=0;i<MAX_NODES;i++)
+	for(i=0;i<INPUTS;i++)
 	{
-		Node[i].out=0;
-		Node[i].Output=0;
-		Node[i].input=0;
-
-		for(j=INPUTS;j<MAX_NODES;j++)
-			Node[i].CON[j]=rand()%21-10;
+		INode[i].Input=0;
+		for(j=0;j<HIDDEN;j++)
+			INode[i].CON[j]=rand()%21-10;
 	}
+
+	for(i=0;i<HIDDEN;i++)
+	{
+		HNode[i].Input=0;
+		for(j=0;j<OUTPUTS;j++)
+			HNode[i].CON[j]=rand()%21-10;
+	}
+
+	for(i=0;i<OUTPUTS;i++)
+		ONode[i].Input=0;
+
 	afit=5000;
 	for(i=0;i<MAX_ORDERS;i++)
 	{
@@ -992,15 +1016,16 @@ int main(int argc, char* argv[])
 
 	for(i=0;i<BUILDING_TYPES;i++)
 		goal[i]=0;
-	goal[DRONE]=22;
-	goal[OVERLORD]=3;
-	goal[HATCHERY]=2;
+//	goal[DRONE]=9;
+//	goal[OVERLORD]=2;
+//	goal[HATCHERY]=1;
 //	goal[MUTALISK]=6;
+//	goal[METABOLIC_BOOST]=1;
 //	goal[EXTRACTOR]=1;
 //	goal[LAIR]=1;
 //	goal[SPIRE]=1;
-//	goal[SPAWNING_POOL]=1;
-//	goal[ZERGLING]=4;
+	goal[SPAWNING_POOL]=1;
+	goal[ZERGLING]=6;
 
 	for(i=0;i<BUILDING_TYPES;i++)
 	{
@@ -1035,11 +1060,7 @@ int main(int argc, char* argv[])
 	for(l=0;l<RUNNINGS;l++)
 	{
 		Save[l]=(Player*)malloc(sizeof(Player));
-		Save[l]->fitness=666;
-		Save[l]->timer=333;
-		for(j=0;j<MAX_NODES;j++)
-			for(q=0;q<MAX_NODES;q++)
-				Save[l]->Node[j].CON[q]=0;
+		Save[l]->Restart();
 		for(q=0;q<MAX_ORDERS;q++)
 		{
 			Save[l]->programm[q].order=255;
@@ -1050,7 +1071,7 @@ int main(int argc, char* argv[])
 	SetConsoleCursorPosition(hStdOut,coord);
 		
 	printf("Calculating [");
-	for(l=0;l<MAX_PLAYER;l++)
+	for(l=0;l<MAX_PLAYER/2;l++)
 		printf("%c",calc);
 	printf("]\n");
 
@@ -1074,7 +1095,7 @@ int main(int argc, char* argv[])
 		for(l=0;l<MAX_PLAYER;l++)
 		{
 			player[l]->Calculate();
-			printf("%c",calc);
+			if(l%2==0) printf("%c",calc);
 		}
 
 		printf("]\n");
@@ -1094,7 +1115,7 @@ int main(int argc, char* argv[])
 		printf("\n");
 		printf("%i runs remaining (this run %i generations remaining)      \n",RUNNINGS-run,MAX_GENERATIONS-rfit);
 		printf("\n");
-		printf("Overview Generation %i :   \n",generation);
+		printf("Overview Generation %i :   (best fitness: %i)          \n",generation,afit);
 		printf("\n");
 
 		printf("[fitness]  [time]  [position]\n");
@@ -1107,11 +1128,11 @@ int main(int argc, char* argv[])
 	SetConsoleCursorPosition(hStdOut,c14);printf("%i",player[MAX_PLAYER/4]->fitness);
 	SetConsoleCursorPosition(hStdOut,c15);printf("%i",player[MAX_PLAYER/2]->fitness);
 
-	SetConsoleCursorPosition(hStdOut,c21);printf("%i:%i",player[0]->timer/30,(player[0]->timer*2)%60);
-	SetConsoleCursorPosition(hStdOut,c22);printf("%i:%i",player[MAX_PLAYER/16]->timer/30,(player[MAX_PLAYER/16]->timer*2)%60);
-	SetConsoleCursorPosition(hStdOut,c23);printf("%i:%i",player[MAX_PLAYER/8]->timer/30,(player[MAX_PLAYER/8]->timer*2)%60);
-	SetConsoleCursorPosition(hStdOut,c24);printf("%i:%i",player[MAX_PLAYER/4]->timer/30,(player[MAX_PLAYER/4]->timer*2)%60);
-	SetConsoleCursorPosition(hStdOut,c25);printf("%i:%i",player[MAX_PLAYER/2]->timer/30,(player[MAX_PLAYER/2]->timer*2)%60);
+	SetConsoleCursorPosition(hStdOut,c21);printf("%i:%i",player[0]->timer/60,player[0]->timer%60);
+	SetConsoleCursorPosition(hStdOut,c22);printf("%i:%i",player[MAX_PLAYER/16]->timer/60,player[MAX_PLAYER/16]->timer%60);
+	SetConsoleCursorPosition(hStdOut,c23);printf("%i:%i",player[MAX_PLAYER/8]->timer/60,player[MAX_PLAYER/8]->timer%60);
+	SetConsoleCursorPosition(hStdOut,c24);printf("%i:%i",player[MAX_PLAYER/4]->timer/60,player[MAX_PLAYER/4]->timer%60);
+	SetConsoleCursorPosition(hStdOut,c25);printf("%i:%i",player[MAX_PLAYER/2]->timer/60,player[MAX_PLAYER/2]->timer%60);
 
 	SetConsoleCursorPosition(hStdOut,c31);printf("#1");
 	SetConsoleCursorPosition(hStdOut,c32);printf("#%i",MAX_PLAYER/16);
@@ -1136,13 +1157,18 @@ int main(int argc, char* argv[])
 			if(player[0]->programm[i].order<BUILDING_TYPES)
 			{
 				x++;
-				printf("[%2i:%2i] (%10s) ",player[0]->programm[i].time/60,player[0]->programm[i].time%60,stats[player[0]->programm[i].order].name);
+				printf("[%2i:%2i] (%c) ",player[0]->programm[i].time/60,player[0]->programm[i].time%60,stats[player[0]->programm[i].order].name[0]);
 				if(x%3==0) printf("\n");
 			}
 		}
+		printf(" . . . \n");
+		printf("Drones: %i",player[0]->force[DRONE]);
+		//printf("Harvested Mins: %i, Harvested Gas: %i              \n",player[0]->harvested_mins,player[0]->harvested_gas);
+		printf("                                         ");
+
 // besser machen, mehr von relativer Fitness abhaengen lassen -> schnellere Evolution (mei... lokale Minima, was solls)
-for(x=0;x<MAX_PARENTS;x++)				
-{
+		for(x=0;x<MAX_PARENTS;x++)				
+		{
 		
 						//sortieren unwichtig wenn folgende Fitness calculation
 				/*for(i=0;i<MAX_PLAYER;i++)
@@ -1152,7 +1178,7 @@ for(x=0;x<MAX_PARENTS;x++)
 					if(rand()%(player[i]->fitness+MAX_PLAYER-i+1)==0)
 						B=i;
 				//Fitness dann noch relativ zur Gesamtfitness setzen!*/
-	Nach fitness sortieren, 0-100, 0:~~~~
+	//Nach fitness sortieren, 0-100, 0:~~~~
 				//oder (wenns sortiert ist...)
 					A=MAX_PLAYER;
 				for(i=0;(i<MAX_PLAYER-MAX_CHILDREN)&&(A==MAX_PLAYER);i++)
@@ -1170,20 +1196,35 @@ for(x=0;x<MAX_PARENTS;x++)
 					k=CROSS_OVER_EVENT; //~~~~~~
 					tempp=player[A];
 
-					for(i=0;i<MAX_NODES;i++)
-						for(j=0;j<MAX_NODES;j++)
-						{
-							k--;
-							player[MAX_PLAYER-1-l]->Node[i].CON[j]=tempp->Node[i].CON[j];
-							if(rand()%k==0)
+				for(i=0;i<INPUTS;i++)
+					for(j=0;j<HIDDEN;j++)
+					{
+						k--;
+						player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->INode[i].CON[j]=tempp->INode[i].CON[j];
+						if(rand()%k==0)
 							{
 								k=CROSS_OVER_EVENT;
 								if(tempp==player[A])
 									tempp=player[B];
 								else tempp=player[A];
 							}
-						}
-				}
+					}
+
+				for(i=0;i<HIDDEN;i++)
+					for(j=0;j<OUTPUTS;j++)
+					{
+						k--;
+						player[MAX_PLAYER-1-l-x*MAX_CHILDREN]->HNode[i].CON[j]=tempp->HNode[i].CON[j];
+						if(rand()%k==0)
+							{
+								k=CROSS_OVER_EVENT;
+								if(tempp==player[A])
+									tempp=player[B];
+								else tempp=player[A];
+							}
+					}
+
+			}
 }
 
 
@@ -1193,9 +1234,12 @@ for(x=0;x<MAX_PARENTS;x++)
 			generation=0;
 			calc=0;
 
-			for(i=0;i<MAX_NODES;i++)
-				for(j=0;j<MAX_NODES;j++)
-					Save[run]->Node[i].CON[j]=player[0]->Node[i].CON[j];
+			for(i=0;i<INPUTS;i++)
+				for(j=0;j<HIDDEN;j++)
+					Save[run]->INode[i].CON[j]=player[0]->INode[i].CON[j];
+			for(i=0;i<HIDDEN;i++)
+				for(j=0;j<OUTPUTS;j++)
+					Save[run]->HNode[i].CON[j]=player[0]->HNode[i].CON[j];
 
 			Save[run]->fitness=player[0]->fitness;
 			Save[run]->timer=player[0]->timer;
@@ -1223,9 +1267,12 @@ for(x=0;x<MAX_PARENTS;x++)
 
 if(run==0)
 {
-	for(i=0;i<MAX_NODES;i++)
-		for(j=0;j<MAX_NODES;j++)
-			Save[run]->Node[i].CON[j]=player[0]->Node[i].CON[j];
+	for(i=0;i<INPUTS;i++)
+		for(j=0;j<HIDDEN;j++)
+			Save[run]->INode[i].CON[j]=player[0]->INode[i].CON[j];
+	for(i=0;i<HIDDEN;i++)
+		for(j=0;j<OUTPUTS;j++)
+			Save[run]->HNode[i].CON[j]=player[0]->HNode[i].CON[j];	
 	Save[run]->fitness=player[0]->fitness;
 	Save[run]->timer=player[0]->timer;
 	Save[run]->harvested_mins=player[0]->harvested_mins;
@@ -1242,9 +1289,9 @@ if(run==0)
 }
 else
 
-for(i=0;i<run-1;i++)
-	for(j=0;j<run-i+1;j++)
-		if(Save[j]->fitness>Save[j+1]->fitness)!!!!! access violation
+for(i=0;i<run-3;i++)
+	for(j=0;j<run-i-1;j++)
+		if(Save[j]->fitness>Save[j+1]->fitness)//!!!!! access violation
 		{
 			tempp=Save[j];
 			Save[j]=Save[j+1];
@@ -1253,7 +1300,7 @@ for(i=0;i<run-1;i++)
 
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");//new page :P
 	printf("Calculating completed.\n");
-	printf("Final fitness: %i (%i:%i Time used)\n",Save[0]->fitness,Save[0]->timer/30,(Save[0]->timer*2)%60);
+	printf("Final fitness: %i (%i:%i Time used)\n",Save[0]->fitness,Save[0]->timer/60,Save[0]->timer%60);
 	printf("  You can find the Zerg Build Order in the ""zergbo.txt""\n");
 	printf(" Brought to you by clawsoftware.de\n");
 	printf("  Give it to all your friends :-)");
