@@ -1,2 +1,2 @@
 "@RACE" "Terra"
-"Nuclear Warhead" "1" "0" "0"
+"Siege Tank" "2" "0" "0"

@@ -4,8 +4,7 @@
 #include "main.h"
 class SCCDLL_API HARVEST_SPEED
 {
-	//private:
-public:
+	public:
 		int minerals[45];
 		int gas[5];
 	
@@ -17,4 +16,4 @@ public:
 		HARVEST_SPEED();
 };
 
-#endif
+#endif // __HARVEST_H

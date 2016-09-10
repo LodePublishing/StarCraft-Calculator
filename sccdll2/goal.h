@@ -1,10 +1,7 @@
 #ifndef __GOAL_H
 #define __GOAL_H
 
-#include "main.h"
 #include "location.h"
-
-#define MAX_GOAL_ENTRIES 25
 
 class SCCDLL_API GOAL_ENTRY
 {
@@ -43,4 +40,4 @@ class SCCDLL_API GOAL_ENTRY
 		GOAL_ENTRY();
 };
 
-#endif
+#endif // __GOAL_H

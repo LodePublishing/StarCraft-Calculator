@@ -11,8 +11,7 @@ class SCCDLL_API RACE: public PRERACE
         static int basicBuildOrder[2][MAX_LENGTH];
         int mutationRate;
 		BUILDING building[MAX_BUILDINGS]; //building declaration in main.h
-        int buildGene(int what);
-        void calculateFitness(int ready);
+        int buildGene(int unit);
         static void generateBasicBuildOrder(); //pre-process goals to create a b
 		int pFitness;
 		int sFitness;
@@ -23,13 +22,14 @@ class SCCDLL_API RACE: public PRERACE
 		int setsFitness(int num);
 		int settFitness(int num);
 
+        void calculateFitness(int ready);
+
 		int getpFitness();
 		int getsFitness();
 		int gettFitness();
-		//int phaenoCode[2][MAX_LENGTH];
 //Controls:
 		void mutateGeneCode();
-		void calculate();
+		int calculateStep();
 		void resetGeneCode();//resets either to a pre-processed buildorder or a completely random one*/
 		void resetData(); //resets all data to standard values
 		void crossOver(RACE* parent2, RACE* child1, RACE* child2);

@@ -38,7 +38,7 @@ int ANARACE::getProgramSuccessUnit(int IP)
 	return(program[IP].successUnit);
 };
 
-int ANARACE::getProgramSuccessLocation(int IP)
+/*int ANARACE::getProgramSuccessLocation(int IP)
 {
 	if((IP<0)||(IP>=MAX_LENGTH))
 	{
@@ -52,7 +52,7 @@ int ANARACE::getProgramSuccessLocation(int IP)
 		return(0);
 	}
 	return(program[IP].successLocation);
-};
+};*/
 
 int ANARACE::setProgramSuccessType(int num)
 {
@@ -77,7 +77,7 @@ int ANARACE::setProgramSuccessUnit(int num)
 	return(1);
 };
 
-int ANARACE::setProgramSuccessLocation(int num)
+/*int ANARACE::setProgramSuccessLocation(int num)
 {
 	if((num<0)||(num>=MAX_LOCATIONS))
 	{
@@ -86,7 +86,7 @@ int ANARACE::setProgramSuccessLocation(int num)
 	}
 	program[getIP()].successLocation=num;
 	return(1);
-};
+};*/
 
 int ANARACE::getProgramNeedSupply(int IP)
 {
@@ -136,6 +136,23 @@ int ANARACE::getProgramIsBuilt(int IP)
 	}
 	return(program[IP].built);
 };
+
+int ANARACE::getProgramIsGoal(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramIsGoal): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].isGoal<0)||(program[IP].isGoal>1))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramIsGoal): Variable not initialized [%i].",program[IP].isGoal);
+		return(0);
+	}
+	return(program[IP].isGoal);
+};
+
 
 int ANARACE::getProgramTime(int IP)
 {
@@ -212,19 +229,23 @@ int ANARACE::getProgramLocation(int IP)
 
 
 
-void ANARACE::calculate()
+int ANARACE::calculateStep()
 {
 //ZERG: Larvenproduktion!  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
 	int tm,tg;
-	int timeout=ga->maxTimeOut;
-	int time=ga->maxTime;
-	int ready=0;
 	int i,j;
-	setIP(ga->maxLength-1);
-	//mins, gas hier rein...
-	while((time)&&(!ready)&&(getIP()>0))
+	if((!time)||(ready)||(!getIP()))
 	{
+		setLength(ga->maxLength-getIP());
+		if(ready)
+			setTimer(time);
+		else setTimer(ga->maxTime);
+		for(i=0;i<MAX_LENGTH;i++)
+			phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[program[i].dominant][i]);
+		return(1);
+	}
+
 		tm=getMins();tg=getGas();
 //TODO: evtl ueberlegen IP zu springen... also erstmal feststellen, warum nicht gebuildet werden kann und dann in einem Ruck resources und btimes hochsetzen...
 		int dominant=0;
@@ -243,7 +264,7 @@ void ANARACE::calculate()
         if(successType>0)
 		{
 			setProgramSuccessType(successType);
-			setProgramSuccessLocation(successLocation);
+//			setProgramSuccessLocation(successLocation);
 			setProgramSuccessUnit(successUnit);
 		}
 
@@ -259,7 +280,7 @@ void ANARACE::calculate()
 				program[getIP()].time=ga->maxTime+1;
 				setProgramSuccessType(TIMEOUT);
 				setProgramSuccessUnit(0);
-				setProgramSuccessLocation(0);
+//				setProgramSuccessLocation(0);
 			}
 			program[getIP()].needSupply=getMaxSupply()-getSupply();
 			program[getIP()].haveSupply=getMaxSupply();
@@ -344,6 +365,10 @@ void ANARACE::calculate()
 						case NEEDED_ALWAYS:break;
 						default:break;
 					}
+
+					if(build->type==REFINERY)
+						loc[0][build->location].force[VESPENE_GEYSIR]--;
+
 					if(stat->supply<0) 
 					{
 						if(getMaxSupply()-stat->supply>MAX_SUPPLY)
@@ -366,9 +391,14 @@ void ANARACE::calculate()
 					location[build->location].force[build->type]+=build->unitCount;
 					location[build->location].availible[build->type]+=build->unitCount;
 					
-					if(build->type==REFINERY) adjustGasHarvest(build->location);
-					if(build->type==COMMAND_CENTER) {adjustMineralHarvest(build->location);adjustGasHarvest(build->location);}
-					last[lastcounter].what=build->type;
+					if(build->type==REFINERY) 
+						adjustGasHarvest(build->location);
+					if(build->type==COMMAND_CENTER) 
+					{
+						adjustMineralHarvest(build->location);
+						adjustGasHarvest(build->location);
+					}
+					last[lastcounter].unit=build->type;
 					last[lastcounter].count=build->unitCount;
 					last[lastcounter].location=build->location;
 
@@ -402,21 +432,11 @@ void ANARACE::calculate()
 		harvestResources();
 		time--;
 		timeout--;
-	}
 	 //end while
-	setLength(ga->maxLength-getIP());
-
 //TODO: Alles rausschmeissen, was schon von race berechnet wurde!
-	if(ready) 
-	{
-//		pFitness=time;
-		setTimer(time);
-	}
-	else setTimer(ga->maxTime);
-
-	for(i=0;i<MAX_LENGTH;i++)
-		phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[program[i].dominant][i]);
 	
+	return(0);
+
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
 	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
 	//mmmh... aber was reinschreiben? baue barracks bei Ort bla => belohne EINMAL ein scv bei ort bla
@@ -425,38 +445,38 @@ void ANARACE::calculate()
 // falschen Standort ueber distances abrechnen! (100-distance oder so... je nach dem wieviele am falschen Ort sind!)
 
 
-int ANARACE::buildGene(int what)
+int ANARACE::buildGene(int unit)
 {
-	const UNIT_STATISTICS* stat=&pStats[what];
+	const UNIT_STATISTICS* stat=&pStats[unit];
 	int ok=0;
 
 	successType=0;
 	successUnit=0;
-	successLocation=0;
+//	successLocation=0;
 
-	if(what==1)
+	if(unit==1)
 		successType=0;
 
-	if(what<=EXTRACTOR+1)
+	if(unit<=EXTRACTOR+1)
 	{
 		if((stat->prerequisite[0]>0)&&(location[0].force[stat->prerequisite[0]]==0))
 		{
 			successUnit=stat->prerequisite[0];
-			successLocation=0;
+//			successLocation=0;
 			successType=PREREQUISITE_FAILED;
 		}
 		else		
 		if((stat->prerequisite[1]>0)&&(location[0].force[stat->prerequisite[1]]==0))
                 {
                         successUnit=stat->prerequisite[1];
-                        successLocation=0;
+//                        successLocation=0;
                         successType=PREREQUISITE_FAILED;
                 }
 		else 
 		if((stat->prerequisite[2]>0)&&(location[0].force[stat->prerequisite[2]]==0))
                 {
                         successUnit=stat->prerequisite[2];
-                        successLocation=0;
+//                        successLocation=0;
                         successType=PREREQUISITE_FAILED;
                 }
 		else
@@ -467,8 +487,7 @@ int ANARACE::buildGene(int what)
                           ((stat->facility[2]==0)||(location[0].availible[stat->facility[2]]==0))&&
                           ((stat->facility[0]>0)||(stat->facility[1]>0)||(stat->facility[2]>0))
 			)
- 
-//TODO: availible/force[0] auf 100 setzen... naj ama guggn
+ //TODO: availible/force[0] auf 100 setzen... naj ama guggn
 		{
 			if(stat->facility[0]>0)
 				successUnit=stat->facility[0];
@@ -476,65 +495,64 @@ int ANARACE::buildGene(int what)
 				successUnit=stat->facility[1];
 			else if(stat->facility[2]>0)
 				successUnit=stat->facility[2];
-			successLocation=0;
+//			successLocation=0;
 			successType=FACILITY_FAILED;
 		}
 		else
 		if((stat->facility2>0)&&(location[0].availible[stat->facility2]==0))
         {
 			successUnit=stat->facility2;
-            successLocation=0;
+//            successLocation=0;
             successType=FACILITY_FAILED;
         }
 //TODO: evtl success 2 Schritte zurueckverfolgen...
 		else
-		if(getMins()<stat->mins+stat->upgrade_cost*location[0].force[what])
+		if(getMins()<stat->mins+stat->upgrade_cost*location[0].force[unit])
 		{
 			successUnit=0;
-			successLocation=0;
+//			successLocation=0;
 		    successType=ENOUGH_MINERALS;
 		}
 		else
-		if(getGas()<stat->gas+stat->upgrade_cost*location[0].force[what])
+		if(getGas()<stat->gas+stat->upgrade_cost*location[0].force[unit])
 		{
 			successUnit=0;
-			successLocation=0;
+//			successLocation=0;
 		    successType=ENOUGH_GAS;
 		}
 		else
 		if((getSupply()<stat->supply)&&(stat->supply>0))
 		{
 			successUnit=0;
-			successLocation=0;
+//			successLocation=0;
 		    successType=SUPPLY_SATISFIED;
 		}
 		else 
 		{
-
-				//Zuerst: availible pruefen ob am Ort gebaut werden kann
-				//Wenn nicht => +/- absteigen bis alle locations durch sind
+//Zuerst: availible pruefen ob am Ort gebaut werden kann
+//Wenn nicht => +/- absteigen bis alle locations durch sind
 			int fac=0;
-                              int loc=1;
-                                if(lastcounter>0)
-                                {
-                                        lastcounter--;
-                                        loc=last[lastcounter].location;
-                                }
+            int tloc=1;
+            
+			if(lastcounter>0)
+            {
+	            lastcounter--;
+                tloc=last[lastcounter].location;
+            }
 
-
-			if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
+			if((stat->facility2==0)||(location[tloc].availible[stat->facility2]>0))
 				for(fac=3;fac--;)
-					if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
+					if( ((stat->facility[fac]>0)&&(location[tloc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
 					{
 						ok=1;
 						break;
 					}
 			if(!ok)
-				for(loc=1;loc<MAX_LOCATIONS;loc++)
-					if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
+				for(tloc=1;tloc<MAX_LOCATIONS;tloc++)
+					if((stat->facility2==0)||(location[tloc].availible[stat->facility2]>0))
 					{
 						for(fac=3;fac--;)
-							if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0)))
+							if( ((stat->facility[fac]>0)&&(location[tloc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0)))
 							{
 								ok=1;
 								break;
@@ -545,7 +563,16 @@ int ANARACE::buildGene(int what)
 //					evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
 //					auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
 //		Phagen ueber Phagen...
-				if(ok)
+
+				if((ok)&&(unit==EXTRACTOR))
+				{
+					if(!loc[0][tloc].availible[VESPENE_GEYSIR])
+						ok=0;
+					else
+						loc[0][tloc].availible[VESPENE_GEYSIR]--;
+				};
+
+					if(ok)
 					{
 						int nr=0;
 						while((nr<MAX_BUILDINGS-1)&&(building[nr].RB))
@@ -555,25 +582,25 @@ int ANARACE::buildGene(int what)
 						}
 						
 						building[nr].facility=stat->facility[fac];
-						building[nr].location=loc;
+						building[nr].location=tloc;
 						building[nr].unitCount=1; //~~
-						building[nr].RB=stat->BT+3200*(stat->facility2==what); //~~ hack :/ TODO
-						setMins(getMins()-stat->mins+stat->upgrade_cost*location[0].force[what]);
-						setGas(getGas()-stat->gas+stat->upgrade_cost*location[0].force[what]);
-						building[nr].type=what;
+						building[nr].RB=stat->BT+3200*(stat->facility2==unit); //~~ hack :/ TODO
+						setMins(getMins()-(stat->mins+stat->upgrade_cost*location[0].force[unit]));
+						setGas(getGas()-(stat->gas+stat->upgrade_cost*location[0].force[unit]));
+						building[nr].type=unit;
 						if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) setSupply(getSupply()-stat->supply);
 							switch(stat->facility_type)
 							{
 								case IS_LOST:
 								if(stat->facility[fac]>0)
 								{
-									location[loc].availible[stat->facility[fac]]--;
+									location[tloc].availible[stat->facility[fac]]--;
 									location[0].availible[stat->facility[fac]]--;
 									setSupply(getSupply()+pStats[stat->facility[fac]].supply); 
 								}
 								if(stat->facility2>0)
 								{
-									location[loc].availible[stat->facility2]--;
+									location[tloc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
 									setSupply(getSupply()+pStats[stat->facility2].supply);
 								}
@@ -583,19 +610,19 @@ int ANARACE::buildGene(int what)
 							case NEEDED_UNTIL_COMPLETE:
 								if(stat->facility[fac]>0)
 								{
-									location[loc].availible[stat->facility[fac]]--;
+									location[tloc].availible[stat->facility[fac]]--;
 									location[0].availible[stat->facility[fac]]--;
 								}
 								if(stat->facility2>0)
 								{
-									location[loc].availible[stat->facility2]--;
+									location[tloc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--; //kommt glaub nicht vor...
 								}
 								break;
 							case NEEDED_ONCE_IS_LOST:
 								if(stat->facility2>0)
 								{
-									location[loc].availible[stat->facility2]--;
+									location[tloc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
 									setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
 								}
@@ -603,38 +630,38 @@ int ANARACE::buildGene(int what)
 							case NEEDED_UNTIL_COMPLETE_IS_LOST:
 								if(stat->facility2>0)
 								{
-									location[loc].availible[stat->facility2]--;
+									location[tloc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
 									setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
 								}
 								if(stat->facility[fac]>0)
 								{
-									location[loc].availible[stat->facility[fac]]--;
+									location[tloc].availible[stat->facility[fac]]--;
 									location[0].availible[stat->facility[fac]]--;
 								}
 								break;
 							case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
 								if(stat->facility2>0)
 								{
-									location[loc].availible[stat->facility2]--;						
+									location[tloc].availible[stat->facility2]--;						
 									location[0].availible[stat->facility2]--; // no supply gain as the item is recovered... well or not? mmmh... ~~~~
 								}
 								if(stat->facility[fac]>0)
 								{
-									location[loc].availible[stat->facility[fac]]--;
+									location[tloc].availible[stat->facility[fac]]--;
 									location[0].availible[stat->facility[fac]]--;
 								}
 								break;
 							case NEEDED_ALWAYS:
 								if(stat->facility[fac]>0)
 								{
-									location[loc].availible[stat->facility[fac]]--;
+									location[tloc].availible[stat->facility[fac]]--;
 									location[0].availible[stat->facility[fac]]--;
 									// supply?
 								}
 								if(stat->facility2>0)
 								{
-									location[loc].availible[stat->facility2]--;
+									location[tloc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
 								}
 								break;
@@ -646,10 +673,10 @@ int ANARACE::buildGene(int what)
 					} //kk!=1?
 				}
 			}
-	else // what > EXTRACTOR+1
+	else // unit > EXTRACTOR+1
 	{
 		int count=0;
-		switch(what)
+		switch(unit)
 		{
                        case MOVE_ONE_1_FORWARD:count=1;break;
                        case MOVE_ONE_3_FORWARD:count=3;break;
@@ -658,28 +685,28 @@ int ANARACE::buildGene(int what)
 		}
                if(count>0)
                 {
-                        if((lastcounter>0)&&(location[last[lastcounter-1].location].availible[last[lastcounter-1].what]>0)&&(pStats[last[lastcounter-1].what].speed>0))
+                        if((lastcounter>0)&&(location[last[lastcounter-1].location].availible[last[lastcounter-1].unit]>0)&&(pStats[last[lastcounter-1].unit].speed>0))
                                 {
 					lastcounter--;
                                         int nr=0;
                                         while((nr<MAX_BUILDINGS-1)&&(building[nr].RB))
                                                         nr++;
                                         //TODO: Fehler wenn nicht genug buildings
-					if(location[last[lastcounter].location].availible[last[lastcounter].what]>last[lastcounter].count)
+					if(location[last[lastcounter].location].availible[last[lastcounter].unit]>last[lastcounter].count)
                                                 building[nr].unitCount=last[lastcounter].count;
-                                        else building[nr].unitCount=location[last[lastcounter].location].availible[last[lastcounter].what];
+                                        else building[nr].unitCount=location[last[lastcounter].location].availible[last[lastcounter].unit];
                                         building[nr].facility=0;
                                         building[nr].location=last[lastcounter].location;
-                                        building[nr].type=last[lastcounter].what;
-                                        building[nr].RB=location[last[lastcounter].location].getDistance(last[lastcounter].location+count)*100/pStats[last[lastcounter].what].speed;
+                                        building[nr].type=last[lastcounter].unit;
+                                        building[nr].RB=pMap->location[last[lastcounter].location].getDistance(last[lastcounter].location+count)*100/pStats[last[lastcounter].unit].speed;
                                         building[nr].onTheRun=1;
 					building[nr].IP=getIP(); // ~ANA
                                                 // 2x Unit => send 8/All instead of just one unit there
-                                        if((getIP()>1)&&((Code[0][getIP()-1]==what)||(Code[1][getIP()-1]==what)))
+                                        if((getIP()>1)&&((Code[0][getIP()-1]==unit)||(Code[1][getIP()-1]==unit)))
                                         {
-                    				if(location[last[lastcounter].location].availible[last[lastcounter].what]>=6)
+                    							if(location[last[lastcounter].location].availible[last[lastcounter].unit]>=6)
                                                                         building[nr].unitCount=6;
-                                                                else building[nr].unitCount=location[last[lastcounter].location].availible[last[lastcounter].what];
+                                                                else building[nr].unitCount=location[last[lastcounter].location].availible[last[lastcounter].unit];
                                                                 setIP(getIP()-1);
                                                                 //TODO dominance... und 8 checken... evtl weniger
                                        }
@@ -693,7 +720,7 @@ int ANARACE::buildGene(int what)
         }
 					
 /*      else
-      if((gRace==ZERG)&&(what==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
+      if((gRace==ZERG)&&(unit==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
 			{
 				int min=5000;
 				int n=0;
@@ -702,7 +729,7 @@ int ANARACE::buildGene(int what)
 					{
 						if((stats[2][building[i].type].type==2) && (stats[2][building[i].type].BT-building[i].RB<min))
 		// type == 2 because this makes only sense with buildings
-		// Sure... but what about Lurker, Guardien, Sunken, ...  ?
+		// Sure... but unit about Lurker, Guardien, Sunken, ...  ?
 		// mmmh... on the other hand this really makes no sense :}
 						{
 							min=stats[2][building[i].type].BT-building[i].RB;
@@ -753,7 +780,7 @@ void ANARACE::resetData() // resets all data to standard starting values
     {
         program[i].successType=0;
 		program[i].successUnit=0;
-		program[i].successLocation=0;
+//		program[i].successLocation=0;
 						
 		program[i].built=0;
 		program[i].haveSupply=0;
@@ -764,6 +791,7 @@ void ANARACE::resetData() // resets all data to standard starting values
         program[i].temp=0;
         program[i].dominant=0;
 		program[i].location=0;
+		program[i].isGoal=0;
 		phaenoCode[i]=0;
 	}
 	setHarvestedGas(0);
@@ -777,28 +805,23 @@ void ANARACE::resetData() // resets all data to standard starting values
 	for(i=0;i<4;i++)
 	{
 		last[i].location=1;
-		last[i].what=SCV;
+		last[i].unit=SCV;
 		last[i].count=1;
 	}
 	for(i=4;i<MAX_LOCATIONS;i++)
 	{
 		last[i].location=0;
-		last[i].what=0;
+		last[i].unit=0;
 		last[i].count=0;
 	}
 	lastcounter=4;
+	setTimeOut(ga->maxTimeOut);
+	setIP(ga->maxLength-1);
+	setCalculated(0);
+	time=ga->maxTime;
+	ready=0;
+
 }
-
-
-/*void ANARACE::init()
-{
-	pStats=pSet->pStats;
-	basicMineralHarvestPerSecond=pSet->misc.pMineralHarvestPerSecond;
-	basicGasHarvestPerSecond=pSet->misc.pGasHarvestPerSecond;
-	adjustGoals(); //goals und buildable kopieren, goalcount etc.
-//#ifdef DEBUGSCC	
-	initialized=1;
-}*/
 
 
 int ANARACE::getUnchangedGenerations()
@@ -930,6 +953,32 @@ int ANARACE::setMaxtFitness(int num)
 	return(1);
 };
 
+void ANARACE::analyzeBuildOrder()
+{
+//keeps track of the '@' symbol on the left of each build order entry
+//if the goal is set to 10 marines, the eleventh won't be marked as a 'fulfilled goal' with a '@'
+	int tGoal[UNIT_TYPE_COUNT];
+	int s,t;
+
+// reset the tgGoals (to sign with '@' the units which are part of the goal list)
+// and subtract the units that are already on the map
+	for(t=0;t<UNIT_TYPE_COUNT;t++)
+	{
+		tGoal[t]=0;
+		for(s=1;s<MAX_LOCATIONS;s++)
+			tGoal[t]+=getPlayer()->goal->globalGoal[s][t]-getMap()->location[s].force[getPlayerNum()][t];
+	}
+
+	for(s=0;s<MAX_LENGTH;s++)
+		if(tGoal[phaenoCode[s]]>0) //~~~~~~ location=0?
+		{
+			tGoal[phaenoCode[s]]--;
+			program[s].isGoal=1;
+		}
+		else program[s].isGoal=0;
+};
+
+
 
 ANARACE::ANARACE()
 {
@@ -939,10 +988,8 @@ ANARACE::ANARACE()
 	setMaxtFitness(0);
 	setUnchangedGenerations(0);
 	setRun(0);
-/*	if(!initialized) init();
-	initLocations();*/
 }
 
 int ANARACE::successType;
 int ANARACE::successUnit;
-int ANARACE::successLocation;
+//int ANARACE::successLocation;

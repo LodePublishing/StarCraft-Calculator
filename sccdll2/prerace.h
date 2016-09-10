@@ -11,16 +11,19 @@ class SCCDLL_API PRERACE
 {
 	protected:
 		static MAP* pMap;
-		static LAST last[MAX_LENGTH];
-		static int lastcounter;
-		static int lastwhat;
+		LAST last[MAX_LENGTH];
+		int lastcounter;
+		int lastunit;
 		static int mapInitialized;
 		void harvestResources();
 		const UNIT_STATISTICS* pStats;
+		int time,ready;
+		int timeout;
 	private:
 		PLAYER* player;
 		int playerNum;
-		int mins,gas,timer,IP;
+		int mins,gas,timer;
+		int IP;
         int mineralHarvestPerSecond[MAX_LOCATIONS][45];
         int gasHarvestPerSecond[MAX_LOCATIONS][5];
 		int harvestedGas,harvestedMins;
@@ -29,41 +32,51 @@ class SCCDLL_API PRERACE
         int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...*/
         int length;
 	public:
+		static MAP_LOCATION loc[MAX_PLAYER][MAX_LOCATIONS];
+		MAP_LOCATION* location;
+
+		int calculated;
+
         int Code[2][MAX_LENGTH];
 		int setpStats(const UNIT_STATISTICS* pStats);
-		//Location ueberlegen...Andere Spieler interessieren eigentlich nur peripher bei Bewegungen und beim Sammeln! Also ein ganz normales Location wie bisher machen und ein location in denen Gegner/Alliierte mit drin sind
-		MAP_LOCATION location[MAX_LOCATIONS];
 
 		static MAP* getMap();
 		
 		static GA* ga;
+
 		int getPlayerNum();
 		int setPlayerNum(int num);
 
 		int setPlayer(PLAYER* player);
 		PLAYER* getPlayer();
 
+		int getCalculated();
+		int setCalculated(int num);
 		int loadPlayer(int num);
-        int adjustMineralHarvest(int loc);
-        int adjustGasHarvest(int loc);
+        int adjustMineralHarvest(int tloc);
+        int adjustGasHarvest(int tloc);
+		int adjustHarvest();
 		int setSupply(int num);
 		int setMaxSupply(int num);
 		int setMins(int num);
 		int setGas(int num);
 		int setTimer(int num);
-		int resetLocations();
+		int setTimeOut(int num);
+		int resetSupply();
 		static int setMap(MAP* map);
 		static void resetMapInitialized();
 
 		int getIP();
 		int setIP(int num);
 
-		int setMineralHarvestPerSecond(int loc,int worker,int num);
-		int getMineralHarvestPerSecond(int loc,int worker);
+		int setMineralHarvestPerSecond(int tloc,int worker,int num);
+		int getMineralHarvestPerSecond(int tloc,int worker);
 
-		int setGasHarvestPerSecond(int loc,int worker,int num);
-		int getGasHarvestPerSecond(int loc,int worker);
+		int setGasHarvestPerSecond(int tloc,int worker,int num);
+		int getGasHarvestPerSecond(int tloc,int worker);
 
+		int getTimeOut();
+		
 		int getHarvestedMins();
 		int getHarvestedGas();
 

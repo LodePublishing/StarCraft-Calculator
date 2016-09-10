@@ -4,7 +4,6 @@ GA::GA()
 {
 	goalCount=0;
 	mapCount=0;
-	playerCount=0;
 	maxTime=0;
 	maxTimeOut=0;
 	maxLength=0;
@@ -12,4 +11,6 @@ GA::GA()
 	maxGenerations=0;
 	preprocessBuildOrder=0;
 	currentMap=0;
+	breedFactor=0; //~~
+	mode=0;
 }

@@ -1,4 +1,4 @@
-//Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
+//TODO: Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
 #ifndef __MAIN_H
 #define __MAIN_H
@@ -9,40 +9,74 @@
 #define SCCDLL_API __declspec(dllimport)
 #endif
 
+
+#define MAX_RACE 2
+#define MIN_RACE 0
+
+#define MAX_LOCATIONS 10
+#define MIN_LOCATIONS 0 //this does not mean that maps with 0 locations can exist....
+
+#define MAX_PLAYER 3
+#define MIN_PLAYER 1
+
+#define MAX_GOAL_ENTRIES 25
+#define MIN_GOAL_ENTRIES 0
+
 #define MAX_MINS 5000000
 #define MAX_GAS 5000000
 
-#define MAX_TIME 3600
-#define MAX_LENGTH 96
-#define MAX_RUNS 10
+#define MAX_MAPS 25
+#define MIN_MAPS 0
+
 #define MAX_PROGRAMS 128 //must be multiplier of (16*player)
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
 #define UNIT_TYPE_COUNT 100
 #define MAX_GOALS 100 // count of possible different goals
 #define MAX_SUPPLY 200
+
 #define MAX_GENERATIONS 10000
-#define MAX_TIMEOUT 133
+#define MIN_GENERATIONS 100
 
-//CODE INITIALISIEREN!
+#define MAX_BREED_FACTOR 40
+#define MIN_BREED_FACTOR 0
 
+#define MAX_MODE 2
+#define MIN_MODE 0
+
+#define MAX_CROSSOVER 40
+#define MIN_CROSSOVER 0
+
+#define MAX_TIME 3600
+#define MIN_TIME 300
+
+#define MAX_TIMEOUT 266
+#define MIN_TIMEOUT 40
+
+#define MAX_LENGTH 96
+#define MIN_LENGTH 32
+
+#define MAX_RUNS 10
+#define MIN_RUNS 1
+
+#define MAX_PREPROCESS_BUILDORDER 1
+#define MIN_PREPROCESS_BUILDORDER 0
 
 struct BUILDING
 {
-	int RB; // Remaining Buildtime
-	int type; // Type of Building
-	int unitCount; //number of units which are moving... currently ONLY for movements...
-	int facility; // in what facility it was produced
-	int IP; // ~~ wird von race nicht gebraucht...
-	int location;
-	int goal; //For movement!
-	int onTheRun;
-        // TODO: Aus Optimierungsgruenden: Eine logforce Variable die _Alle_ Einheiten mitzaehlt
+	int RB;			// Remaining Buildtime
+	int type;		// Type of Building
+	int unitCount;	// number of units which are moving... currently ONLY for movements...
+	int facility;	// in what facility it was produced
+	int IP;			// for back-tracking certain buildings (especially for the 'cancel building' option of zerg)
+	int location;	// where the building was finished
+	int goal;		// For movement, where the units will move to, not yet fully implemented
+	int onTheRun;	// is this building/unit moving around or is it under construction at some place?
 };
 
 struct LAST
 {
-	int what;
+	int unit;
 	int location;
 	int count;
 };
@@ -69,35 +103,6 @@ struct GOAL
 #define UNKNOWN 7
 
 #define NAME_LENGTH 21
-
-struct UNIT_STATISTICS
-{
-	char name[NAME_LENGTH];
-	int BT;
-	int mins,gas;
-	int supply;
-	int upgrade_cost; //fuer Upgrades erstmal nur.. 50, 75, 100
-	int upgrade[2];  //what building is needed to go level 2 and level 3 (templar archives, science facility, fleet beacon, lair, hive)
-	
-	int prerequisite[3];
-	int facility[3]; //where _can_ the unit be produced? //primariliy for zerg and terra
-			// for upgrades: fac[2] and fac[3] are places to hold prequerisities for additional upgrading beyond level 1
-	int facility2; // additional facilities, primarily for drones or morphing templars
-	int facility_type; // 0: facilities are lost (templars, drones, command center/comsat, ...), 1: facility is needed at this place, but only once (probes!), 2: facility is needed until the item is complete (Scvs, buildings in general)
-	int create; // Additional building created when this item is completed (only for add-ons)
-	int speed;
-};
-
-
-#define IS_LOST 0
-#define NEEDED_ONCE 1
-#define NEEDED_UNTIL_COMPLETE 2
-#define NEEDED_ONCE_IS_LOST 3 // Special, probes in facility0!
-#define NEEDED_UNTIL_COMPLETE_IS_LOST 4 // Special, scvs in facility0!
-#define NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE 5 //availible returns to 1 but one item is lost... kinda hack for upgrades :)
-#define NEEDED_ALWAYS 6 //nuke silos/nukes, reaver/scarabs, carrier/interceptors, ...
-
-// TODO: Alternativ Prerequisites!!!
 
 #define TERRA 0
 #define PROTOSS 1
@@ -411,11 +416,34 @@ struct UNIT_STATISTICS
 //#define NULL                          99
 //
 
-//evtl ueberlegen einfach mehrere goals mit unit, anzahl zu nehmen...
-//some global variables
+// these are the possible values for facility_type
+// they describe what happens to the units while constructing / when the building is complete
+#define IS_LOST 0		// 0: facilities are lost (templars/archons, drones/buildings, command center/comsat, ...), 
+#define NEEDED_ONCE 1   // 1: facility is needed at this place, but only once (probes!)
+#define NEEDED_UNTIL_COMPLETE 2 // 2: facility is needed until the item is complete (Scvs, buildings in general)
+#define NEEDED_ONCE_IS_LOST 3 // Special, probes in facility0!
+#define NEEDED_UNTIL_COMPLETE_IS_LOST 4 // Special, scvs in facility0!
+#define NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE 5 //availible returns to 1 but one item is lost... kinda hack for upgrades :)
+#define NEEDED_ALWAYS 6 //nuke silos/nukes, reaver/scarabs, carrier/interceptors, ...
 
 
-
+struct UNIT_STATISTICS
+{
+	char name[NAME_LENGTH];
+	int BT;
+	int mins,gas;
+	int supply;
+	int upgrade_cost;	 // upgrade costs in minerals and gas (50, 75, ...)
+	int upgrade[2];		 // what building is needed to go upgrade level 2 and level 3 (templar archives, science facility, fleet beacon, lair, hive)
+	int prerequisite[3]; // these prerequisites buildings need to be anywhere on the map, so that this unit can be build
+	int facility[3];	 // where _can_ the unit be produced? primariliy for zerg and terra
+			             // for upgrades: fac[2] and fac[3] are places to hold prequerisities for additional upgrading beyond level 1~~
+	int facility2;		 // additional facilities, primarily for drones or morphing templars
+	int facility_type;	 // see above
+						 
+	int create;			 // Additional building created when this item is completed (only for add-ons)
+	int speed;			 // speed of units, not yet implemented
+};
 
 const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {
@@ -484,7 +512,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"     Vehicle Weapons",266,10000,10000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_VEHICLE_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0},
 {"        Ship Plating",266,15000,15000,  0, 7500, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_PLATING, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0},
 {"        Ship Weapons",266,10000,10000,  0, 5000, {SCIENCE_FACILITY, SCIENCE_FACILITY}, {0 ,0, 0}, {ARMORY, 0, 0}, R_SHIP_WEAPONS, NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE, 0, 0},
-{"            Refinery", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, VESPENE_GEYSIR, NEEDED_UNTIL_COMPLETE_IS_LOST, 0, 0},
+{"            Refinery", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {SCV, 0, 0}, 0/*VESPENE_GEYSIR*/, NEEDED_UNTIL_COMPLETE/*_IS_LOST*/, 0, 0}, //~~~ueberlegen...
 {"             Gas SCV",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {REFINERY, 0, 0}, SCV, NEEDED_ONCE_IS_LOST, 0, 0},	//~~~~
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
@@ -522,7 +550,6 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"      R_Ship Plating",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"      R_Ship Weapons",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0}
 },
-// TODO: Automatisch bauende Gebaeude/Einheiten fuer Spells und Larven!	
 
 {
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
@@ -589,7 +616,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
-{"         Assimilator", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, VESPENE_GEYSIR, NEEDED_ONCE_IS_LOST, 0, 0},
+{"         Assimilator", 40,10000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {PROBE, 0, 0}, /*VESPENE_GEYSIR*/0, NEEDED_ONCE/*_IS_LOST*/, 0, 0},
 {"           Gas Probe",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {ASSIMILATOR, 0, 0}, PROBE, NEEDED_ONCE_IS_LOST, 0, 0},	//Needed once? ~~~
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"        Window move+",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
@@ -694,7 +721,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
-{"           Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {VESPENE_GEYSIR, 0, 0}, DRONE, IS_LOST, 0, 0}, //~~
+{"           Extractor", 40, 5000,    0,  0, 0, {0, 0}, {0 ,0, 0}, {/*VESPENE_GEYSIR*/DRONE, 0, 0}, 0/*DRONE*/, IS_LOST, 0, 0}, //~~
 {"           Gas Drone",  3,    0,    0,  1, 0, {0, 0}, {0 ,0, 0}, {EXTRACTOR, 0, 0}, DRONE, NEEDED_ONCE_IS_LOST, 0, 0}, //~~~~
 
 {"      Window move+++",  3,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
@@ -735,8 +762,9 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 }
 };
 
+// TODO: automatic building units/buildings for spells and larvaes
 
-#endif
+#endif // __MAIN_H
 
 
 

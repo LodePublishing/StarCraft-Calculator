@@ -7,6 +7,8 @@
 #include "map.h"
 #include "ga.h"
 
+// TODO: improve error checking, ranges etc. to recognize "stupid" settings, impossible goals etc.
+
 class SCCDLL_API SOUP
 {
 	private:
@@ -15,24 +17,23 @@ class SCCDLL_API SOUP
 		int run_number,goalsInitialized,playerInitialized,mapInitialized,goalCount,gaInitialized;
 		GOAL_ENTRY* goal[MAX_PLAYER];
 		GA* ga;
-		MAP_LOCATION_BASIC location[MAX_LOCATIONS];
+		ANARACE* anaplayer[MAX_PLAYER];
 	public:
 		int setGoal(GOAL_ENTRY* goal, int player);
 		int setMap(MAP* map);
-		int setParameters(GA* ga);
 
-		//ERROR doFullCheckAndInitAllTheStuff();
 
-		//Problem Changes on the fly <> full check
-		// evtl ne 'running' oder 'changed' (in settings) Variable einfuehren, die dann bei jeder Aenderung eine volle Pruefung macht...
-		// mmh
-
+// initializes the soup (primarily it does some error checking whether all is initialized and allocates the memory for the players
 		int initSoup();
+
+//one generation, copies stats and results of best individual and average values of the soup in 'best'
+		ANARACE* newGeneration(); 
 
 		SOUP();
 		~SOUP();
-		ANARACE* anaplayer[MAX_PLAYER];
-		ANARACE* newGeneration(); //one generation, copies stats and results of best individual and average values of the soup in 'best'
+
+// internal function (called by settings)
+		int setParameters(GA* ga);
 };
 
 #endif

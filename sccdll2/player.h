@@ -41,5 +41,4 @@ class SCCDLL_API PLAYER
 		PLAYER();
 };
 
-
-#endif
+#endif // __PLAYER_H

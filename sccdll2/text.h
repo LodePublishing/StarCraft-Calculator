@@ -3,12 +3,14 @@
 
 #include "main.h"
 
-struct Namen
+// this is mainly for for io to display some of the output
+
+struct NAME
 {
-	char b[6];
+	char value[6];
 };
 
-const char error_m[ERROR_MESSAGES][21]=
+const char error_message[ERROR_MESSAGES][21]=
 {
 	"OK",
 	"enough Minerals",
@@ -21,12 +23,12 @@ const char error_m[ERROR_MESSAGES][21]=
 };
 
 
-char error_sm[ERROR_MESSAGES]=
+char error_small_message[ERROR_MESSAGES]=
 {
 	'O','M','G','S','P','F','T','U'
 };
-//TODO: restliche units einfuegen
-const Namen kurz[RACES][UNIT_TYPE_COUNT]=
+
+const NAME short_name[RACES][UNIT_TYPE_COUNT]=
 {
 	{
 	{"NULL!"},{"SCV  "},{"Marin"},{"Ghost"},{"Vultu"},{"Golia"},{"STank"},{"FiBat"},{"Medic"},{"Wrait"},

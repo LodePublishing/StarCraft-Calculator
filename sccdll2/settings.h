@@ -7,9 +7,8 @@
 #include "harvest.h"
 #include "map.h"
 #include "ga.h"
-//Vorgehen:
-// - Lade Settings, Maps, Goals aus Files
-// - User waehlt Map und Goal je Spieler
+
+// generally all function return 0 if there was an error and 1 if there was no error
 
 class SCCDLL_API SETTINGS
 {
@@ -22,19 +21,46 @@ class SCCDLL_API SETTINGS
 		int setMapCount(int num);
 		int setGoalCount(int num);
 	public:
+
+//all those nasty range checking stuff :-)
+		int getMAXBreedFactor();
+		int getMAXMode();
+		int getMAXCrossOver();
+		int getMAXMaxTime();
+		int getMAXMaxTimeOut();
+		int getMAXMaxLength();
+		int getMAXMaxRuns();
+		int getMAXMaxGenerations();
+		int getMAXPreprocessBuildOrder();
+		int getMAXCurrentMap();
+
+		int getMINBreedFactor();
+		int getMINMode();
+		int getMINCrossOver();
+		int getMINMaxTime();
+		int getMINMaxTimeOut();
+		int getMINMaxLength();
+		int getMINMaxRuns();
+		int getMINMaxGenerations();
+		int getMINPreprocessBuildOrder();
+		int getMINCurrentMap();
+
+		
 		int setMaxTime(int num); //sets max Time in minutes
-		int setMaxTimeOut(int num);
+		int setMaxTimeOut(int num); //
 		int setMaxLength(int num);
 		int setMaxRuns(int num);
 		int setMaxGenerations(int num);
-		int setPlayerCount(int num);
 		int setPreprocessBuildOrder(int num);
 		int setCurrentMap(int num);
-
 		int setGoal(int goal, int player);
+		int setBreedFactor(int num);
+		int setMode(int num);
+		int setCrossOver(int num);
 
-//		int setHarvestSpeed(); //~~ maybe allow multiple harvest speeds later on
-
+		int getBreedFactor();
+		int getMode();
+		int getCrossOver();
 		int getMaxTime();
 		int getMaxTimeOut();
 		int getMaxLength();
@@ -42,25 +68,19 @@ class SCCDLL_API SETTINGS
 		int getMaxGenerations();
 		int getPreprocessBuildOrder();
 		int getCurrentMap();
-
-		int getHarvestMineralsSpeed(int r,int n);
-		int getHarvestGasSpeed(int r,int n);
-		int getDistance(int l1,int l2);
-
+		int getHarvestMineralsSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
+		int getHarvestGasSpeed(int race, int workers); // get basic mineral harvest speed of <race> with <workers> workers
+		int getDistance(int l1,int l2); // get distance between location 1 and 2
 		const GA* getGa();
-
 		int getGoalCount();
-		int getPlayerCount();
 		int getMapCount();
 		int getGoal(GOAL_ENTRY &goal,int num);
 
 		void loadDefaults();
-
 		int loadGoalFile(const char* goalFile);
 		int loadSettingsFile(const char* settingsFile);
 		int loadMapFile(const char* mapFile);
 		int loadHarvestFile(const char* harvestFile);
-
 		ANARACE* newGeneration();
 
 		int initSoup();

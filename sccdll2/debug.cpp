@@ -37,6 +37,8 @@ void DEBUG::toLog(int code, const char* msg, ...)
 	else
 		fprintf(pFile,"[%d.%d. %d:%d]:%s\n",tmnow->tm_mday, tmnow->tm_mon+1,tmnow->tm_hour,tmnow->tm_min,buf);
 
+	strcpy(errorMessage,buf);
+
 	va_end(args);
 	fclose(pFile);
 };

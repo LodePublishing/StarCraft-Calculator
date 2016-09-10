@@ -4,7 +4,7 @@
 #include "player.h"
 #include "location.h"
 
-#define MAX_MAPS 25
+// this needs still some work to make everything private
 
 class SCCDLL_API MAP
 {
@@ -15,20 +15,26 @@ class SCCDLL_API MAP
 	public:
 		const char* getName();
 		int getMaxLocations();
-		int getMaxPlayer();
+		int getMaxPlayer();		
 
-		int setName(const char* line);
-		int setMaxLocations(int num);
-		int setMaxPlayer(int num);
+		int setName(const char* line);  // every map needs a name :)
+		int setMaxLocations(int num);  // sets the number of locations of this map
+		int setMaxPlayer(int num);	// sets the number of player that are part of this map
 
-		int adjustDistanceList();
-		int adjustSupply(); //evtl fuer jeden player einzeln :-o
+		int adjustDistanceList();	// adjust the distances between the locations and sorts them
+		int adjustSupply();			// adjust supply depending on the units that were included in the map file
 
-		int locationList[MAX_LOCATIONS][MAX_LOCATIONS];			
+// this is a list which holds the sorted distances, e.g. locationList[4][i] is the number of location which has the i-th smallest distance to location 4
+		int locationList[MAX_LOCATIONS][MAX_LOCATIONS];	 
+
+// look at location.h for description
 		MAP_LOCATION_BASIC location[MAX_LOCATIONS];
+// => player.h
 		PLAYER player[MAX_PLAYER];
+
+// Constructor and destructor
 		MAP();
 		~MAP();
 };
 
-#endif
+#endif // __MAP_H

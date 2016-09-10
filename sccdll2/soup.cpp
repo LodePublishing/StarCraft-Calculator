@@ -5,6 +5,7 @@
 #include <windows.h>
 #include "race.h"
 #include "anarace.h"
+#include "debug.h"
 
 bool APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
@@ -58,57 +59,45 @@ int SOUP::setParameters(GA* ga)
 
 int SOUP::initSoup()
 {
-	int i;
+	int k,i,t;
 	if(!mapInitialized)
-		return(-1);
+	{
+		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");
+		return(0);
+	}
 	if(!goalsInitialized)
-		return(-2);
+	{
+		debug.toLog(0,"ERROR: (SOUP::initSoup) Goals not initialized.");
+		return(0);
+	}
 	if(!gaInitialized)
-		return(-3);
+	{
+		debug.toLog(0,"ERROR: (SOUP::initSoup) GA not initialized.");
+		return(0);
+	}
+	if(playerInitialized)
+	{
+		debug.toLog(0,"ERROR: (SOUP::initSoup) SOUP is already initialzed.");
+		return(0);
+	}
 	PRERACE::resetMapInitialized();
 	if(!(PRERACE::setMap(pMap)))
-		return(-4);
-
-	for(i=MAX_PROGRAMS;i--;)
 	{
-		player[i]=new RACE();
-		if(i>MAX_PROGRAMS/2)
-		{
-
-//Problem: Mins werden net richtig initialisiert!
-			if(!player[i]->loadPlayer(2)) //~~
-			{
-				for(int j=i;j>=0;j--)
-					delete player[j];
-				return(-5);
-			}
-		}
-		else
-		{
-			if(!player[i]->loadPlayer(1)) //~~
-			{
-				for(int j=i;j>=0;j--)
-					delete player[j];
-				return(-5);
-			}
-		}
-	};
-
-	for(i=2;i--;) //~~ getmaxplayer oder so
+		debug.toLog(0,"ERROR: (SOUP::initSoup) Map not initialized.");
+		return(0);
+	}
+	t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
+	for(k=0;k<pMap->getMaxPlayer()-1;k++)
 	{
-		anaplayer[i]=new ANARACE();
-		if(!(anaplayer[i]->loadPlayer(i+1))) 
+		for(i=0;i<t;i++)
 		{
-			for(int j=i;j>=0;j--)
-				delete player[j];
-			return(-6);
-		};
+			player[i+k*t]=new RACE();
+			player[i+k*t]->loadPlayer(k+1);
+			player[i+k*t]->resetGeneCode();
+		}
+		anaplayer[k]=new ANARACE();
+		anaplayer[k]->loadPlayer(k+1);
 	};
-	for(i=0;i<MAX_PROGRAMS;i++)
-		player[i]->resetGeneCode();
-
-	
-
 	playerInitialized=1;
 	return(1);
 };
@@ -127,26 +116,60 @@ int SOUP::initSoup()
 
 ANARACE* SOUP::newGeneration()
 {
-	int i,j,t;
+	int i,j,k,l,m,t,complete,newcalc;
 	if(!mapInitialized)
+	{
+		debug.toLog(0,"ERROR: (SOUP::newGeneration) Map not initialized.");
 		return(0);
+	}
 	if(!goalsInitialized)
+	{
+		debug.toLog(0,"ERROR: (SOUP::newGeneration) Goals not initialized.");
 		return(0);
+	}
 	if(!gaInitialized)
+	{
+		debug.toLog(0,"ERROR: (SOUP::newGeneration) GA not initialized.");
 		return(0);
+	}
 	if(anaplayer[0]->getRun()>=ga->maxRuns) //~~
 		return(0);
 
-	for(i=0;i<MAX_PROGRAMS;i++)
+	t=MAX_PROGRAMS/(pMap->getMaxPlayer()-1);
+	for(i=0;i<t;i++)
 	{
-		player[i]->resetData();
-		player[i]->resetLocations();
-		if((i!=0)||(i!=MAX_PROGRAMS/2))
-			player[i]->mutateGeneCode();
-		player[i]->calculate();
+		for(k=0;k<pMap->getMaxPlayer();k++)
+			for(l=0;l<pMap->getMaxLocations()-1;l++)
+				for(m=0;m<UNIT_TYPE_COUNT;m++)
+				{
+					PRERACE::loc[k][l].force[m]=pMap->location[l].force[k][m];
+					PRERACE::loc[k][l].availible[m]=pMap->location[l].force[k][m];
+				}
+
+		for(k=0;k<pMap->getMaxPlayer()-1;k++)
+		{
+			player[k*t+i]->resetData();
+			player[k*t+i]->resetSupply();
+			player[k*t+i]->adjustHarvest();
+			if(i!=0)
+				player[k*t+i]->mutateGeneCode();
+		}
+		complete=0;
+		while(!complete)
+		{
+			complete=1;
+			for(k=0;k<pMap->getMaxPlayer()-1;k++)
+				complete&=player[k*t+i]->calculateStep();
+		}
 	}
 
-/*	for(t=7;t--;)
+
+/*
+
+  ga->crossOver
+
+
+	for(t=7;t--;)
 		for(i=t*16;i<t*16+MAX_PROGRAMS/16;i++)
 			for(j=t*16;j<i;j++)
 				if((player[j]->getpFitness()>player[i]->getpFitness())||
@@ -172,21 +195,22 @@ ANARACE* SOUP::newGeneration()
 			c2=rand()%(MAX_PROGRAMS/16);
 		player[p1*16]->crossOver(player[p2*16],player[c1*16+7],player[c2*16+7]);
 	}*/
-	
-		for(i=0;i<MAX_PROGRAMS/2;i++)
-			for(j=0;j<i;j++)
-				if((player[i]->getpFitness()>player[j]->getpFitness())||
-				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()>player[j]->getsFitness()))||
-				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()==player[j]->getsFitness())&&(player[i]->gettFitness()>player[j]->gettFitness())) )
-				{
-					RACE* temp;
-					temp=player[i];
-					player[i]=player[j];
-					player[j]=temp;
-				}
 
-		for(i=MAX_PROGRAMS/2;i<MAX_PROGRAMS;i++)
-			for(j=MAX_PROGRAMS/2;j<i;j++)
+	
+/*		for(k=0;k<pMap->getMaxPlayer();k++)
+		for(l=0;l<pMap->getMaxLocations()-1;l++)
+		for(m=0;m<UNIT_TYPE_COUNT;m++)
+		{
+			PRERACE::loc[k][l].force[m]=pMap->location[l].force[k][m];
+			PRERACE::loc[k][l].availible[m]=pMap->location[l].force[k][m];
+		}*/
+	newcalc=0;
+	
+	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+	{
+		
+		for(i=k*t;i<(k+1)*t;i++)
+			for(j=k*t;j<i;j++)
 				if((player[i]->getpFitness()>player[j]->getpFitness())||
 				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()>player[j]->getsFitness()))||
 				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()==player[j]->getsFitness())&&(player[i]->gettFitness()>player[j]->gettFitness())) )
@@ -200,79 +224,102 @@ ANARACE* SOUP::newGeneration()
 //		qsort(player[0],MAX_PROGRAMS/2,sizeof(RACE),compare);
 //		qsort(player[MAX_PROGRAMS/2],MAX_PROGRAMS/2,sizeof(RACE),compare);
 
-		for(i=10;i--;)
+		for(i=0;i<ga->breedFactor*t/100;i++) // % are replaced
 		{
-			t=rand()%(MAX_PROGRAMS/4)+MAX_PROGRAMS/4;
+			l=rand()%(t*(ga->breedFactor)/100) + t*(100-ga->breedFactor)/100;
 			for(j=0;j<MAX_LENGTH;j++)
 			{
-				player[t]->Code[0][j]=player[0]->Code[0][j];
-				player[t]->Code[1][j]=player[0]->Code[1][j];
+				player[k*t+l]->Code[0][j]=player[k*t]->Code[0][j];
+				player[k*t+l]->Code[1][j]=player[k*t]->Code[1][j];
 //				memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
 //				memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
 			}
 		}  
 
-		for(i=10;i--;)
+		if((player[k*t]->getpFitness()>anaplayer[k]->getMaxpFitness())||
+		  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
+		 &&(player[k*t]->getsFitness()>anaplayer[k]->getMaxsFitness()))||
+		  ((player[k*t]->getpFitness()>=anaplayer[k]->getMaxpFitness())
+		 &&(player[k*t]->getsFitness()>=anaplayer[k]->getMaxsFitness())
+		 &&(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())))
 		{
-			t=rand()%(MAX_PROGRAMS/4)+MAX_PROGRAMS/4+MAX_PROGRAMS/2;
-			for(j=0;j<MAX_LENGTH;j++)
-			{
-				player[t]->Code[0][j]=player[MAX_PROGRAMS/2]->Code[0][j];
-				player[t]->Code[1][j]=player[MAX_PROGRAMS/2]->Code[1][j];
-			}
-//			memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
-//			memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
-		}
 
-		for(j=0;j<2;j++)
-		{
-			if((player[j*MAX_PROGRAMS/2]->getpFitness()>anaplayer[j]->getMaxpFitness())||((player[j*MAX_PROGRAMS/2]->getpFitness()>=anaplayer[j]->getMaxpFitness())&&(player[j*MAX_PROGRAMS/2]->getsFitness()>anaplayer[j]->getMaxsFitness()))|| ((player[j*MAX_PROGRAMS/2]->getpFitness()>=anaplayer[j]->getMaxpFitness())&&(player[j*MAX_PROGRAMS/2]->getsFitness()>=anaplayer[j]->getMaxsFitness())&&(player[j*MAX_PROGRAMS/2]->gettFitness()>anaplayer[j]->getMaxtFitness())))
+			if(player[k*t]->gettFitness()>anaplayer[k]->getMaxtFitness())
+				anaplayer[k]->setMaxtFitness(player[t*k]->gettFitness());
+			if(player[k*t]->getsFitness()>anaplayer[k]->getMaxsFitness())
 			{
-				if(player[j*MAX_PROGRAMS/2]->gettFitness()>anaplayer[j]->getMaxtFitness())
-					anaplayer[j]->setMaxtFitness(player[j*MAX_PROGRAMS/2]->gettFitness());
-				if(player[j*MAX_PROGRAMS/2]->getsFitness()>anaplayer[j]->getMaxsFitness())
-				{
-					anaplayer[j]->setMaxsFitness(player[j*MAX_PROGRAMS/2]->getsFitness());
-					anaplayer[j]->setMaxtFitness(player[j*MAX_PROGRAMS/2]->gettFitness());
-				}
-				if(player[j*MAX_PROGRAMS/2]->getpFitness()>anaplayer[j]->getMaxpFitness())
-				{
-					anaplayer[j]->setMaxpFitness(player[j*MAX_PROGRAMS/2]->getpFitness());
-					anaplayer[j]->setMaxsFitness(player[j*MAX_PROGRAMS/2]->getsFitness());
-					anaplayer[j]->setMaxtFitness(player[j*MAX_PROGRAMS/2]->gettFitness());
-				}
-				anaplayer[j]->setUnchangedGenerations(0);
-				for(t=0;t<MAX_LENGTH;t++)
-				{
-					anaplayer[j]->Code[0][t]=player[j*MAX_PROGRAMS/2]->Code[0][t];
-					anaplayer[j]->Code[1][t]=player[j*MAX_PROGRAMS/2]->Code[1][t];
-					//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
-					//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
-				}
-				anaplayer[j]->resetData();
-				anaplayer[j]->resetLocations();
-				anaplayer[j]->calculate();
+				anaplayer[k]->setMaxsFitness(player[t*k]->getsFitness());
+				anaplayer[k]->setMaxtFitness(player[t*k]->gettFitness());
 			}
-			anaplayer[j]->setUnchangedGenerations(anaplayer[j]->getUnchangedGenerations()+1);
-			anaplayer[j]->setGeneration(anaplayer[j]->getGeneration()+1);
-			if(anaplayer[j]->getUnchangedGenerations()>ga->maxGenerations)
+			if(player[t*k]->getpFitness()>anaplayer[k]->getMaxpFitness())
 			{
-				for(i=MAX_PROGRAMS/2;i--;)
-					player[i+j*MAX_PROGRAMS/2]->resetGeneCode();
-				anaplayer[j]->setRun(anaplayer[j]->getRun()+1);
-				anaplayer[j]->setGeneration(0);
-				anaplayer[j]->setMaxpFitness(0);
-				anaplayer[j]->setMaxsFitness(0);
-				anaplayer[j]->setMaxtFitness(0);
-				anaplayer[j]->setUnchangedGenerations(0);		
-				//TODO: Saven!
+				anaplayer[k]->setMaxpFitness(player[t*k]->getpFitness());
+				anaplayer[k]->setMaxsFitness(player[t*k]->getsFitness());
+				anaplayer[k]->setMaxtFitness(player[t*k]->gettFitness());
+			}
+			anaplayer[k]->setUnchangedGenerations(0);
+			newcalc=1;
+			for(i=0;i<MAX_LENGTH;i++)
+			{
+				anaplayer[k]->Code[0][i]=player[t*k]->Code[0][i];
+				anaplayer[k]->Code[1][i]=player[t*k]->Code[1][i];
+				//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
+				//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
 			}
 		}
-//TODO: Fehler: Die Commandcenter sammeln sich aus irgend einem Grunde an!
+	}
+//TODO: newcalc wieder rein, aber obacht, loc ist static und aendert sich wegen der Anfragen der normalen player! was ueberlegen... entweder mehr aus prerace in race und anarace oder hier temporaer zwischenspeichern
+//	if(newcalc)
+//	{
+		for(k=0;k<pMap->getMaxPlayer();k++)
+			for(l=0;l<pMap->getMaxLocations()-1;l++)
+				for(m=0;m<UNIT_TYPE_COUNT;m++)
+				{
+					PRERACE::loc[k][l].force[m]=pMap->location[l].force[k][m];
+					PRERACE::loc[k][l].availible[m]=pMap->location[l].force[k][m];
+				}
 
-if((anaplayer[0]->getMaxpFitness()>anaplayer[1]->getMaxpFitness())||((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>anaplayer[1]->getMaxsFitness()))|| ((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>=anaplayer[1]->getMaxsFitness())&&(anaplayer[0]->getMaxtFitness()>anaplayer[1]->getMaxtFitness())))
+		for(k=0;k<pMap->getMaxPlayer()-1;k++)
+		{
+			anaplayer[k]->resetData();
+			anaplayer[k]->resetSupply();
+			anaplayer[k]->adjustHarvest();
+		}
+		complete=0;
+		while(!complete)
+		{
+			complete=1;
+			for(k=0;k<pMap->getMaxPlayer()-1;k++)
+				complete&=anaplayer[k]->calculateStep();
+		}
+
+//	}
+
+	for(k=0;k<pMap->getMaxPlayer()-1;k++) //-1 because of the 0 player
+	{
+		anaplayer[k]->setUnchangedGenerations(anaplayer[k]->getUnchangedGenerations()+1);
+		anaplayer[k]->setGeneration(anaplayer[k]->getGeneration()+1);
+		if(anaplayer[k]->getUnchangedGenerations()>ga->maxGenerations)
+		{
+			for(i=k*t;i<(k+1)*t;i++)
+				player[i]->resetGeneCode();
+
+			anaplayer[k]->setRun(anaplayer[k]->getRun()+1);
+			anaplayer[k]->setGeneration(0);
+			anaplayer[k]->setMaxpFitness(0);
+			anaplayer[k]->setMaxsFitness(0);
+			anaplayer[k]->setMaxtFitness(0);
+			anaplayer[k]->setUnchangedGenerations(0);		
+			//TODO: Saven!
+		}
+	}
+	//	~~
+ 	//	if((anaplayer[0]->getMaxpFitness()>anaplayer[1]->getMaxpFitness())||((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>anaplayer[1]->getMaxsFitness()))|| ((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>=anaplayer[1]->getMaxsFitness())&&(anaplayer[0]->getMaxtFitness()>anaplayer[1]->getMaxtFitness())))
+	//	return(anaplayer[0]);
+	//	else 
+//TODO: sort the anaplayer and return the best
+	anaplayer[0]->analyzeBuildOrder();
 	return(anaplayer[0]);
-else return(anaplayer[1]);
 };
 
 SOUP::SOUP()
@@ -293,8 +340,8 @@ SOUP::~SOUP()
 	{
 		for(i=0;i<MAX_PROGRAMS;i++)
 			delete player[i];
-		delete anaplayer[0];
-		delete anaplayer[1];
+		for(i=0;i<MAX_PLAYER;i++)
+			delete anaplayer[i]; //~~
 	};
 
 };
