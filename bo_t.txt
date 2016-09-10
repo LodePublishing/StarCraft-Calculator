@@ -2,110 +2,52 @@ StarCraft Evolution Chamber by ClawSoftware.de
 --------------------------------------------------
 
 Build Order of best Individual:
-Time used: 20:58
-[00:20] Refinery
-[00:48] SCV
-[01:03] Mineral SCV to Gas
-[01:04] Mineral SCV to Gas
-[01:05] Mineral SCV to Gas
-[01:06] Mineral SCV to Gas
-[01:40] SCV
-[02:32] SCV
-[03:07] SCV
-[03:33] SCV
-[03:54] SCV
-[04:25] Supply Depot
-[05:08] SCV
-[05:27] Barracks
-[05:41] SCV
-[06:01] SCV
-[06:21] SCV
-[06:50] Factory
-[07:00] SCV
-[07:20] SCV
-[07:21] Mineral SCV to Gas
-[07:40] SCV
-[07:41] Gas SCV to Mineral
-[07:42] Supply Depot
-[08:13] Starport
-[08:14] SCV
-[08:34] SCV
-[08:46] Starport
-[08:55] SCV
-[09:15] SCV
-[09:26] Science Facility
-[09:28] Control Tower
-[09:36] SCV
-[09:52] Supply Depot
-[10:00] SCV
-[10:08] Control Tower
-[10:20] SCV
-[10:40] SCV
-[11:00] SCV
-[11:01] Science Vessel
-[11:20] SCV
-[11:21] Armory
-[11:40] SCV
-[12:00] SCV
-[12:01] Supply Depot
-[12:20] SCV
-[12:40] SCV
-[12:44] Dropship
-[12:45] Science Vessel
-[13:00] SCV
-[13:20] SCV
-[13:21] Supply Depot
-[13:34] Wraith
-[14:05] Valkyrie
-[14:06] SCV
-[14:34] Wraith
-[14:35] SCV
-[14:55] Dropship
-[14:56] Supply Depot
-[14:57] Supply Depot
-[15:39] Dropship
-[15:45] Science Vessel
-[15:46] SCV
-[16:06] SCV
-[16:14] Command Center
-[16:33] Wraith
-[16:40] SCV
-[17:05] Science Vessel
-[17:33] Wraith
-[18:25] Valkyrie
-[18:33] Dropship
-[19:16] Valkyrie
-[20:07] Valkyrie
-SCV : 38 [68]
-Wraith : 4 [1113]
-Science Vessel : 4 [1105]
-Dropship : 4 [1163]
-Valkyrie : 4 [1257]
-Command Center : 2 [1094]
-Supply Depot : 7 [308]
-Refinery : 1 [63]
-Barracks : 1 [410]
-Factory : 1 [493]
-Starport : 2 [566]
-Science Facility : 1 [629]
-Armory : 1 [764]
-Control Tower : 2 [648]
-Harvested Minerals : 7141
-Harvested Gas      : 2922
-Minerals at the end: 941
-Gas at the end     : 122
-------------------------------
+Time used: 9:0
+6 SCV
+1 Supply Depot
+1 SCV
+1 Supply Depot
+1 SCV
+2 Barracks
+1 Supply Depot
+1 Marine
+1 Barracks
+3 Marine
+1 Supply Depot
+Marine : 30
+SCV : 12
+Command Center : 1
+Supply Depot : 4
+Barracks : 3
+Harvested Minerals: 2842
+Harvested Gas: 0
+Minerals after completing last task: 142
+Gas after completing last task: 0
 
 Other possible solutions: 
 
-------------------------------
 
+----------------------------------------------------------
 
-------------------------------
-
-
-------------------------------
-
-
-------------------------------
-
+Time used: 9:4
+6 SCV
+1 Barracks
+1 Supply Depot
+1 Marine
+1 Supply Depot
+1 SCV
+2 Marine
+2 Barracks
+8 Marine
+1 Supply Depot
+4 Marine
+1 Supply Depot
+Marine : 30
+SCV : 11
+Command Center : 1
+Supply Depot : 4
+Barracks : 3
+Harvested Minerals: 2787
+Harvested Gas: 0
+Minerals after completing last task: 87
+Gas after completing last task: 0

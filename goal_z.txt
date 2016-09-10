@@ -1,11 +1,15 @@
-Max Time 45
-Max Generations 250
+Max Time 30
+Max Generations 200
 Max Vespene 1
-Mutations 50
+Mutations 25
 Mutation Rate 50
 Detailed Output 1
 Attack 0
-Time to Enemy 80
+Time to Enemy 60
+Time to Entrance 15
+Scout Drone 0 // 0: no scout drone, 1: early scout drone (after 3 minutes), 2: late scout drone (after 5 minutes)
+Wallin 0 // 0: no wallin, 1: hatchery + 2 sunkens, 2: 8 Linge, 3: hatchery+2 sunkens+8 linge
+
 
 Remember: The numbers mean how many the program should build of this unit
 >at least<. And: You don't have to enter all the tech buildings, they will
@@ -13,58 +17,58 @@ added automaticly. (i.e. the program will build a templar archive if you
 set Dark Templars to for example two and left everything else at zero)
 
 Units
-            Zergling 24 0        // one zergling actually means one egg with two zerglings
-           Hydralisk 0 0
-           Ultralisk 0 0
-               Drone 0 0
-             Defiler 0 0
-              Lurker 0 0
-            Overlord 0 0
-            Mutalisk 0 0
-            Guardien 0 0
-               Queen 0 0 
-             Scourge 0 0      // one scourge actually means one egg with two scourges
-            Devourer 0 0
+            Zergling 12
+           Hydralisk 0
+           Ultralisk 0
+               Drone 0
+             Defiler 0
+              Lurker 0
+            Overlord 0
+            Mutalisk 0
+            Guardien 0
+               Queen 0
+             Scourge 0
+            Devourer 0
 Buildings                      
-            Hatchery 2 0 
-                Lair 0 0
-                Hive 0 0
-         Nydus Canal 0 0
-       Hydralisk den 0 0
-       Defiler mound 0 0
-       Greater Spire 0 0
-        Queen's Nest 0 0
-   Evolution Chamber 0 0
-    Ultralisk Cavern 0 0
-               Spire 0 0
-       Spawning Pool 0 0
-        Creep Colony 0 0
-        Spore Colony 0 0
-       Sunken Colony 0 0
-           Extractor 0 0
+            Hatchery 2
+                Lair 0
+                Hive 0
+         Nydus Canal 0
+       Hydralisk den 0
+       Defiler mound 0
+       Greater Spire 0
+        Queen's Nest 0
+   Evolution Chamber 0
+    Ultralisk Cavern 0
+               Spire 0
+       Spawning Pool 0
+        Creep Colony 0
+        Spore Colony 0
+       Sunken Colony 0
+           Extractor 0
 
 Researches
-        Ventral Sacs 0 0      (Overlord drop)
-            Antennae 0 0      (Overlord sight range)
-Pneumatized Carapace 0 0       (Overlord speed)
-     Metabolic Boost 1 0      (Zergling speed)
-      Adrenal Glands 0 0 
-   Muscular Augments 0 0      (Hydralisk speed)
-      Grooved Spines 0 0      (Hydralisk range)
-      Gamete Meiosis 0 0      (Queen energy)
-   Metasynaptic node 0 0      (Defiler energy)
-   Chitinous Plating 0 0      (Ultralisk armor)
-  Anabolic Synthesis 0 0      (Ultralisk speed)
-           Burrowing 0 0 
-     Spawn Broodling 0 0
-              Plague 0 0      (Blood bath)
-             Consume 0 0      (Defiler ability)
-             Ensnare 0 0      (Queen ability)
-       Lurker Aspect 0 0
+        Ventral Sacs 0       (Overlord drop)
+            Antennae 0       (Overlord sight range)
+Pneumatized Carapace 0       (Overlord speed)
+     Metabolic Boost 1       (Zergling speed)
+      Adrenal Glands 0  
+   Muscular Augments 0       (Hydralisk speed)
+      Grooved Spines 0       (Hydralisk range)
+      Gamete Meiosis 0       (Queen energy)
+   Metasynaptic node 0       (Defiler energy)
+   Chitinous Plating 0       (Ultralisk armor)
+  Anabolic Synthesis 0       (Ultralisk speed)
+           Burrowing 0
+     Spawn Broodling 0
+              Plague 0       (Blood bath)
+             Consume 0       (Defiler ability)
+             Ensnare 0       (Queen ability)
+       Lurker Aspect 0
 
 Upgrades
-            Carapace 1 0
-      Flyer Carapace 0 0
-       Melee Attacks 0 0
-     Missile Attacks 0 0
-       Flyer Attacks 0 0
+            Carapace 0
+      Flyer Carapace 0
+       Melee Attacks 0
+     Missile Attacks 0
+       Flyer Attacks 0

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "scc\main.h"
 
 #define BUILDING_TYPES_PROTOSS 58
 
@@ -160,7 +160,6 @@ class Player_Protoss: public RACE
 public:
 	void Set_Goals()
 	{
-		unsigned char i,j;
 		building_types=BUILDING_TYPES_PROTOSS;
 		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
 			if(goal[i].what>0)
@@ -180,7 +179,6 @@ public:
 
 		Ziel[PROBE]=1;
 		Ziel[NEXUS]=1;
-		Ziel[GATEWAY]=1; // noch in Tech rein! 
 
 		if((goal[ARMOR].what>1)||(goal[GROUND_WEAPONS].what>1))
 		{
@@ -197,7 +195,7 @@ public:
 			Ziel[FLEET_BEACON]=1;
 		}
 
-/*		if((wallin==3)||(wallin==4))
+		if((wallin==3)||(wallin==4))
 		{
 			Ziel[FORGE]=1;
 			Ziel[PHOTON_CANNON]=1;
@@ -207,8 +205,8 @@ public:
 		if((wallin==3)||(wallin==2))
 		{
 			if(goal[GATEWAY]==0) goal[GATEWAY]=1;
-			if(goal[ZEALOT]<3) goal[ZEALOT]=3;
-		}*/
+			if(goal[ZEALOTS]<3) goal[ZEALOTS]=3;
+		}
 
 
 
@@ -236,7 +234,6 @@ public:
 			Goal_Harvested_Mins+=(goal[i].what*stats[1][i].mins);
 		Goal_Harvested_Mins*=1.1;
 
-		Max_Build_Types=0;
 		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
 		if(Ziel[i]==1)
 		{
@@ -249,7 +246,7 @@ public:
 	{
 		if((who>=ARMOR)&&(who<=PLASMA_SHIELDS))
 		{
-			building[nr].on_the_run=0;
+			building[j].on_the_run=0;
 			building[nr].RB=stats[1][who].BT+force[who]*32;
 			switch(who)
 			{
@@ -267,7 +264,7 @@ public:
 
 			mins-=stats[1][who].mins;
 		    gas-=stats[1][who].gas;
-			building[nr].on_the_run=0;
+			building[j].on_the_run=0;
 		}
 		building[nr].type=who;
 		Supply-=stats[1][who].supply;
@@ -280,9 +277,9 @@ public:
 	
 	void Build(unsigned short what)
 	{
-	   unsigned char m;
+		unsigned char m;
 
-		if((stats[1][what].type==2)&&(what!=PYLON)&&(force[PYLON]==0)&&(what!=ASSIMILATOR)&&(what!=NEXUS))
+		if((stats[1][what].type==2)&&(what!=PYLON)&&(force[PYLON]==0)&&(what!=ASSIMILATOR))
 			return;
 	
 			if((what==ONE_MINERAL_PROBE_TO_GAS)&&(force[ASSIMILATOR]>0)&&(peonmins>0))
@@ -498,27 +495,26 @@ public:
 	
 	void Calculate()
 	{
-		unsigned short tt,i,j;
+		unsigned char ready,scout;
+		unsigned short tt;
 		ready=0;
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
-		//gasready=0;
-		//minsready=0;
 		Vespene_Av=Max_Vespene;		
 		tt=0;
-		
+		scout=0;
 
 		while((timer<Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{			
-	/*		if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
+			if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
 			{
 				scout=1;
 				if(peonmins>0)
 					peonmins--;
 				else peongas--;
 				Scout_Time=timer;
-			}*/
+			}
 			
 			BuildingRunning=0;
 			ok=0;
@@ -554,6 +550,8 @@ public:
 					if(building[j].RB==0)
 					{
 						
+						
+						
 						if((Attack==1)&&(building[j].type<NEXUS)&&(building[j].on_the_run==0)&&(building[j].type!=PROBE)&&(building[j].type!=SHUTTLE)&&(building[j].type!=DARK_ARCHON)&&(building[j].type!=ARCHON))
 						{
 							building[j].on_the_run=1;
@@ -561,9 +559,9 @@ public:
 							{
 							case ZEALOT:
 								if(force[LEG_ENHANCEMENTS]>0)
-									building[j].RB+=(unsigned short)((/*Main_Production*Time_to_Front+*/Time_to_Enemy)*0.75);
+									building[j].RB+=(unsigned short)((Main_Production*Time_to_Front+Time_to_Enemy)*0.75);
 								else
-									building[j].RB+=(/*Main_Production*Time_to_Front+*/Time_to_Enemy);
+									building[j].RB+=(Main_Production*Time_to_Front+Time_to_Enemy);
 								break;
 							
 							case SCOUT:
@@ -578,13 +576,13 @@ public:
 							case ARCHON:
 							case DARK_ARCHON:
 							case DARK_TEMPLAR:
-								building[j].RB+=(/*Main_Production*Time_to_Front+*/Time_to_Enemy);
+								building[j].RB+=(Main_Production*Time_to_Front+Time_to_Enemy);
 								break;
 							case CARRIER:
 								building[j].RB+=(unsigned short)(Time_to_Enemy*1.25);
 								break;
 							case HIGH_TEMPLAR:
-								building[j].RB+=(unsigned short)(/*Main_Production*Time_to_Front+*/Time_to_Enemy*1.25);
+								building[j].RB+=(unsigned short)(Main_Production*Time_to_Front+Time_to_Enemy)*1.25;
 									break;
 							case OBSERVER:
 								if(force[GRAVITIC_BOOSTERS]>0)
@@ -604,13 +602,12 @@ public:
 								building[j].RB+=Time_to_Enemy*3;
 								break;
 						}
-					}
 
 						switch(building[j].type)
 						{
 							case PROBE:peonmins++;availible[NEXUS]++;break;
-							case PYLON:Supply+=8;break;
-							case NEXUS:Supply+=9;break;
+							case PYLON:Supply+=7;break;
+							case NEXUS:Supply+=10;break;
 							case ASSIMILATOR:break;
 							case ZEALOT:
 							case DRAGOON:
@@ -662,29 +659,24 @@ public:
 						if(building[j].RB==0)
 						{
 							force[building[j].type]++;
-							if((force[building[j].type]>=goal[force[building[j].type]].what)&&(ftime[building[j].type]==0))
-								ftime[building[j].type]=timer;
 							if(stats[1][building[j].type].type<3)
 								availible[building[j].type]++;
 							else
 								availible[building[j].type]=1;
 							ready=1;
 							for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
-								ready&=((goal[i].what<=force[i])&&((goal[i].time>=ftime[i])||(goal[i].time==0)));
-						//	if((harvested_mins >= Goal_Harvested_Mins)&&(minsready==0)) minsready=(timer*100)/Max_Time;
-						//	if((harvested_gas >= Goal_Harvested_Gas)&&(gasready==0)) gasready=(timer*100)/Max_Time;
-						}	
+								ready&=((goal[i].what<=force[i])&&((goal[i].time>timer)||(goal[i].time==0)));
+						}
 						}
 				}
-			
 			}
+
 			Build(Build_Av[program[IP].order]);
 			tt++;
 			if((ok==1)||(tt>267))
 			{
 				if(tt<=267) program[IP].time=timer;
 				else program[IP].time=20000;
-				program[IP].temp=availible[GATEWAY];
 				tt=0;
 				IP++;
 			}
@@ -693,17 +685,127 @@ public:
 		timer++;
 	}
 
+	fitness=0;
+
 	length=IP;
-	CalculateFitness();
+
+	if(ready==0)
+	{
+		timer=Max_Time;
+		//Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
+		
+		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)		
+		if(goal[i].what>0)
+		{
+			if(goal[i].what>force[i])
+				fitness+=(unsigned short)(force[i]*100/goal[i].what);
+			else fitness+=100;
+		}
+			
+
+	// Ziele unterschiedlich bewerten!
+			// sqrt nochmal ueberlegen mmmh :| programm muss halt schritt fuer schritt belohnt werden ^^ vielleicht je nach techstufe, also z.B. pool: 1, lair: 2, spire: 3~~~~
+
+		if(Goal_Harvested_Gas>harvested_gas)
+			fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
+		else fitness+=100;
+
+		if(Goal_Harvested_Mins>harvested_mins)
+			fitness+=(unsigned short)(harvested_mins*100/Goal_Harvested_Mins);
+		else fitness+=100;
+
+		for(i=0;i<MAX_BUILDINGS;i++)
+			if(building[i].RB>0)
+				if(goal[building[i].type].what>force[building[i].type])
+					fitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[1][building[i].type].BT));
+
+	}
+	else
+	{
+		fitness=Max_Time-timer;
+		fitness+=200;//mins, gas
+		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
+	 		if(goal[i].what>0)
+				fitness+=100;
+	}
 }
 
 
-void InitRaceSpecific()
+void Mutate()
 {
+	unsigned char ttt,ta,tb;
+//loeschen, einfuegen, veraendern
+	for(i=0;i<Mutations;i++)
+	{
+	if(rand()%Mutations==0)
+	{
+		x=rand()%MAX_LENGTH;
+		for(y=x;y<MAX_LENGTH-1;y++)
+			program[y].order=program[y+1].order;
+	}
+	
+	if(rand()%Mut_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		for(y=MAX_LENGTH-1;y>x;y--)
+			program[y].order=program[y-1].order;
+		program[x].order=rand()%Max_Build_Types;
+	}
+
+	if(rand()%Mut_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		program[x].order=rand()%Max_Build_Types;
+	}
+	if(rand()%Mut_Rate==0)
+	{
+		ta=rand()%MAX_LENGTH;
+		tb=rand()%MAX_LENGTH;
+		ttt=program[ta].order;
+		program[ta].order=program[tb].order;
+		program[tb].order=ttt;
+	}
+	if(rand()%(Mut_Rate/2)==0)
+	{
+		ta=rand()%MAX_LENGTH;
+		tb=rand()%MAX_LENGTH;
+		if(ta>tb)
+		{
+		ttt=program[ta].order;
+		for(i=ta;i<tb;i++)
+			program[i].order=program[i+1].order;
+		program[tb].order=ttt;
+		}
+	}
+	}
+}
+
+void Init()
+{
+	for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
+	{
+		force[i]=0;
+		if(stats[1][i].type<3)
+			availible[i]=0;
+		else
+			availible[i]=1;
+	}
+	for(i=0;i<MAX_BUILDINGS;i++)
+	{
+		building[i].RB=0;
+		building[i].type=255;
+		building[i].on_the_run=0;
+	}
+
+	fitness=0;
+	mins=50;
+	gas=0;
 	force[NEXUS]=1;
 	availible[NEXUS]=1;
 	force[PROBE]=4;
 	Supply=5;
+	peonmins=4;
+	peongas=0;
+	IP=0;
 }
-
 };

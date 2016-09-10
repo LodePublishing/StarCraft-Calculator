@@ -1,4 +1,4 @@
-#include "main.h"
+#include "scc\main.h"
 
 #define BUILDING_TYPES_ZERG 53
 
@@ -144,7 +144,6 @@ public:
 
 	void Set_Goals()
 	{
-		unsigned char i;
 		building_types=BUILDING_TYPES_ZERG;
 		for(i=0;i<BUILDING_TYPES_ZERG;i++)
 			if(goal[i].what>0)
@@ -164,6 +163,7 @@ public:
 
 		Ziel[OVERLORD]=1;
 		Ziel[DRONE]=1;
+		Ziel[HATCHERY]=1;
 		if((goal[CARAPACE].what>0)||(goal[MELEE_ATTACKS].what>0)||(goal[MISSILE_ATTACKS].what>0))
 			Ziel[EVOLUTION_CHAMBER]=1;
 
@@ -183,24 +183,16 @@ public:
 			Ziel[SPAWNING_POOL]=1;
 			Ziel[SPIRE]=1;
 		}
-
-		if(Ziel[LAIR]>0)
-			Ziel[SPAWNING_POOL]=1;
-		
-		for(i=0;i<BUILDING_TYPES_ZERG;i++)
-			if((Ziel[i]>goal[i].what)&&(i!=HATCHERY)&&(i!=LAIR))//~~~~~~
-				goal[i].what=Ziel[i];
-		Ziel[HATCHERY]=1;
-		if((Ziel[LAIR]>goal[LAIR].what)&&(Ziel[HIVE]<Ziel[LAIR]))
-			goal[LAIR].what=Ziel[LAIR]-Ziel[HIVE];
-
 		if(goal[LURKER].what>0)
 		{
 			Ziel[HYDRALISK]=1;
 			Ziel[LURKER_ASPECT]=1;
-			goal[LURKER_ASPECT].what=1;
 		}
-		
+
+		for(i=0;i<BUILDING_TYPES_ZERG;i++)
+			if((Ziel[i]>goal[i].what)&&(i!=HATCHERY)&&(i!=LAIR))//~~~~~~
+				goal[i].what=Ziel[i];
+
 		Ziel[SPAWNING_POOL]=1;//vielleicht noch bei tech rein...
 		Ziel[EXTRACTOR]=1;
 //		Ziel[METABOLIC_BOOST]=1;
@@ -219,7 +211,6 @@ public:
 			Goal_Harvested_Mins+=(goal[i].what*stats[2][i].mins)+(stats[2][goal[i].what].type==2)*50;
 		Goal_Harvested_Mins*=1.1;
 
-		Max_Build_Types=0;
 		for(i=0;i<BUILDING_TYPES_ZERG;i++)
 		if(Ziel[i]==1)
 		{
@@ -277,7 +268,7 @@ public:
 	
 	void Build(unsigned short what)
 	{
-		unsigned char m,i,j;
+		unsigned char m;
 		
 			if((what==ONE_MINERAL_DRONE_TO_GAS)&&(force[EXTRACTOR]>0)&&(peonmins>0))
 			{
@@ -516,26 +507,24 @@ public:
 	
 	void Calculate()
 	{
-		unsigned char tt,i,j;
+		unsigned char ready,tt;
 		ready=0;
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
-	//	gasready=0;
-	//	minsready=0;
 		Vespene_Av=Max_Vespene;		
 		tt=0;
 
 		while((timer<Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{			
-/*			if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
+			if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
 			{
 				scout=1;
 				if(peonmins>0)
 					peonmins--;
 				else peongas--;
 				Scout_Time=timer;
-			}*/
+			}
 			BuildingRunning=0;
 			ok=0;
 
@@ -661,16 +650,13 @@ public:
 						if(building[j].RB==0)
 						{
 							force[building[j].type]++;
-							if((force[building[j].type]>=goal[force[building[j].type]].what)&&(ftime[building[j].type]==0))                                                              ftime[building[j].type]=timer;
 							if(stats[2][building[j].type].type<3)
 								availible[building[j].type]++;
 							else
 								availible[building[j].type]=1;
 							ready=1;
 							for(i=0;i<BUILDING_TYPES_ZERG;i++)
-								ready&=((goal[i].what<=force[i])&&((goal[i].time>ftime[i])||(goal[i].time==0)));
-//							if((harvested_mins >= Goal_Harvested_Mins)&&(minsready==0)) minsready=(timer*100)/Max_Time;
-//							if((harvested_gas >= Goal_Harvested_Gas)&&(gasready==0)) gasready=(timer*100)/Max_Time;
+								ready&=((goal[i].what<=force[i])&&((goal[i].time>timer)||(goal[i].time==0)));
 						}
 					}
 				}
@@ -701,9 +687,11 @@ public:
 		timer++;
 	}
 
+	fitness=0;
+
 	length=IP;
-	CalculateFitness();
-/*	if(ready==0)
+
+	if(ready==0)
 	{
 		timer=Max_Time;
 		//Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
@@ -740,14 +728,106 @@ public:
 				default:break;
 			}
 		}
-*/		
+
+	// Ziele unterschiedlich bewerten!
+			// sqrt nochmal ueberlegen mmmh :| programm muss halt schritt fuer schritt belohnt werden ^^ vielleicht je nach techstufe, also z.B. pool: 1, lair: 2, spire: 3~~~~
+
+		if(Goal_Harvested_Gas>harvested_gas)
+			fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
+		else fitness+=100;
+
+		if(Goal_Harvested_Mins>harvested_mins)
+			fitness+=(unsigned short)(harvested_mins*100/Goal_Harvested_Mins);
+		else fitness+=100;
+		//!!!!!!!!!!!!!!!!!
+		for(i=0;i<MAX_BUILDINGS;i++)
+			if(building[i].RB>0)
+				if(goal[building[i].type].what>force[building[i].type])
+					fitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[2][building[i].type].BT));
+	}
+	else
+	{
+		fitness=Max_Time-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
+		fitness+=200;//mins, gas
+		for(i=0;i<BUILDING_TYPES_ZERG;i++)
+	 		if(goal[i].what>0)
+				fitness+=100;
+	}
 }
 
-void InitRaceSpecific()
+
+void Mutate()
 {
-	unsigned short i;
+	unsigned char ttt,ta,tb;
+//loeschen, einfuegen, veraendern
+	for(i=0;i<Mutations;i++)
+	{
+	if(rand()%Mutations==0)
+	{
+		x=rand()%MAX_LENGTH;
+		for(y=x;y<MAX_LENGTH-1;y++)
+			program[y].order=program[y+1].order;
+	}
+	
+	if(rand()%Mut_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		for(y=MAX_LENGTH-1;y>x;y--)
+			program[y].order=program[y-1].order;
+		program[x].order=rand()%Max_Build_Types;
+	}
+
+	if(rand()%Mut_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		program[x].order=rand()%Max_Build_Types;
+	}
+	if(rand()%Mut_Rate==0)
+	{
+		ta=rand()%MAX_LENGTH;
+		tb=rand()%MAX_LENGTH;
+		ttt=program[ta].order;
+		program[ta].order=program[tb].order;
+		program[tb].order=ttt;
+	}
+	if(rand()%(Mut_Rate/2)==0)
+	{
+		ta=rand()%MAX_LENGTH;
+		tb=rand()%MAX_LENGTH;
+		if(ta>tb)
+		{
+		ttt=program[ta];
+		for(i=ta;i<tb;i++)
+			program[i].order=program[i+1].order;
+		program[tb].order=ttt;
+		}
+	}
+	}
+}
+
+void Init()
+{
+	for(i=0;i<BUILDING_TYPES_ZERG;i++)
+	{
+		force[i]=0;
+		if(stats[2][i].type<3)
+			availible[i]=0;
+		else
+			availible[i]=1;
+	}
+	for(i=0;i<MAX_BUILDINGS;i++)
+	{
+		building[i].RB=0;
+		building[i].type=255;
+	}
+
 	for(i=0;i<LARVA_MAX;i++)
-		larva[i]=20; // 20 Sekunden bis neue Larve aus Hatch rauskommt
+		larva[i]=20;
+
+	fitness=0;
+
+	mins=50;
+	gas=0;
 	larvae=3;
 	force[HATCHERY]=1;
 	availible[HATCHERY]=1;
@@ -755,6 +835,9 @@ void InitRaceSpecific()
 	force[OVERLORD]=1;
 	larvacounter=1;
 	Supply=5;
+	peonmins=4;
+	peongas=0;
+	IP=0;
 }
 
 };

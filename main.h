@@ -6,9 +6,9 @@
 #define MAX_LENGTH 100
 #define RUNNINGS 5
 #define MAX_PLAYER 100
-#define LARVA_MAX 200
+#define LARVA_MAX 500
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
-#define MAX_GOALS 60
+
 struct Namen
 {
 	char b[6];
@@ -55,11 +55,13 @@ struct GOAL
 };
 
 unsigned short Ziel[60],Build_Av[60],Build_Bv[60]; 
-unsigned char Vespene_Av,Max_Build_Types,Max_Vespene,race;
+unsigned char Vespene_Av,Max_Build_Types,Max_Vespene;
 unsigned short Max_Time,Max_Generations,Mut_Rate,Mutations;
-unsigned short total_goals,building_types;
+unsigned short afit;
+unsigned short generation;
 unsigned char num,Attack;
-GOAL goal[MAX_GOALS];
+unsigned short x,y,i,j,A,B;
+GOAL goal[60];
 double Goal_Harvested_Gas,Goal_Harvested_Mins;
 unsigned short Time_to_Enemy;
 
@@ -266,34 +268,33 @@ const Stats stats[3][60]=
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
-
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0}
 	}
-};
+};	
 
 class RACE
 {
 public:
-	unsigned force[60];
-	unsigned short ftime[60]; //when the goal is reached...
+	unsigned char force[60];
 	unsigned char availible[60];
+
 	double mins,gas;
 	unsigned short larvae,IP,min,n;
 	unsigned short peonmins,peongas, peonbuilding, length,BuildingRunning;
 	short Supply;
 
 	unsigned char av_starport,av_factory;
-	//hacked: man kann sonst in nem kompletten Starport sowohl erforschen, als auch valkyries baun etc.
+	//hacked: man kann in nem kompletten Starport sowohl erforschen, als auch valkyries baun etc.
 
-	unsigned char ready;
 	struct Program
 	{
-		unsigned char order,location,supply;//supply noch aendern... Verbrauch/Verfuegbar
-		unsigned short time,mins,gas,temp;
+		unsigned char order,location,supply;
+		unsigned short time,mins,gas;
 	} program[MAX_LENGTH];
+	
 	struct Building
 	{
 		unsigned short RB; // Remaining Buildtime
@@ -309,186 +310,21 @@ public:
 	unsigned char larvacounter;
 
 	double harvested_gas,harvested_mins;
-	unsigned short pFitness,sFitness,timer,gasready,minsready;
+	unsigned short fitness,timer;
 
 	virtual void Set_Goals() {};
 	virtual inline void Produce() {};
 	virtual void Build() {};
 	virtual void Calculate() {};
-	virtual void InitRaceSpecific() {};
+	virtual void Mutate() {};
+	virtual void Init() {};
 
-	void CalculateFitness()
-	{
-		unsigned char i;
-		unsigned short verschwendung;
-		unsigned char bonus[MAX_GOALS]; // ob schon Bonus fuer halbfertige Einheit vergeben wurde
-		pFitness=0;
-		sFitness=0;
-		sFitness=(unsigned short)(harvested_mins+harvested_gas);
-		//Problem: Verschwendung... viele Science Labors etc
-		 if(ready==0)
-	         {
-	                 timer=Max_Time;
-	         //Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
-		// HAEE??? WARUM HIER MAX_BUILD_TYPES!?
-			 for(i=0;i<building_types;i++)
-                                if(goal[i].what>0)
-	        	             {
-	                              if(goal[i].what>force[i])
-				      {
-				      //nicht alle erledigt & ueber der Zeit
-					      if(goal[i].time>0)
-					      	pFitness+=(100*goal[i].time*force[i])/(goal[i].what*Max_Time);
-					      else pFitness+=(100*force[i])/goal[i].what;
-				      }
-				      else
-				      {
-					if((goal[i].time>0)&&(ftime[i]>goal[i].time))
-						pFitness+=(goal[i].time*100/ftime[i]);
-					else	pFitness+=100;
-					if(goal[i].what<force[i])
-						sFitness-=(force[i]-goal[i].what)*(stats[race][i].mins+stats[race][i].gas);
-				      }
-				     }
-// Obacht vor sehr kleinen goal[i].times vielleicht nochmal in der scc.cpp checken
-				      
-				      
-		//if(Goal_Harvested_Gas>harvested_gas)
-                  //      fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
-             //   else
-	//	{
-	//		fitness+=100;
-	//		fitness+=gasready;
-	//	};
-	
-     	//	if(Goal_Harvested_Mins>harvested_mins)
-          //              fitness+=(unsigned short)(harvested_mins*100/Goal_Harvested_Mins);
-            //    else 
-	//	{
-	//		fitness+=100;
-	//		fitness+=minsready;
-	//	};
-//Problem hier: wenn Programm viele nichtfertige Gebaeude kurz vor Ende hat wirds nicht abgefangen...
-		for(i=0;i<MAX_GOALS;i++)
-			bonus[i]=goal[i].what-force[i];
-		for(i=0;i<MAX_BUILDINGS;i++)
-                        if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type])&&(bonus[building[i].type]>0))
-			{
-	                          pFitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[race][building[i].type].BT));
-				  bonus[building[i].type]--;
-			}
-	       }
-	        else
-		 {
-		            pFitness=Max_Time-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
-		            
-			    // pFitness+=400;//mins, gas
-		            // Warum hier Max_Build_Types!? 
-			     for(i=0;i<building_types;i++)
-	                      if(goal[i].what>0)
-		                   pFitness+=100;
-		   }
-		
-	}
-	
-	void Mutate()
-{
-	unsigned char ttt,ta,tb,i,x,y;
-//loeschen, einfuegen, veraendern
-	for(i=0;i<Mutations;i++)
-	{
-	if(rand()%Mut_Rate==0)
-	{
-		x=rand()%MAX_LENGTH;
-		for(y=x;y<MAX_LENGTH-1;y++)
-			program[y].order=program[y+1].order;
-	}
-	
-	if(rand()%Mut_Rate==0)
-	{
-		x=rand()%MAX_LENGTH;
-		for(y=MAX_LENGTH-1;y>x;y--)
-			program[y].order=program[y-1].order;
-		program[x].order=rand()%Max_Build_Types;
-	}
-
-	if(rand()%Mut_Rate==0)
-	{
-		x=rand()%MAX_LENGTH;
-		program[x].order=rand()%Max_Build_Types;
-	}
-	if(rand()%Mut_Rate==0)
-	{
-		ta=rand()%MAX_LENGTH;
-		tb=rand()%MAX_LENGTH;
-		ttt=program[ta].order;
-		program[ta].order=program[tb].order;
-		program[tb].order=ttt;
-	}
-	if(rand()%(Mut_Rate/2)==0)
-	{
-		ta=rand()%MAX_LENGTH;
-		tb=rand()%MAX_LENGTH;
-		if(ta>tb)
-		{
-		ttt=program[ta].order;
-		for(i=ta;i<tb;i++)
-			program[i].order=program[i+1].order;
-		program[tb].order=ttt;
-		}
-	}
-	}
-}
-
-void Init()
-{
-	unsigned char i;
-	for(i=0;i<building_types;i++)
-        {
-               force[i]=0;
-	       ftime[i]=0;
-               if(stats[2][i].type<3)
-	               availible[i]=0;
-	       else
-	               availible[i]=1;
-	}
-	for(i=0;i<MAX_BUILDINGS;i++)
-	{
-	       building[i].RB=0;
-	       building[i].type=255;
-	}
-        pFitness=0;
-	sFitness=0;
-        mins=50;
-        gas=0;
-	peonmins=4;
-	peongas=0;
-	IP=0;
-	InitRaceSpecific();
-}
-	
-	
 	void Restart()
 	{
-		unsigned char i;
-		/*unsigned char randliste[100],xxx,xy,i;
-		xxx=0;xy=0;
-		for(i=0;i<building_types;i++)
-		{
-			xy=0;
-			while(Ziel[i]-xy>0)
-			{
-				randliste[xxx]=Build_Av[i];
-				xxx++;xy++;
-			}
-		}*/
 		for(i=0;i<MAX_LENGTH;i++)
 		{
-			program[i].order=rand()%Max_Build_Types;
-			//evtl ganzes Programm hier rein...
-			//Liste erstellen 
+			program[i].order=rand()%Max_Build_Types;//evtl ganzes Programm hier rein...
 			program[i].time=20000;
-			program[i].temp=0;
 //			program[i].loc=
 		}
 		timer=Max_Time;
@@ -496,23 +332,10 @@ void Init()
 		length=MAX_LENGTH;
 		av_starport=0;
 		av_factory=0;
+		afit=0;
 	}
 };
 
-void Init()
-{
-	Attack=20;
-	Time_to_Enemy=9999;
-	Goal_Harvested_Mins=0;
-	Goal_Harvested_Gas=0;
-        Max_Time=0;
-        Max_Generations=0;
-        Max_Vespene=0;
-        Mutations=0;
-        Mut_Rate=0;
-        Max_Build_Types=0;
-}
-
+unsigned char building_types;
 
 #endif
-
