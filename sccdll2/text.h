@@ -7,7 +7,7 @@ struct Namen
 {
 	char b[6];
 };
- 
+
 const char error_m[ERROR_MESSAGES][21]=
 {
 	"OK",
@@ -16,13 +16,14 @@ const char error_m[ERROR_MESSAGES][21]=
 	"supply satisfied",
 	"prerequisite built",
 	"facility availible",
+	"timeout",
 	"unknown problem"
 };
 
 
 char error_sm[ERROR_MESSAGES]=
 {
-	'O','M','G','S','P','F','U'
+	'O','M','G','S','P','F','T','U'
 };
 //TODO: restliche units einfuegen
 const Namen kurz[RACES][UNIT_TYPE_COUNT]=

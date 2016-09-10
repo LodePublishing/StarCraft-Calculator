@@ -1,6 +1,7 @@
 #include "settings.h"
 #include "map.h"
 #include "goal.h"
+#include "debug.h"
 #include <stdio.h> 
 #include <stdarg.h>
 #include <string.h>
@@ -18,7 +19,7 @@ int SETTINGS::setMaxTime(int num) //maximum time of build order in seconds
 int SETTINGS::setMaxTimeOut(int num) //timeout for building
 {
 	if(num<30) return(0);
-	ga.maxTime=num;
+	ga.maxTimeOut=num;
 	return(1);
 };
 
@@ -97,10 +98,6 @@ int SETTINGS::setGoal(int goal, int player)
 		return(0);
 	return(soup.setGoal(&goalEntry[goal], player));
 };
-
-
-
-
 
 int SETTINGS::getMaxTime()
 {
@@ -203,7 +200,7 @@ int SETTINGS::loadGoalFile(const char* goalFile) //~~~
 
 	if((pFile = fopen (goalFile,"r"))==NULL)
 	{
-		toLog("ERROR: (loadGoalFile) %s: Could not open file!",goalFile);
+		debug.toLog(0,"ERROR: (loadGoalFile) %s: Could not open file!",goalFile);
 		return(0); 
 	}
 	
@@ -224,14 +221,14 @@ int SETTINGS::loadGoalFile(const char* goalFile) //~~~
 		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param3,buffer);strtok(NULL,"\"");
 		if((buffer=strtok(NULL,"\""))!=NULL)
 		{
-			toLog("WARNING: (loadGoalFile) %s: Line %d [%s]: Too many parameters.",goalFile,ln,old);
+			debug.toLog(0,"WARNING: (loadGoalFile) %s: Line %d [%s]: Too many parameters.",goalFile,ln,old);
 			continue;
 		}
 		value1=atoi(param1);value2=atoi(param2);value3=atoi(param3);
 		
 		if((value1<0)||(value2<0)||(value3<0))
 		{
-			toLog("WARNING: (loadGoalFile) %s: Line %d [%s]: Value below zero.",goalFile,ln,old);
+			debug.toLog(0,"WARNING: (loadGoalFile) %s: Line %d [%s]: Value below zero.",goalFile,ln,old);
 			continue;
 		}
 
@@ -242,7 +239,7 @@ int SETTINGS::loadGoalFile(const char* goalFile) //~~~
 				else if(!strcmp(param1,"Zerg")) goalEntry[getGoalCount()].setRace(ZERG);
 				else
 				{
-					toLog("ERROR: (loadGoalFile) %s: Line %d [%s]: Invalid race.",goalFile,ln,old);
+					debug.toLog(0,"ERROR: (loadGoalFile) %s: Line %d [%s]: Invalid race.",goalFile,ln,old);
 					fclose(pFile);
 					return(0);
 				}
@@ -250,7 +247,7 @@ int SETTINGS::loadGoalFile(const char* goalFile) //~~~
 		else 
 			if(!goalEntry[getGoalCount()].isRaceInitialized())
 			{
-				toLog("ERROR: (loadGoalFile) %s: Line %d [%s]: @RACE must be the first line.",goalFile,ln,old);
+				debug.toLog(0,"ERROR: (loadGoalFile) %s: Line %d [%s]: @RACE must be the first line.",goalFile,ln,old);
 				fclose(pFile);
 				return(0);
 			}
@@ -258,22 +255,23 @@ int SETTINGS::loadGoalFile(const char* goalFile) //~~~
 			{
 
 //Aufbau der goal datei: "Einheitname" LEER "Anzahl" LEER "Zeit" LEER "Ort"
-				for(i=REFINERY;i--;) 
+				for(i=0;i<REFINERY;i++) 
 					if((strstr(stats[goalEntry[getGoalCount()].getRace()][i].name,item)!=NULL)&&(value2<=getMaxTime())&&(value3<=MAX_LOCATIONS)) //TODO: strcmp durch 'erstes auftauchen' vertauschen
 					{
 						//TODO: values checken!
 			 			//TODO: evtl statt Ortsnummer einfach den Ortsnamen nehmen
 						//TODO: evtl statt Ortsnummer einfach den Ortsnamen nehmen
 						if(!goalEntry[getGoalCount()].addGoal(i,value1,60*value2,value3))
-							toLog("WARNING: (loadGoalFile) %s: Line %d [%s]: Problems with adding goal.",goalFile,ln,old);
-						i=-1;
+							debug.toLog(0,"WARNING: (loadGoalFile) %s: Line %d [%s]: Problems with adding goal.",goalFile,ln,old);
+						i=REFINERY+1;
 						break;
 					}
-				if(i!=-1)
-					toLog("WARNING: (loadGoalFile) %s: Line %d [%s]: No unit name matched this goal.",goalFile,ln,old);
+				if(i!=REFINERY+1)
+					debug.toLog(0,"WARNING: (loadGoalFile) %s: Line %d [%s]: No unit name matched this goal.",goalFile,ln,old);
 			}
 	} //end while
 
+	goalEntry[getGoalCount()].adjustGoals();
 	setGoalCount(getGoalCount()+1);
 	fclose(pFile);
 	return(1);
@@ -295,7 +293,7 @@ int SETTINGS::loadSettingsFile(const char* settingsFile)
 
 	if((pFile = fopen (settingsFile,"r"))==NULL)
 	{
-		toLog("ERROR: (loadSettingsFile) %s: Could not open file!",settingsFile);
+		debug.toLog(0,"ERROR: (loadSettingsFile) %s: Could not open file!",settingsFile);
 		return(0);
 	}
 
@@ -311,14 +309,14 @@ int SETTINGS::loadSettingsFile(const char* settingsFile)
 		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param,buffer);
 		if((buffer=strtok(NULL,"\""))!=NULL)
 		{
-			toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Too many parameters.",settingsFile,ln,old);
+			debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Too many parameters.",settingsFile,ln,old);
 			continue;
 		}
 		value=atoi(param);
 		
 		if(value<0)
 		{
-			toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Value below zero.",settingsFile,ln,old);
+			debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Value below zero.",settingsFile,ln,old);
 			continue;
 		}
 
@@ -328,9 +326,9 @@ int SETTINGS::loadSettingsFile(const char* settingsFile)
 			else 
 			{
 				if(!strcmp(item,"@END"))
-					toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Lonely @END.",settingsFile,ln,old);
+					debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Lonely @END.",settingsFile,ln,old);
 				else
-					toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",settingsFile,ln,old);
+					debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",settingsFile,ln,old);
 			}
 			
 		}
@@ -339,44 +337,44 @@ int SETTINGS::loadSettingsFile(const char* settingsFile)
 			if(!strcmp(item,"@END"))
 				mode=0;
 			else if(!strcmp(item,"@SETTINGS"))
-				toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: New @SETTINGS block found within a @SETTINGS block.",settingsFile,ln,old);
+				debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: New @SETTINGS block found within a @SETTINGS block.",settingsFile,ln,old);
 			else if(mode==1)
 			{
 				if(!strcmp(item,"Max Time"))
 				{
 					//TODO evtl alles in set... rein
 					if(!setMaxTime(value))
-						toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Time too low.",settingsFile,ln,old);
+						debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Time too low.",settingsFile,ln,old);
 				}
 				else if(!strcmp(item,"Max Timeout"))
 				{
 					if(!setMaxTimeOut(value))
-						toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Timeout too low.",settingsFile,ln,old);
+						debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Timeout too low.",settingsFile,ln,old);
 				}
 				else if(!strcmp(item,"Max Length"))
 				{
 					if(!setMaxLength(value))
-						toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Length out of range.",settingsFile,ln,old);
+						debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Length out of range.",settingsFile,ln,old);
 				}
 
 				else if(!strcmp(item,"Max Runs"))
 				{
 					if(!setMaxRuns(value))
-						toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Runs too low.",settingsFile,ln,old);
+						debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Runs too low.",settingsFile,ln,old);
 				}
 				
 				else if(!strcmp(item,"Preprocess Buildorder"))
 				{
 					if(!setPreprocessBuildOrder(value))
-						toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Preprocess Buildorder out of Range.",settingsFile,ln,old);
+						debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Preprocess Buildorder out of Range.",settingsFile,ln,old);
 				}
 				else if(!strcmp(item,"Max unchanged Generations"))
 				{
 					if(!setMaxGenerations(value))
-						toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Generations out of range.",settingsFile,ln,old);
+						debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Max Generations out of range.",settingsFile,ln,old);
 				}
 				else
-					toLog("WARNING: (loadSettingsFile) %s: Line %d [%s]: Unknown entry.",settingsFile,ln,old);
+					debug.toLog(0,"WARNING: (loadSettingsFile) %s: Line %d [%s]: Unknown entry.",settingsFile,ln,old);
 			}
 		}// END if(mode>0)
 	}// END while
@@ -395,7 +393,7 @@ int SETTINGS::loadHarvestFile(const char* harvestFile)
 	int i=0;
 	if((pFile = fopen (harvestFile,"r"))==NULL)
 	{
-		toLog("ERROR: (loadHarvestFile) %s: Could not open file!",harvestFile);
+		debug.toLog(0,"ERROR: (loadHarvestFile) %s: Could not open file!",harvestFile);
 		return(0); 
 	}
 
@@ -414,13 +412,13 @@ int SETTINGS::loadHarvestFile(const char* harvestFile)
 		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param,buffer);strtok(NULL,"\"");
 		if((buffer=strtok(NULL,"\""))!=NULL)
 		{
-			toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Too many parameters.",harvestFile,ln,old);
+			debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Too many parameters.",harvestFile,ln,old);
 			continue;
 		}
 
 		if((value=atoi(param))<0)
 		{
-			toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Value below zero.",harvestFile,ln,old);
+			debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Value below zero.",harvestFile,ln,old);
 			continue;
 		}
 
@@ -429,9 +427,9 @@ int SETTINGS::loadHarvestFile(const char* harvestFile)
 			if(!strcmp(item,"@HARVESTDATA")) 
 				mode=1;
 			else if(!strcmp(item,"@END"))
-				toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Lonely @END.",harvestFile,ln,old);
+				debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Lonely @END.",harvestFile,ln,old);
 			else 
-				toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",harvestFile,ln,old);
+				debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",harvestFile,ln,old);
 		
 		}
 		else if(mode==1)		
@@ -447,7 +445,7 @@ int SETTINGS::loadHarvestFile(const char* harvestFile)
 				else if(!strcmp(item,"@END"))
 					mode=0;
 				else 
-					toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: @TERRA, @PROTOSS or @ZERG expected.",harvestFile,ln,old);
+					debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: @TERRA, @PROTOSS or @ZERG expected.",harvestFile,ln,old);
 			}
 			else if(modeRace>0)
 			{
@@ -461,14 +459,14 @@ int SETTINGS::loadHarvestFile(const char* harvestFile)
 					{
 						if(!harvestSpeed[modeRace-1].setHarvestMineralSpeed(i++,(value=atoi(buffer))))
 						{
-							toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Values out of range.",harvestFile,ln,old);
+							debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Values out of range.",harvestFile,ln,old);
 							break;
 						}
 						buffer=strtok(NULL," ");
 					}
 					if(i<45)
 					{
-						toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Missing entries.",harvestFile,ln,old);
+						debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Missing entries.",harvestFile,ln,old);
 						for(;i<45;i++)
 							//~~
 							harvestSpeed[modeRace-1].setHarvestMineralSpeed(i++,value);
@@ -483,25 +481,25 @@ int SETTINGS::loadHarvestFile(const char* harvestFile)
 					{
 						if(!harvestSpeed[modeRace-1].setHarvestGasSpeed(i++,(value=atoi(buffer))))
 						{
-							toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Values out of range.",harvestFile,ln,old);
+							debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Values out of range.",harvestFile,ln,old);
 							break;
 						}
 						buffer=strtok(NULL," ");
 					}
 					if(i<5)
 					{
-						toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Missing entries",harvestFile,ln,old);
+						debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Missing entries",harvestFile,ln,old);
 						for(;i<5;i++)
 							//~~
 							harvestSpeed[modeRace-1].setHarvestGasSpeed(i++,value);
 					}
 				}
 				else 
-					toLog("WARNING: (loadHarvestFile) %s: Line %d [%s]: Unknown entry.",harvestFile,ln,old);
+					debug.toLog(0,"WARNING: (loadHarvestFile) %s: Line %d [%s]: Unknown entry.",harvestFile,ln,old);
 			}
 		}
 		else
-			toLog("ERROR: (loadHarvestFile) %s: Line %d [%s]: Serious bug.",harvestFile,ln,item);
+			debug.toLog(0,"ERROR: (loadHarvestFile) %s: Line %d [%s]: Serious bug.",harvestFile,ln,item);
 	}// END while
 	return(1);
 };
@@ -522,11 +520,11 @@ int SETTINGS::loadMapFile(const char* mapFile)
 //	char tmp[1024];
 	int ln=0;
 	int value1=0,value2=0,value3=0;
-	int mode=0,modeLocation=0,modePlayer=0;
+	int mode=0,modeLocation=0,modePlayer=-1;
 	int i=0;
 	if((pFile = fopen (mapFile,"r"))==NULL)
 	{
-		toLog("ERROR: (loadMapFile) %s: Could not open file!",mapFile);
+		debug.toLog(0,"ERROR: (loadMapFile) %s: Could not open file!",mapFile);
 		return(0); 
 	}
 
@@ -549,13 +547,13 @@ int SETTINGS::loadMapFile(const char* mapFile)
 		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param3,buffer);strtok(NULL,"\"");
 		if((buffer=strtok(NULL,"\""))!=NULL)
 		{
-			toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Too many parameters.",mapFile,ln,old);
+			debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Too many parameters.",mapFile,ln,old);
 			continue;
 		}
 
 		if(((value1=atoi(param1))<0)||((value2=atoi(param2))<0)||((value3=atoi(param3))<0))
 		{
-			toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Value below zero.",mapFile,ln,old);
+			debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Value below zero.",mapFile,ln,old);
 			continue;
 		}
 
@@ -570,21 +568,21 @@ int SETTINGS::loadMapFile(const char* mapFile)
 					mode=2;
 					modeLocation=value1;
 				}
-				else toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Location out of range.",mapFile,ln,old);
+				else debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Location out of range.",mapFile,ln,old);
 			}
 			else if(!strcmp(item,"@PLAYER"))
 			{
-				if((value1>0)&&(value1<=getPlayerCount()))
+				if((value1>=0)&&(value1<=getPlayerCount()))
 				{
 					mode=3;
-					modePlayer=value1-1;
+					modePlayer=value1;
 				}
-				else toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Player is out of range.",mapFile,ln,old);
+				else debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Player is out of range.",mapFile,ln,old);
 			}
 			else if(!strcmp(item,"@END"))
-				toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Lonely @END.",mapFile,ln,old);
+				debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Lonely @END.",mapFile,ln,old);
 			else 
-				toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",mapFile,ln,old);
+				debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Line is outside a block but is not marked as comment.",mapFile,ln,old);
 		
 		}
 		else if(mode>0)		
@@ -594,44 +592,34 @@ int SETTINGS::loadMapFile(const char* mapFile)
 				if(!strcmp(item,"Name"))
 				{
 					if(!map[getMapCount()].setName(param1))
-						toLog("ERROR: (loadMapFile) %s: Line %d [%s]: Name not set!",mapFile,ln,old);
+						debug.toLog(0,"ERROR: (loadMapFile) %s: Line %d [%s]: Name not set!",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Max Locations"))
 				{
 					if(!map[getMapCount()].setMaxLocations(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Max Locations out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Max Locations out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Max Players"))
 				{
 					if((!map[getMapCount()].setMaxPlayer(value1))||(!setPlayerCount(value1)))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Max Player out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Max Player out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"@END"))
 					mode=0;
 				else 
-					toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry. GRR",mapFile,ln,old);
+					debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry. GRR",mapFile,ln,old);
 			}
 			else if(mode==2) // LOCATION Block
 			{
 				if(!strcmp(item,"Name"))
 				{
 					if(!map[getMapCount()].location[modeLocation-1].setName(param1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Name invalid.",mapFile,ln,old);
-				}
-				else if(!strcmp(item,"Mineral Count"))
-				{
-					if(!map[getMapCount()].location[modeLocation-1].setMineralCount(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Mineral Count out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Name invalid.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Mineral Distance"))
 				{
 					if(!map[getMapCount()].location[modeLocation-1].setMineralDistance(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Mineral Distance out of range.",mapFile,ln,old);
-				}
-				else if(!strcmp(item,"Vespene Geysir Count"))
-				{
-					if(!map[getMapCount()].location[modeLocation-1].setGeysirCount(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Geysir Count out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Mineral Distance out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Distances"))
 				{
@@ -642,7 +630,7 @@ int SETTINGS::loadMapFile(const char* mapFile)
 					{
 						if(!map[getMapCount()].location[modeLocation-1].setDistance(distanceCount++,(value1=atoi(buffer))) )
 						{
-							toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Values out of range",mapFile,ln,old);
+							debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Values out of range",mapFile,ln,old);
 							break;
 						}
 						buffer=strtok(NULL," ");
@@ -650,70 +638,72 @@ int SETTINGS::loadMapFile(const char* mapFile)
 			
 					if(distanceCount<map[getMapCount()].getMaxLocations())
 					{
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Missing entries",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Missing entries",mapFile,ln,old);
 						for(;distanceCount<map[getMapCount()].getMaxLocations();distanceCount++)
 							map[getMapCount()].location[modeLocation-1].setDistance(distanceCount,0);
 					}
 				}
 				else if(!strcmp(item,"@PLAYER"))
 				{
-					if((value1>0)&&(value1<=getPlayerCount()))
+					if((value1>=0)&&(value1<=getPlayerCount()))
 					{
 						mode=4;
-						modePlayer=value1-1;
+						modePlayer=value1;
 					}
 					else 
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Value out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Value out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"@END"))
 					mode=0;
 				else 
-					toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry!.",mapFile,ln,old);
+					debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry!.",mapFile,ln,old);
 			}
 			else if(mode==3) //PLAYER Block
 			{
 				if(!strcmp(item,"Race"))
 				{
-					if(!strcmp(param1,"Terra")) map[getMapCount()].player[modePlayer].setRace(TERRA);
-					else if(!strcmp(param1,"Protoss")) map[getMapCount()].player[modePlayer].setRace(PROTOSS);
-					else if(!strcmp(param1,"Zerg")) map[getMapCount()].player[modePlayer].setRace(ZERG);
+					if(!strcmp(param1,"Terra")) 
+					{
+						map[getMapCount()].player[modePlayer].setRace(TERRA);
+						map[getMapCount()].player[modePlayer].setHarvest(&harvestSpeed[TERRA].minerals[0],&harvestSpeed[TERRA].gas[0]);
+					}
+					else if(!strcmp(param1,"Protoss")) 
+					{
+						map[getMapCount()].player[modePlayer].setRace(PROTOSS);
+						map[getMapCount()].player[modePlayer].setHarvest(&harvestSpeed[PROTOSS].minerals[0],&harvestSpeed[PROTOSS].gas[0]);
+					}
+					else if(!strcmp(param1,"Zerg")) 
+					{
+						map[getMapCount()].player[modePlayer].setRace(ZERG);
+						map[getMapCount()].player[modePlayer].setHarvest(&harvestSpeed[ZERG].minerals[0],&harvestSpeed[ZERG].gas[0]);
+					}
 					else 
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Invalid race.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Invalid race.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Point"))
 				{
 					if(!map[getMapCount()].player[modePlayer].setPosition(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Starting Point out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Starting Point out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Minerals"))
 				{
-					if(!map[getMapCount()].player[modePlayer].setMins(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Starting Minerals out of range.",mapFile,ln,old);
+					if(!map[getMapCount()].player[modePlayer].setMins(value1*100))
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Starting Minerals out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starting Gas"))
 				{
-					if(!map[getMapCount()].player[modePlayer].setGas(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Starting Gas out of range.",mapFile,ln,old);
+					if(!map[getMapCount()].player[modePlayer].setGas(value1*100))
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Starting Gas out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"Starttime"))
 				{
 					if(!map[getMapCount()].player[modePlayer].setTimer(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Start time out of range.",mapFile,ln,old);
-				}
-				else if(!strcmp(item,"Need Supply"))
-				{
-					if(!map[getMapCount()].player[modePlayer].setSupply(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Starting supply out of range.",mapFile,ln,old);
-				}
-				else if(!strcmp(item,"Max Supply"))
-				{
-					if(!map[getMapCount()].player[modePlayer].setMaxSupply(value1))
-						toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Max supply out of range.",mapFile,ln,old);
+						debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Start time out of range.",mapFile,ln,old);
 				}
 				else if(!strcmp(item,"@END"))
 					mode=0;
 				else
-					toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry.",mapFile,ln,old);
+					debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry.",mapFile,ln,old);
 			}
 			else if(mode==4) // PLAYER Block in LOCATION Block
 			{
@@ -722,44 +712,51 @@ int SETTINGS::loadMapFile(const char* mapFile)
 					mode=2;
 				else
 				{
-					for(i=UNIT_TYPE_COUNT;i--;) 
+					for(i=0;i<UNIT_TYPE_COUNT;i++) 
 					if(strstr(stats[map[getMapCount()].player[modePlayer].getRace()][i].name,item)!=NULL)
 						{
-							if(value1*stats[map[getMapCount()].player[modePlayer].getRace()][i].supply+map[getMapCount()].player[modePlayer].getSupply()<=MAX_SUPPLY)
+/*							if(value1*stats[map[getMapCount()].player[modePlayer].getRace()][i].supply+map[getMapCount()].player[modePlayer].getSupply()<=MAX_SUPPLY)
 							{
 								if(stats[map[getMapCount()].player[modePlayer].getRace()][i].supply>0)
 									map[getMapCount()].player[modePlayer].setSupply(map[getMapCount()].player[modePlayer].getSupply()-stats[map[getMapCount()].player[modePlayer].getRace()][i].supply*map[getMapCount()].location[modeLocation-1].force[modePlayer][i]);
-								else map[getMapCount()].player[modePlayer].setMaxSupply(map[getMapCount()].player[modePlayer].getMaxSupply()+stats[map[getMapCount()].player[modePlayer].getRace()][i].supply*map[getMapCount()].location[modeLocation-1].force[modePlayer][i]);
+								else map[getMapCount()].player[modePlayer].setMaxSupply(map[getMapCount()].player[modePlayer].getMaxSupply()+stats[map[getMapCount()].player[modePlayer].getRace()][i].supply*map[getMapCount()].location[modeLocation-1].force[modePlayer][i]);*/
 								
 								map[getMapCount()].location[0].force[modePlayer][i]=value1;
 								//location[modePlayer][0].availible[i]=value1;
 								map[getMapCount()].location[modeLocation-1].force[modePlayer][i]=value1;
 								//location[modePlayer][modeLocation-1].availible[i]=value1;
-								if(stats[map[getMapCount()].player[modePlayer].getRace()][i].supply>0)
+								/*if(stats[map[getMapCount()].player[modePlayer].getRace()][i].supply>0)
 									map[getMapCount()].player[modePlayer].setSupply(map[getMapCount()].player[modePlayer].getSupply()+stats[map[getMapCount()].player[modePlayer].getRace()][i].supply*value1);
-								else map[getMapCount()].player[modePlayer].setMaxSupply(map[getMapCount()].player[modePlayer].getMaxSupply()-stats[map[getMapCount()].player[modePlayer].getRace()][i].supply*value1);
+								else map[getMapCount()].player[modePlayer].setMaxSupply(map[getMapCount()].player[modePlayer].getMaxSupply()-stats[map[getMapCount()].player[modePlayer].getRace()][i].supply*value1);*/
 								//TODO: Begrenzungen bei researches und upgrades und nichtbaubaren Sachen!
-							};
-							i=-1;
+//							};
+							i=UNIT_TYPE_COUNT+1;
 							break;
 						};
-					if(i>-1) toLog("WARNING: (loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
+					if(i!=UNIT_TYPE_COUNT+1) debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: No matching unit name.",mapFile,ln,item);
 				}
 			}
 			else
-				toLog("WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry. OMFG",mapFile,ln,item);
+				debug.toLog(0,"WARNING: (loadMapFile) %s: Line %d [%s]: Unknown entry. OMFG",mapFile,ln,item);
 
 		}// END if(mode>0)
 	}// END while
 
+
+
 //	misc.supply=misc.maxSupply-misc.supply;
 //	if(misc.maxSupply<misc.supply)
 //		print("Warning: max supply is lower than supply.\n");
+	map[getMapCount()].adjustSupply();
+	map[getMapCount()].adjustDistanceList();
 	setMapCount(getMapCount()+1);
 	return(1);
 };
 
-
+const GA* SETTINGS::getGa()
+{
+	return(&ga);
+};
 
 int SETTINGS::initSoup()
 {
@@ -770,38 +767,24 @@ int SETTINGS::initSoup()
 }
 
 
-int SETTINGS::newGeneration()
+ANARACE* SETTINGS::newGeneration()
 {
-	soup.newGeneration();
-	return(0);
+	return(soup.newGeneration());
 };
 
-void SETTINGS::toLog(const char* msg, ...)
+void SETTINGS::loadDefaults()
 {
-	va_list args;
-	char buf[1024];
-	FILE* pFile;
-	time_t tnow;
-	struct tm *tmnow;
-
-	if(!(pFile=fopen("error.log","a")))
-		return;
-
-	va_start(args, msg);
-	vsprintf(buf,msg,args);
-
-	time(&tnow);
-	tmnow=localtime(&tnow);
-
-	if(tmnow->tm_min<10)
-		fprintf(pFile,"[%d.%d. %d:0%d]:%s\n",tmnow->tm_mday, tmnow->tm_mon+1,tmnow->tm_hour,tmnow->tm_min,buf);
-	else
-		fprintf(pFile,"[%d.%d. %d:%d]:%s\n",tmnow->tm_mday, tmnow->tm_mon+1,tmnow->tm_hour,tmnow->tm_min,buf);
-
-	va_end(args);
-	fclose(pFile);
-};
+	setMaxTime(MAX_TIME);
+	setMaxTimeOut(MAX_TIMEOUT);
+	setMaxLength(MAX_LENGTH);
+	setMaxRuns(MAX_RUNS);
+	setMaxGenerations(MAX_GENERATIONS);
+	setPlayerCount(MAX_PLAYER);
+	setPreprocessBuildOrder(0);
+}
 
 SETTINGS::SETTINGS()
 {
+	loadDefaults();
+	srand(time(NULL));
 }

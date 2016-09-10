@@ -4,8 +4,10 @@
 #include "main.h"
 
 #define MAX_LOCATIONS 10
-#define MAX_PLAYER 4
+#define MAX_PLAYER 3
 
+
+//TODO: Get/Set geysir auf die FORCES beziehen!!
 
 class SCCDLL_API MAP_LOCATION_BASIC
 {
@@ -18,18 +20,14 @@ class SCCDLL_API MAP_LOCATION_BASIC
 	//	int canShootbetweenwhichconnection... (cliffdrop oder so...)
 	public:
 		int setName(const char* line);
-		int setMineralCount(int num);
 		int setMineralDistance(int num);
-		int setGeysirCount(int num);
 		int setDistance(int num,int dist);
 
 		const char* getName();
-		int getMineralCount();
 		int getMineralDistance();
-		int getGeysirCount();
 
 		int getDistance(int num);
-		int force[MAX_PLAYER][UNIT_TYPE_COUNT];
+		int force[MAX_PLAYER][UNIT_TYPE_COUNT]; //evtl zu player
 		MAP_LOCATION_BASIC();
 };
 

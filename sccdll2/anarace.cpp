@@ -1,65 +1,277 @@
 #include "anarace.h"
 #include <stdlib.h>
 #include <string.h>
-
+#include "debug.h"
 // TODO: reimplement/recheck the speed of the units
+
+
+int ANARACE::getProgramSuccessType(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramSuccessType): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].successType<0)||(program[IP].successType>=ERROR_MESSAGES))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramSuccessType): Variable not initialized [%i].",program[IP].successType);
+		return(0);
+	}
+	return(program[IP].successType);
+};
+
+
+int ANARACE::getProgramSuccessUnit(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramSuccessUnit): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].successUnit<0)||(program[IP].successUnit>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramSuccessUnit): Variable not initialized [%i].",program[IP].successUnit);
+		return(0);
+	}
+	return(program[IP].successUnit);
+};
+
+int ANARACE::getProgramSuccessLocation(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramSuccessLocation): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].successLocation<0)||(program[IP].successLocation>=MAX_LOCATIONS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramSuccessLocation): Variable not initialized [%i].",program[IP].successLocation);
+		return(0);
+	}
+	return(program[IP].successLocation);
+};
+
+int ANARACE::setProgramSuccessType(int num)
+{
+	if((num<0)||(num>=ERROR_MESSAGES))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setProgramSuccessType): Value [%i] out of range.",num);
+		return(0);
+	}
+	program[getIP()].successType=num;
+	return(1);
+};
+
+
+int ANARACE::setProgramSuccessUnit(int num)
+{
+	if((num<0)||(num>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setProgramSuccessUnit): Value [%i] out of range.",num);
+		return(0);
+	}
+	program[getIP()].successUnit=num;
+	return(1);
+};
+
+int ANARACE::setProgramSuccessLocation(int num)
+{
+	if((num<0)||(num>=MAX_LOCATIONS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setProgramSuccessLocation): Value [%i] out of range.",num);
+		return(0);
+	}
+	program[getIP()].successLocation=num;
+	return(1);
+};
+
+int ANARACE::getProgramNeedSupply(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramNeedSupply): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].needSupply<0)||(program[IP].needSupply>MAX_SUPPLY))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramNeedSupply): Variable not initialized [%i].",program[IP].needSupply);
+		return(0);
+	}
+	return(program[IP].needSupply);
+};
+
+int ANARACE::getProgramHaveSupply(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramHaveSupply): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].haveSupply<0)||(program[IP].haveSupply>MAX_SUPPLY))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramHaveSupply): Variable not initialized [%i].",program[IP].haveSupply);
+		return(0);
+	}
+	return(program[IP].haveSupply);
+};
+
+
+int ANARACE::getProgramIsBuilt(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramIsBuilt): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].built<0)||(program[IP].built>1))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramIsBuilt): Variable not initialized [%i].",program[IP].built);
+		return(0);
+	}
+	return(program[IP].built);
+};
+
+int ANARACE::getProgramTime(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramTime): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].time<0)||(program[IP].time>MAX_TIME))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramTime): Variable not initialized [%i].",program[IP].time);
+		return(0);
+	}
+	return(program[IP].time);
+};
+
+int ANARACE::getProgramTemp(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramTemp): Value [%i] out of range.",IP);
+		return(0);
+	}
+	return(program[IP].temp);
+};
+
+int ANARACE::getProgramHaveMinerals(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramHaveMinerals): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].mins<0)||(program[IP].mins>MAX_MINS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramHaveMinerals): Variable not initialized [%i].",program[IP].mins);
+		return(0);
+	}
+	return(program[IP].mins);
+};
+int ANARACE::getProgramHaveGas(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramHaveGas): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].gas<0)||(program[IP].gas>MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramHaveGas): Variable not initialized [%i].",program[IP].gas);
+		return(0);
+	}
+	return(program[IP].gas);
+};
+
+int ANARACE::getProgramLocation(int IP)
+{
+	if((IP<0)||(IP>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramLocation): Value [%i] out of range.",IP);
+		return(0);
+	}
+
+	if((program[IP].location<0)||(program[IP].location>MAX_LOCATIONS)) //todo: ga werte einfuegen
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getProgramLocation): Variable not initialized [%i].",program[IP].location);
+		return(0);
+	}
+	return(program[IP].location);
+};
+
+
 
 void ANARACE::calculate()
 {
 //ZERG: Larvenproduktion!  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
+	int tm,tg;
 	int timeout=ga->maxTimeOut;
 	int time=ga->maxTime;
 	int ready=0;
 	int i,j;
-	IP=ga->maxLength-1;
+	setIP(ga->maxLength-1);
 	//mins, gas hier rein...
-	while((time)&&(!ready)&&(IP>0))
+	while((time)&&(!ready)&&(getIP()>0))
 	{
+		tm=getMins();tg=getGas();
 //TODO: evtl ueberlegen IP zu springen... also erstmal feststellen, warum nicht gebuildet werden kann und dann in einem Ruck resources und btimes hochsetzen...
 		int dominant=0;
 		int ok=0;
 					//evtl versuchen umzuschreiben, dass er mehrere Befehle pro Sekunde machen kann ... TODO
-		if(Code[0][IP]>Code[1][IP]) //dominance
+		if(Code[0][getIP()]>Code[1][getIP()]) //dominance
 		{
-			if(!(ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=0][IP]])))
-				ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=1][IP]]);
+			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]))))
+				ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=1][getIP()]));
 		}
 		else
 		{
-			if(!(ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=1][IP]])))
-				ok=buildGene(player->goal->genoToPhaenotype[Code[dominant=0][IP]]);
+			if(!(ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=1][getIP()]))))
+				ok=buildGene(getPlayer()->goal->toPhaeno(Code[dominant=0][getIP()]));
 		}
-                if(success.type>0)
+        if(successType>0)
 		{
-			program[IP].success[dominant].type=success.type;
-			program[IP].success[dominant].loc=success.loc;
-			program[IP].success[dominant].what=success.what;
+			setProgramSuccessType(successType);
+			setProgramSuccessLocation(successLocation);
+			setProgramSuccessUnit(successUnit);
 		}
 
 		if((ok)||(!timeout))
 		{
 			if(timeout) 
 			{
-				program[IP].time=ga->maxTime-time; //ANA~
-		                program[IP].dominant=dominant; //ANA~
-		                program[IP].type=Code[dominant][IP];
+				program[getIP()].time=ga->maxTime-time; //ANA~
+                program[getIP()].dominant=dominant; //ANA~
 			}
 			else 
 			{
-				program[IP].time=ga->maxTime+1;
-				program[IP].success[dominant].type=TIMEOUT;
-				program[IP].success[dominant].what=0;
-				program[IP].success[dominant].loc=0;
+				program[getIP()].time=ga->maxTime+1;
+				setProgramSuccessType(TIMEOUT);
+				setProgramSuccessUnit(0);
+				setProgramSuccessLocation(0);
 			}
-			program[IP].needSupply=maxSupply-supply;
-			program[IP].haveSupply=maxSupply;
-			
+			program[getIP()].needSupply=getMaxSupply()-getSupply();
+			program[getIP()].haveSupply=getMaxSupply();
+			program[getIP()].mins=tm;//getMins();
+			program[getIP()].gas=tg;//getGas();
+//			program[getIP()].temp=location[1].availible[COMMAND_CENTER];
+	
 			timeout=ga->maxTimeOut;
-			IP--;
+			setIP(getIP()-1);
 		}
 	
-		Building* build;//=&(building[MAX_BUILDINGS-1]);
+		BUILDING* build;//=&(building[MAX_BUILDINGS-1]);
 //!!!???		for(j=MAX_BUILDINGS;j--;build=&(building[j]))
 		for(j=MAX_BUILDINGS;j--;)
 		{
@@ -132,7 +344,22 @@ void ANARACE::calculate()
 						case NEEDED_ALWAYS:break;
 						default:break;
 					}
-					if(stat->supply<0) {supply-=stat->supply;maxSupply-=stat->supply;};
+					if(stat->supply<0) 
+					{
+						if(getMaxSupply()-stat->supply>MAX_SUPPLY)
+						{
+							if(getMaxSupply()<MAX_SUPPLY)
+							{
+								setSupply(getSupply()+(MAX_SUPPLY-getMaxSupply()));
+								setMaxSupply(MAX_SUPPLY);//problem beim abbrechen!
+							}
+						}
+						else
+						{
+							setSupply(getSupply()-stat->supply);
+							setMaxSupply(getMaxSupply()-stat->supply);
+						}
+					};
 					//~~~~
 					location[0].force[build->type]+=build->unitCount;
 					location[0].availible[build->type]+=build->unitCount;
@@ -158,16 +385,16 @@ void ANARACE::calculate()
 
 					program[build->IP].built=1;
 					program[build->IP].location=build->location;
+
 					lastcounter++;
 	//			IP zeugs checken... length is immer 2 :/	
 					for(i=MAX_GOALS;i--;)
-						if((player->goal->goal[i].unit>0)&&((player->goal->goal[i].location==0)||(build->location==player->goal->goal[i].location))&&(build->type==player->goal->goal[i].unit)&&((player->goal->goal[i].time==0)||(time<=player->goal->goal[i].time)))
-							ftime[build->type]=time;
+						if((getPlayer()->goal->goal[i].unit>0)&&((getPlayer()->goal->goal[i].location==0)||(build->location==getPlayer()->goal->goal[i].location))&&(build->type==getPlayer()->goal->goal[i].unit)&&((getPlayer()->goal->goal[i].time==0)||(time<=getPlayer()->goal->goal[i].time)))
+							setFinalTime(build->type,time);
 					
 					ready=1;
 					for(i=MAX_GOALS;i--;)
-						
-						ready&=( ( ((player->goal->goal[i].location==0)&&(player->goal->goal[i].count<=location[0].force[player->goal->goal[i].unit]))||((player->goal->goal[i].location>0)&&(player->goal->goal[i].count<=location[player->goal->goal[i].location].force[player->goal->goal[i].unit])) )&&((player->goal->goal[i].time>=ftime[i])||(player->goal->goal[i].time==0)));
+						ready&=( ( ((getPlayer()->goal->goal[i].location==0)&&(getPlayer()->goal->goal[i].count<=location[0].force[getPlayer()->goal->goal[i].unit]))||((getPlayer()->goal->goal[i].location>0)&&(getPlayer()->goal->goal[i].count<=location[getPlayer()->goal->goal[i].location].force[getPlayer()->goal->goal[i].unit])) )&&((getPlayer()->goal->goal[i].time>=getFinalTime(i))||(getPlayer()->goal->goal[i].time==0)));
 					// oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
 				}
 			}
@@ -177,15 +404,18 @@ void ANARACE::calculate()
 		timeout--;
 	}
 	 //end while
-	length=ga->maxLength-IP;
+	setLength(ga->maxLength-getIP());
 
 //TODO: Alles rausschmeissen, was schon von race berechnet wurde!
 	if(ready) 
 	{
 //		pFitness=time;
-		timer=time;
+		setTimer(time);
 	}
-	else timer=ga->maxTime;
+	else setTimer(ga->maxTime);
+
+	for(i=0;i<MAX_LENGTH;i++)
+		phaenoCode[i]=getPlayer()->goal->toPhaeno(Code[program[i].dominant][i]);
 	
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
 	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
@@ -200,31 +430,34 @@ int ANARACE::buildGene(int what)
 	const UNIT_STATISTICS* stat=&pStats[what];
 	int ok=0;
 
-	success.what=0;//ANA~
-	success.loc=0;
-	success.type=OK;
+	successType=0;
+	successUnit=0;
+	successLocation=0;
+
+	if(what==1)
+		successType=0;
 
 	if(what<=EXTRACTOR+1)
 	{
 		if((stat->prerequisite[0]>0)&&(location[0].force[stat->prerequisite[0]]==0))
 		{
-			success.what=stat->prerequisite[0];
-			success.loc=0;
-			success.type=PREREQUISITE_FAILED;
+			successUnit=stat->prerequisite[0];
+			successLocation=0;
+			successType=PREREQUISITE_FAILED;
 		}
 		else		
 		if((stat->prerequisite[1]>0)&&(location[0].force[stat->prerequisite[1]]==0))
                 {
-                        success.what=stat->prerequisite[1];
-                        success.loc=0;
-                        success.type=PREREQUISITE_FAILED;
+                        successUnit=stat->prerequisite[1];
+                        successLocation=0;
+                        successType=PREREQUISITE_FAILED;
                 }
 		else 
 		if((stat->prerequisite[2]>0)&&(location[0].force[stat->prerequisite[2]]==0))
                 {
-                        success.what=stat->prerequisite[2];
-                        success.loc=0;
-                        success.type=PREREQUISITE_FAILED;
+                        successUnit=stat->prerequisite[2];
+                        successLocation=0;
+                        successType=PREREQUISITE_FAILED;
                 }
 		else
 		if //ANA~
@@ -238,43 +471,42 @@ int ANARACE::buildGene(int what)
 //TODO: availible/force[0] auf 100 setzen... naj ama guggn
 		{
 			if(stat->facility[0]>0)
-				success.what=stat->facility[0];
+				successUnit=stat->facility[0];
 			else if(stat->facility[1]>0)
-				success.what=stat->facility[1];
+				successUnit=stat->facility[1];
 			else if(stat->facility[2]>0)
-				success.what=stat->facility[2];
-
-			success.loc=0;
-			success.type=FACILITY_FAILED;
+				successUnit=stat->facility[2];
+			successLocation=0;
+			successType=FACILITY_FAILED;
 		}
 		else
 		if((stat->facility2>0)&&(location[0].availible[stat->facility2]==0))
-                {
-                        success.what=stat->facility2;
-                        success.loc=0;
-                        success.type=FACILITY_FAILED;
-                }
+        {
+			successUnit=stat->facility2;
+            successLocation=0;
+            successType=FACILITY_FAILED;
+        }
 //TODO: evtl success 2 Schritte zurueckverfolgen...
 		else
-		if(mins<stat->mins+stat->upgrade_cost*location[0].force[what])
+		if(getMins()<stat->mins+stat->upgrade_cost*location[0].force[what])
 		{
-			success.what=0;
-			success.loc=0;
-		        success.type=ENOUGH_MINERALS;
+			successUnit=0;
+			successLocation=0;
+		    successType=ENOUGH_MINERALS;
 		}
 		else
-		if(gas<stat->gas+stat->upgrade_cost*location[0].force[what])
+		if(getGas()<stat->gas+stat->upgrade_cost*location[0].force[what])
 		{
-			success.what=0;
-			success.loc=0;
-		        success.type=ENOUGH_GAS;
+			successUnit=0;
+			successLocation=0;
+		    successType=ENOUGH_GAS;
 		}
 		else
-		if((supply<stat->supply)&&(stat->supply>0))
+		if((getSupply()<stat->supply)&&(stat->supply>0))
 		{
-			success.what=0;
-			success.loc=0;
-		        success.type=SUPPLY_SATISFIED;
+			successUnit=0;
+			successLocation=0;
+		    successType=SUPPLY_SATISFIED;
 		}
 		else 
 		{
@@ -326,10 +558,10 @@ int ANARACE::buildGene(int what)
 						building[nr].location=loc;
 						building[nr].unitCount=1; //~~
 						building[nr].RB=stat->BT+3200*(stat->facility2==what); //~~ hack :/ TODO
-						mins-=stat->mins+stat->upgrade_cost*location[0].force[what];
-						gas-=stat->gas+stat->upgrade_cost*location[0].force[what];
+						setMins(getMins()-stat->mins+stat->upgrade_cost*location[0].force[what]);
+						setGas(getGas()-stat->gas+stat->upgrade_cost*location[0].force[what]);
 						building[nr].type=what;
-						if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) supply-=stat->supply;
+						if((stat->supply>0)||((pStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) setSupply(getSupply()-stat->supply);
 							switch(stat->facility_type)
 							{
 								case IS_LOST:
@@ -337,13 +569,13 @@ int ANARACE::buildGene(int what)
 								{
 									location[loc].availible[stat->facility[fac]]--;
 									location[0].availible[stat->facility[fac]]--;
-									supply+=pStats[stat->facility[fac]].supply; 
+									setSupply(getSupply()+pStats[stat->facility[fac]].supply); 
 								}
 								if(stat->facility2>0)
 								{
 									location[loc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
-									supply+=pStats[stat->facility2].supply;
+									setSupply(getSupply()+pStats[stat->facility2].supply);
 								}
 								break;
 							case NEEDED_ONCE:
@@ -365,7 +597,7 @@ int ANARACE::buildGene(int what)
 								{
 									location[loc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
-									supply+=pStats[stat->facility2].supply; // <- nicht noetig :/
+									setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
 								}
 								break;
 							case NEEDED_UNTIL_COMPLETE_IS_LOST:
@@ -373,7 +605,7 @@ int ANARACE::buildGene(int what)
 								{
 									location[loc].availible[stat->facility2]--;
 									location[0].availible[stat->facility2]--;
-									supply+=pStats[stat->facility2].supply; // <- nicht noetig :/
+									setSupply(getSupply()+pStats[stat->facility2].supply); // <- nicht noetig :/
 								}
 								if(stat->facility[fac]>0)
 								{
@@ -410,7 +642,7 @@ int ANARACE::buildGene(int what)
 						}
 	
 //						building[nr].on_the_run=0;
-						building[nr].IP=IP;
+						building[nr].IP=getIP();
 					} //kk!=1?
 				}
 			}
@@ -441,14 +673,14 @@ int ANARACE::buildGene(int what)
                                         building[nr].type=last[lastcounter].what;
                                         building[nr].RB=location[last[lastcounter].location].getDistance(last[lastcounter].location+count)*100/pStats[last[lastcounter].what].speed;
                                         building[nr].onTheRun=1;
-					building[nr].IP=IP; // ~ANA
+					building[nr].IP=getIP(); // ~ANA
                                                 // 2x Unit => send 8/All instead of just one unit there
-                                        if((IP>1)&&((Code[0][IP-1]==what)||(Code[1][IP-1]==what)))
+                                        if((getIP()>1)&&((Code[0][getIP()-1]==what)||(Code[1][getIP()-1]==what)))
                                         {
                     				if(location[last[lastcounter].location].availible[last[lastcounter].what]>=6)
                                                                         building[nr].unitCount=6;
                                                                 else building[nr].unitCount=location[last[lastcounter].location].availible[last[lastcounter].what];
-                                                                IP--;
+                                                                setIP(getIP()-1);
                                                                 //TODO dominance... und 8 checken... evtl weniger
                                        }
                                                 location[last[lastcounter].location].availible[building[nr].type]-=building[nr].unitCount;
@@ -497,7 +729,7 @@ int ANARACE::buildGene(int what)
 					}*/
 //TODO: Verwandtschaftsgrad fuer crossing over feststellen!	
 	if(ok)
-		program[IP].built=1; //ANA~
+		program[getIP()].built=1; //ANA~
 	return ok;
 }
 
@@ -507,7 +739,7 @@ void ANARACE::resetData() // resets all data to standard starting values
 {
 	int i;
 	for(i=UNIT_TYPE_COUNT;i--;)
-		ftime[i]=0;
+		setFinalTime(i,0);
 	for(i=MAX_BUILDINGS;i--;)
 	{
 	       building[i].RB=0;
@@ -517,33 +749,30 @@ void ANARACE::resetData() // resets all data to standard starting values
 	       building[i].unitCount=0;
 	       building[i].onTheRun=0;
 	}
-       for(i=MAX_LENGTH;i--;)//ANA~
-        {
-                program[i].built=0;
-                program[i].success[0].type=0;
-		program[i].success[0].what=0;
-		program[i].success[0].loc=0;
-                program[i].success[1].type=0;
-		program[i].success[1].what=0;
-		program[i].success[1].loc=0;
+	for(i=MAX_LENGTH;i--;)//ANA~
+    {
+        program[i].successType=0;
+		program[i].successUnit=0;
+		program[i].successLocation=0;
 						
+		program[i].built=0;
 		program[i].haveSupply=0;
-                program[i].needSupply=0;
-                program[i].time=ga->maxTime+1;
-		program[i].type=255;
-                program[i].mins=0;
-                program[i].gas=0;
-                program[i].temp=0;
-                program[i].dominant=0;
-        }
-	harvestedGas=0;
-	harvestedMins=0;
-
-	setMins(player->getMins());
-	setGas(player->getGas());
-	setTimer(player->getTimer());
-	setSupply(player->getSupply());
-	setMaxSupply(player->getMaxSupply());
+        program[i].needSupply=0;
+        program[i].time=MAX_TIME;
+        program[i].mins=0;
+        program[i].gas=0;
+        program[i].temp=0;
+        program[i].dominant=0;
+		program[i].location=0;
+		phaenoCode[i]=0;
+	}
+	setHarvestedGas(0);
+	setHarvestedMins(0);
+	setMins(getPlayer()->getMins());
+	setGas(getPlayer()->getGas());
+	setTimer(getPlayer()->getTimer());
+	setSupply(0);
+	setMaxSupply(0);
 
 	for(i=0;i<4;i++)
 	{
@@ -572,25 +801,148 @@ void ANARACE::resetData() // resets all data to standard starting values
 }*/
 
 
-/*
-void ANARACE::initLocations()
+int ANARACE::getUnchangedGenerations()
 {
-	int i;
-	memcpy(location,pSet->location,sizeof(LOCATION)*MAX_LOCATIONS);
-        for(i=MAX_LOCATIONS;i--;)
-        {
-                adjustMineralHarvest(i);
-                adjustGasHarvest(i);
-        }
-}*/
+	if((unchangedGenerations<0)||(unchangedGenerations>MAX_GENERATIONS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getUnchangedGenerations): Variable not initialized [%i].",unchangedGenerations);
+		return(0);
+	}
+	return(unchangedGenerations);
+};
+
+int ANARACE::getRun()
+{
+	if((run<0)||(run>MAX_RUNS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getRun): Variable not initialized [%i].",run);
+		return(0);
+	}
+	return(run);
+};
+
+int ANARACE::getGeneration()
+{
+	if((generation<0)||(generation>MAX_GENERATIONS)) //ga->maxgeneration?
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getGeneration): Variable not initialized [%i].",generation);
+		return(0);
+	}
+	return(generation);
+};
+
+int ANARACE::getMaxpFitness()
+{
+	if((maxpFitness<0)||(maxpFitness>50000))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getMaxpFitness): Variable not initialized [%i].",maxpFitness);
+		return(0);
+	}
+	return(maxpFitness);
+};
+
+int ANARACE::getMaxsFitness()
+{
+	if((maxsFitness<0)||(maxsFitness>MAX_MINS+MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getMaxsFitness): Variable not initialized [%i].",maxsFitness);
+		return(0);
+	}
+	return(maxsFitness);
+};
+
+int ANARACE::getMaxtFitness()
+{
+	if((maxtFitness<0)||(maxtFitness>50000))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::getMaxtFitness): Variable not initialized [%i].",maxtFitness);
+		return(0);
+	}
+	return(maxtFitness);
+};
+
+int ANARACE::setUnchangedGenerations(int num)
+{
+//	if((num<0)||(num>ga->maxGenerations))
+	if((num<0)||(num>MAX_GENERATIONS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setUnchangedGenerations): Value [%i] out of range.",num);
+		return(0);
+	}
+	unchangedGenerations=num;
+	return(1);
+};
+
+int ANARACE::setRun(int num)
+{
+//	if((num<0)||(num>ga->maxRuns))
+	if((num<0)||(num>MAX_RUNS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setRun): Value [%i] out of range.",num);
+		return(0);
+	}
+	run=num;
+	return(1);
+};
+
+int ANARACE::setGeneration(int num)
+{
+//	if((num<0)||(num>ga->maxGenerations))
+	if((num<0)||(num>MAX_GENERATIONS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setGeneration): Value [%i] out of range.",num);
+		return(0);
+	}
+	generation=num;
+	return(1);
+};
+
+int ANARACE::setMaxpFitness(int num)
+{
+	if((num<0)||(num>50000))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setMaxpFitness): Value [%i] out of range.",num);
+		return(0);
+	}
+	maxpFitness=num;
+	return(1);
+};
+
+int ANARACE::setMaxsFitness(int num)
+{
+	if((num<0)||(num>MAX_MINS+MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setMaxsFitness): Value [%i] out of range.",num);
+		return(0);
+	}
+	maxsFitness=num;
+	return(1);
+};
+
+int ANARACE::setMaxtFitness(int num)
+{
+	if((num<0)||(num>50000))
+	{
+		debug.toLog(0,"DEBUG: (ANARACE::setMaxtFitness): Value [%i] out of range.",num);
+		return(0);
+	}
+	maxtFitness=num;
+	return(1);
+};
+
 
 ANARACE::ANARACE()
 {
-	generation=0;
-	maxpFitness=0;
-	maxsFitness=0;
-	maxtFitness=0;
-	unchangedGenerations=0;
+	setGeneration(0);
+	setMaxpFitness(0);
+	setMaxsFitness(0);
+	setMaxtFitness(0);
+	setUnchangedGenerations(0);
+	setRun(0);
 /*	if(!initialized) init();
 	initLocations();*/
 }
+
+int ANARACE::successType;
+int ANARACE::successUnit;
+int ANARACE::successLocation;

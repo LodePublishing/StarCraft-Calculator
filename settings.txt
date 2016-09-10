@@ -1,9 +1,10 @@
 "@SETTINGS"
-"Max Time" = "900"
+"Max Time" = "1800"
 "Preprocess Buildorder" = "0"
 "Max unchanged Generations" = "666"
 "Max Length" = "96"
 "Max Runs" = "6"
+"Max Timeout" = "266"
 "@END"
 
 

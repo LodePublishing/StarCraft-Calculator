@@ -21,9 +21,6 @@ class SCCDLL_API SOUP
 		int setMap(MAP* map);
 		int setParameters(GA* ga);
 
-		void resetLocations();
-
-
 		//ERROR doFullCheckAndInitAllTheStuff();
 
 		//Problem Changes on the fly <> full check

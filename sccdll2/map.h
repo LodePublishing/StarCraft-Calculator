@@ -21,6 +21,9 @@ class SCCDLL_API MAP
 		int setMaxLocations(int num);
 		int setMaxPlayer(int num);
 
+		int adjustDistanceList();
+		int adjustSupply(); //evtl fuer jeden player einzeln :-o
+
 		int locationList[MAX_LOCATIONS][MAX_LOCATIONS];			
 		MAP_LOCATION_BASIC location[MAX_LOCATIONS];
 		PLAYER player[MAX_PLAYER];

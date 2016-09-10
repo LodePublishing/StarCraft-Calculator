@@ -34,12 +34,12 @@ int SOUP::setMap(MAP* map)
 
 int SOUP::setGoal(GOAL_ENTRY* goal, int player)
 {
-	if((!mapInitialized)||(player<0)||(player>=pMap->getMaxPlayer()))
+	if((!mapInitialized)||(player<=0)||(player>=pMap->getMaxPlayer())) // 0 not allowed because this is temporary player
 		return(0);
 //	if(!this->goal[player]) ~~~~~~~~
 //	{
 		goalCount++;
-		if(goalCount==pMap->getMaxPlayer())
+		if(goalCount==pMap->getMaxPlayer()-1)
 			goalsInitialized=1;
 //	}
 	this->goal[player]=goal;
@@ -65,7 +65,8 @@ int SOUP::initSoup()
 		return(-2);
 	if(!gaInitialized)
 		return(-3);
-	if(!PRERACE::setMap(pMap))
+	PRERACE::resetMapInitialized();
+	if(!(PRERACE::setMap(pMap)))
 		return(-4);
 
 	for(i=MAX_PROGRAMS;i--;)
@@ -73,7 +74,9 @@ int SOUP::initSoup()
 		player[i]=new RACE();
 		if(i>MAX_PROGRAMS/2)
 		{
-			if(!player[i]->loadPlayer(1)) //~~
+
+//Problem: Mins werden net richtig initialisiert!
+			if(!player[i]->loadPlayer(2)) //~~
 			{
 				for(int j=i;j>=0;j--)
 					delete player[j];
@@ -82,7 +85,7 @@ int SOUP::initSoup()
 		}
 		else
 		{
-			if(!player[i]->loadPlayer(0)) //~~
+			if(!player[i]->loadPlayer(1)) //~~
 			{
 				for(int j=i;j>=0;j--)
 					delete player[j];
@@ -94,7 +97,7 @@ int SOUP::initSoup()
 	for(i=2;i--;) //~~ getmaxplayer oder so
 	{
 		anaplayer[i]=new ANARACE();
-		if(!(anaplayer[i]->loadPlayer(i))) 
+		if(!(anaplayer[i]->loadPlayer(i+1))) 
 		{
 			for(int j=i;j>=0;j--)
 				delete player[j];
@@ -104,10 +107,173 @@ int SOUP::initSoup()
 	for(i=0;i<MAX_PROGRAMS;i++)
 		player[i]->resetGeneCode();
 
+	
+
 	playerInitialized=1;
 	return(1);
 };
 
+
+/*int compare(const void* a,const void* b)
+{
+	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<(*(RACE*)b).sFitness)) || ( ((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness==(*(RACE*)b).sFitness)&& ((*(RACE*)a).tFitness>=(*(RACE*)b).tFitness)) )
+		return (1);
+	else if(( (*(RACE*)a).pFitness>(*(RACE*)b).pFitness)|| ((*(RACE*)a).sFitness>(*(RACE*)b).sFitness))
+		return (-1);
+	else return(0);
+};*/
+
+//TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
+
+ANARACE* SOUP::newGeneration()
+{
+	int i,j,t;
+	if(!mapInitialized)
+		return(0);
+	if(!goalsInitialized)
+		return(0);
+	if(!gaInitialized)
+		return(0);
+	if(anaplayer[0]->getRun()>=ga->maxRuns) //~~
+		return(0);
+
+	for(i=0;i<MAX_PROGRAMS;i++)
+	{
+		player[i]->resetData();
+		player[i]->resetLocations();
+		if((i!=0)||(i!=MAX_PROGRAMS/2))
+			player[i]->mutateGeneCode();
+		player[i]->calculate();
+	}
+
+/*	for(t=7;t--;)
+		for(i=t*16;i<t*16+MAX_PROGRAMS/16;i++)
+			for(j=t*16;j<i;j++)
+				if((player[j]->getpFitness()>player[i]->getpFitness())||
+				  ((player[j]->getpFitness()==player[i]->getpFitness())&&(player[j]->getsFitness()>player[i]->getsFitness()))||
+				  ((player[j]->getpFitness()==player[i]->getpFitness())&&(player[j]->getsFitness()==player[i]->getsFitness())&&(player[j]->gettFitness()>player[i]->gettFitness())) )
+				{
+					RACE* temp;
+					temp=player[i];
+					player[i]=player[j];
+					player[j]=temp;
+				}*/
+
+
+//		qsort(player[i*16],MAX_PROGRAMS/16,sizeof(RACE),compare);
+
+/*	for(i=7;i--;)
+	{
+		int p1=rand()%(MAX_PROGRAMS/16);
+		int p2=rand()%(MAX_PROGRAMS/16);
+		int c1=rand()%(MAX_PROGRAMS/16);
+		int c2=c1;
+		while(c1==c2)
+			c2=rand()%(MAX_PROGRAMS/16);
+		player[p1*16]->crossOver(player[p2*16],player[c1*16+7],player[c2*16+7]);
+	}*/
+	
+		for(i=0;i<MAX_PROGRAMS/2;i++)
+			for(j=0;j<i;j++)
+				if((player[i]->getpFitness()>player[j]->getpFitness())||
+				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()>player[j]->getsFitness()))||
+				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()==player[j]->getsFitness())&&(player[i]->gettFitness()>player[j]->gettFitness())) )
+				{
+					RACE* temp;
+					temp=player[i];
+					player[i]=player[j];
+					player[j]=temp;
+				}
+
+		for(i=MAX_PROGRAMS/2;i<MAX_PROGRAMS;i++)
+			for(j=MAX_PROGRAMS/2;j<i;j++)
+				if((player[i]->getpFitness()>player[j]->getpFitness())||
+				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()>player[j]->getsFitness()))||
+				  ((player[i]->getpFitness()==player[j]->getpFitness())&&(player[i]->getsFitness()==player[j]->getsFitness())&&(player[i]->gettFitness()>player[j]->gettFitness())) )
+				{
+					RACE* temp;
+					temp=player[i];
+					player[i]=player[j];
+					player[j]=temp;
+				}
+
+//		qsort(player[0],MAX_PROGRAMS/2,sizeof(RACE),compare);
+//		qsort(player[MAX_PROGRAMS/2],MAX_PROGRAMS/2,sizeof(RACE),compare);
+
+		for(i=10;i--;)
+		{
+			t=rand()%(MAX_PROGRAMS/4)+MAX_PROGRAMS/4;
+			for(j=0;j<MAX_LENGTH;j++)
+			{
+				player[t]->Code[0][j]=player[0]->Code[0][j];
+				player[t]->Code[1][j]=player[0]->Code[1][j];
+//				memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
+//				memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
+			}
+		}  
+
+		for(i=10;i--;)
+		{
+			t=rand()%(MAX_PROGRAMS/4)+MAX_PROGRAMS/4+MAX_PROGRAMS/2;
+			for(j=0;j<MAX_LENGTH;j++)
+			{
+				player[t]->Code[0][j]=player[MAX_PROGRAMS/2]->Code[0][j];
+				player[t]->Code[1][j]=player[MAX_PROGRAMS/2]->Code[1][j];
+			}
+//			memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH); 
+//			memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH);
+		}
+
+		for(j=0;j<2;j++)
+		{
+			if((player[j*MAX_PROGRAMS/2]->getpFitness()>anaplayer[j]->getMaxpFitness())||((player[j*MAX_PROGRAMS/2]->getpFitness()>=anaplayer[j]->getMaxpFitness())&&(player[j*MAX_PROGRAMS/2]->getsFitness()>anaplayer[j]->getMaxsFitness()))|| ((player[j*MAX_PROGRAMS/2]->getpFitness()>=anaplayer[j]->getMaxpFitness())&&(player[j*MAX_PROGRAMS/2]->getsFitness()>=anaplayer[j]->getMaxsFitness())&&(player[j*MAX_PROGRAMS/2]->gettFitness()>anaplayer[j]->getMaxtFitness())))
+			{
+				if(player[j*MAX_PROGRAMS/2]->gettFitness()>anaplayer[j]->getMaxtFitness())
+					anaplayer[j]->setMaxtFitness(player[j*MAX_PROGRAMS/2]->gettFitness());
+				if(player[j*MAX_PROGRAMS/2]->getsFitness()>anaplayer[j]->getMaxsFitness())
+				{
+					anaplayer[j]->setMaxsFitness(player[j*MAX_PROGRAMS/2]->getsFitness());
+					anaplayer[j]->setMaxtFitness(player[j*MAX_PROGRAMS/2]->gettFitness());
+				}
+				if(player[j*MAX_PROGRAMS/2]->getpFitness()>anaplayer[j]->getMaxpFitness())
+				{
+					anaplayer[j]->setMaxpFitness(player[j*MAX_PROGRAMS/2]->getpFitness());
+					anaplayer[j]->setMaxsFitness(player[j*MAX_PROGRAMS/2]->getsFitness());
+					anaplayer[j]->setMaxtFitness(player[j*MAX_PROGRAMS/2]->gettFitness());
+				}
+				anaplayer[j]->setUnchangedGenerations(0);
+				for(t=0;t<MAX_LENGTH;t++)
+				{
+					anaplayer[j]->Code[0][t]=player[j*MAX_PROGRAMS/2]->Code[0][t];
+					anaplayer[j]->Code[1][t]=player[j*MAX_PROGRAMS/2]->Code[1][t];
+					//memcpy(anaplayer[j]->Code[0],player[j*MAX_PROGRAMS/2]->Code[0],MAX_LENGTH*4);
+					//memcpy(anaplayer[j]->Code[1],player[j*MAX_PROGRAMS/2]->Code[1],MAX_LENGTH*4);
+				}
+				anaplayer[j]->resetData();
+				anaplayer[j]->resetLocations();
+				anaplayer[j]->calculate();
+			}
+			anaplayer[j]->setUnchangedGenerations(anaplayer[j]->getUnchangedGenerations()+1);
+			anaplayer[j]->setGeneration(anaplayer[j]->getGeneration()+1);
+			if(anaplayer[j]->getUnchangedGenerations()>ga->maxGenerations)
+			{
+				for(i=MAX_PROGRAMS/2;i--;)
+					player[i+j*MAX_PROGRAMS/2]->resetGeneCode();
+				anaplayer[j]->setRun(anaplayer[j]->getRun()+1);
+				anaplayer[j]->setGeneration(0);
+				anaplayer[j]->setMaxpFitness(0);
+				anaplayer[j]->setMaxsFitness(0);
+				anaplayer[j]->setMaxtFitness(0);
+				anaplayer[j]->setUnchangedGenerations(0);		
+				//TODO: Saven!
+			}
+		}
+//TODO: Fehler: Die Commandcenter sammeln sich aus irgend einem Grunde an!
+
+if((anaplayer[0]->getMaxpFitness()>anaplayer[1]->getMaxpFitness())||((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>anaplayer[1]->getMaxsFitness()))|| ((anaplayer[0]->getMaxpFitness()>=anaplayer[1]->getMaxpFitness())&&(anaplayer[0]->getMaxsFitness()>=anaplayer[1]->getMaxsFitness())&&(anaplayer[0]->getMaxtFitness()>anaplayer[1]->getMaxtFitness())))
+	return(anaplayer[0]);
+else return(anaplayer[1]);
+};
 
 SOUP::SOUP()
 {
@@ -118,140 +284,17 @@ SOUP::SOUP()
 	gaInitialized=0;
 	goalsInitialized=0;
 
-/*	RACE::setMap(this->map);
-    RACE::sepSet=settings;
-	RACE::pMap=data->pMap;
-    ANARACE::pSet=settings;
-	ANARACE::pMap=data->pMap;*/
-//	anaplayer=new ANARACE();
-
-//TODO!!! static pSet hier initialisieren! race und anarace noch nicht initialisieren sondern ueber new hier aufrufen!
-//	for(i=RUNNINGS;i--;) statistics[i]=new STATISTICS;
 };
 
 SOUP::~SOUP()
 {
 	int i;
 	if(playerInitialized)
-		for(i=0;i<MAX_PLAYER;i++)
+	{
+		for(i=0;i<MAX_PROGRAMS;i++)
 			delete player[i];
-//	delete settings;
-//	delete [] statistics;
-};
+		delete anaplayer[0];
+		delete anaplayer[1];
+	};
 
-int compare(const void* a,const void* b)
-{
-	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<(*(RACE*)b).sFitness)) || ( ((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness==(*(RACE*)b).sFitness)&& ((*(RACE*)a).tFitness>=(*(RACE*)b).tFitness)) )
-		return (1);
-	else if(( (*(RACE*)a).pFitness>(*(RACE*)b).pFitness)|| ((*(RACE*)a).sFitness>(*(RACE*)b).sFitness))
-		return (-1);
-	else return(0);
-};
-
-//TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
-
-void SOUP::resetLocations()
-{
-
-	//kommen ja immer 4, 2 oder 1 in ein paaring...
-/*	int i,j;
-
-	for(i=0;i<MAX_LOCATIONS;i++)
-	{
-		location[i].force=pMap->location[i].force;
-		location[i].availible=
-	}*/
-};
-
-ANARACE* SOUP::newGeneration()
-{
-	int i;
-	if((!mapInitialized)||(!goalsInitialized)||(!gaInitialized)||(ANARACE::getRun()>=ga->maxRuns)) 
-		return(0);
-
-	for(i=MAX_PLAYER;i--;)
-	{
-		player[i]->resetData();
-		if(i>0) player[i]->mutateGeneCode();
-	}
-	
-	for(i=MAX_PLAYER;i--;)
-	{
-		resetLocations();
-		player[i]->calculate();
-	}
-	/*for(i=7;i--;)
-		qsort(player[i*16],MAX_PLAYER/16,sizeof(RACE),compare);
-	for(i=7;i--;)
-	{
-		int p1=rand()%(MAX_PLAYER/16);
-		int p2=rand()%(MAX_PLAYER/16);
-		int c1=rand()%(MAX_PLAYER/16);
-		int c2=c1;
-		while(c1==c2)
-			c2=rand()%(MAX_PLAYER/16);
-		player[p1*16]->crossOver(player[p2*16],player[c1*16+7],player[c2*16+7]);
-	}*/
-/*	
-int j;		
-		for(i=0;i<MAX_PLAYER;i++)
-			for(j=0;j<i;j++)
-				if((player[j]->pFitness>player[i]->pFitness)||
-				  ((player[j]->pFitness==player[i]->pFitness)&&(player[j]->sFitness>player[i]->sFitness))||
-				  ((player[j]->pFitness==player[i]->pFitness)&&(player[j]->sFitness==player[i]->sFitness)&&(player[j]->tFitness>player[i]->tFitness)) )
-				{
-					RACE* temp;
-					temp=player[i];
-					player[i]=player[j];
-					player[j]=temp;
-				}
-		//qsort(player,MAX_PLAYER,sizeof(RACE),compare);
-		  for(i=20;i--;)
-		{
-			int t=rand()%(MAX_PLAYER/2)+MAX_PLAYER/2;
-			memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH*4); 
-			memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH*4);
-		}  
-
-		if((player[0]->pFitness>anaplayer->maxpFitness)||((player[0]->pFitness>=anaplayer->maxpFitness)&&(player[0]->sFitness>anaplayer->maxsFitness))|| ((player[0]->pFitness>=anaplayer->maxpFitness)&&(player[0]->sFitness>=anaplayer->maxsFitness)&&(player[0]->tFitness>anaplayer->maxtFitness)))
-		{
-			if(player[0]->tFitness>anaplayer->maxtFitness)
-				anaplayer->maxtFitness=player[0]->tFitness;
-			if(player[0]->sFitness>anaplayer->maxsFitness)
-			{
-				anaplayer->maxsFitness=player[0]->sFitness;
-				anaplayer->maxtFitness=player[0]->tFitness;
-			}
-			if(player[0]->pFitness>anaplayer->maxpFitness)
-			{
-				anaplayer->maxpFitness=player[0]->pFitness;
-				anaplayer->maxsFitness=player[0]->sFitness;
-				anaplayer->maxtFitness=player[0]->tFitness;
-			}
-			anaplayer->unchangedGenerations=0;
-			memcpy(anaplayer->Code[0],player[0]->Code[0],MAX_LENGTH*4);
-			memcpy(anaplayer->Code[1],player[0]->Code[1],MAX_LENGTH*4);
-			anaplayer->resetData();
-			anaplayer->initLocations();
-			anaplayer->calculate();
-		}
-	
-		anaplayer->unchangedGenerations++;
-		anaplayer->generation++;
-		if(anaplayer->unchangedGenerations>settings->ga.maxGenerations)
-		{
-			for(i=MAX_PLAYER;i--;)
-			{
-				player[i]->resetGeneCode();
-				player[i]->resetData();
-				player[i]->initLocations();
-			}
-			anaplayer->run++;
-			anaplayer->generation=0;
-			anaplayer->maxpFitness=0;
-			anaplayer->maxsFitness=0;
-			anaplayer->maxtFitness=0;
-			anaplayer->unchangedGenerations=0;
-		}*/
-	return(anaplayer[0]);
 };

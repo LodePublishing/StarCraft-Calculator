@@ -1,2 +1,2 @@
 "@RACE" "Terra"
-"Marine" "20" "0" "2"
+"Nuclear Warhead" "1" "0" "0"

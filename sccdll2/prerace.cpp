@@ -1,25 +1,40 @@
 #include "prerace.h"
+#include "debug.h"
+
+MAP* PRERACE::getMap()
+{
+	return(pMap);
+};
 
 int PRERACE::setMins(int num)
 {
-	if(num<0)
+	if((num<0)||(num>MAX_MINS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setMins): Value [%i] out of range.",num);
 		return(0);
+	}
 	mins=num;
 	return(1);
 };
 
 int PRERACE::setGas(int num)
 {
-	if(num<0)
+	if((num<0)||(num>MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setGas): Value [%i] out of range.",num);
 		return(0);
+	}
 	gas=num;
 	return(1);
 };
 
 int PRERACE::setTimer(int num)
 {
-	if(num<0)
+	if((num<0)||(num>MAX_TIME))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setTimer): Value [%i] out of range.",num);
 		return(0);
+	}
 	timer=num;
 	return(1);
 };
@@ -27,7 +42,10 @@ int PRERACE::setTimer(int num)
 int PRERACE::setSupply(int num)
 {
 	if((num>MAX_SUPPLY)||(num<0))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setSupply): Value [%i] out of range.",num);
 		return(0);
+	}
 	supply=num;
 	return(1);
 };
@@ -35,7 +53,10 @@ int PRERACE::setSupply(int num)
 int PRERACE::setMaxSupply(int num)
 {
 	if((num>MAX_SUPPLY)||(num<0))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setMaxSupply): Value [%i] out of range.",num);
 		return(0);
+	}
 	maxSupply=num;
 	return(1);
 };
@@ -43,35 +64,69 @@ int PRERACE::setMaxSupply(int num)
 int PRERACE::setMap(MAP* map)
 {
 	if(!map)
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setMap): Map not initialized.");
 		return(0);
+	}
 	pMap=map;
+	mapInitialized=1;
 	return(1);
 };
 
 
-int PRERACE::getPlayer()
+int PRERACE::getPlayerNum()
 {
+	if((playerNum<0)||(playerNum>=MAX_PLAYER))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getPlayer): Variable not initialized [%i].",playerNum);
+		return(0);
+	}
 	return(playerNum);
 };
 
 int PRERACE::getSupply()
 {
+	if((supply<0)||(supply>200))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getSupply): Variable not initialized [%i].",supply);
+		return(0);
+	}
 	return(supply);
 };
 int PRERACE::getMaxSupply()
 {
+	if((maxSupply<0)||(maxSupply>200))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getMaxSupply): Variable not initialized [%i].",maxSupply);
+		return(0);
+	}
 	return(maxSupply);
 };
 int PRERACE::getMins()
 {
+	if((mins<0)||(mins>MAX_MINS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getMins): Variable not initialized [%i].",mins);
+		return(0);
+	}
 	return(mins);
 };
 int PRERACE::getGas()
 {
+	if((gas<0)||(gas>MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getGas): Variable not initialized [%i].",gas);
+		return(0);
+	}
 	return(gas);
 };
 int PRERACE::getTimer()
 {
+	if((timer<0)||(timer>MAX_TIME))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getTimer): Variable not initialized [%i].",timer);
+		return(0);
+	}
 	return(timer);
 };
 
@@ -81,31 +136,35 @@ int PRERACE::adjustMineralHarvest(int loc)
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 		return(0);
 	int i,j;
+	i=playerNum;
+	i=loc;
 	if((loc==0)||((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(!pMap->location[loc].force[0][MINERALS])))
 	{
 		for(j=45;j--;)
 			mineralHarvestPerSecond[loc][j]=0;
 	}
-	else if((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(pMap->location[loc].force[0][MINERALS]))
+	/*else if((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(pMap->location[loc].force[0][MINERALS]))
 	{
 	//nach naehestem command_center suchen
 	}
 	else if((pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(!pMap->location[loc].force[0][MINERALS]))
 	{
 	//nach naehesten Mineralien suchen
-	}
+	}*/
 
 	//TODO: Wenn 2 SPieler an einem sammeln, beide einberechnen!
-	else
+	else if(player->getBasicMineralHarvestPerSecond(i)>0)
 	{
 		int k;
 		for(i=45;i--;)
 		{
-			k=0;
-			for(j=0;j<45;j++)
-				if(i*8<=j*pMap->location[loc].force[0][MINERALS]) { k=j;j=45;}
-			mineralHarvestPerSecond[loc][i]=(player->getBasicMineralHarvestPerSecond(k)*pMap->location[loc].force[0][MINERALS])/8;
-		}
+//			k=0;
+//			for(j=0;j<45;j++)
+//				if(i*8<=j*pMap->location[loc].force[0][MINERALS]) 
+//				{ k=j;j=45;};
+			mineralHarvestPerSecond[loc][i]=player->getBasicMineralHarvestPerSecond(i/*k*/);//*pMap->location[loc].force[0][MINERALS])/8;
+		}	//ab hier funzt alles... nur scheint player->getBasic... nicht richtig initialisiert zu sein...
+	
 	}
 	return(1);
 };
@@ -115,16 +174,16 @@ int PRERACE::adjustGasHarvest(int loc)
 	if((loc<0)||(loc>=MAX_LOCATIONS))
 		return(0);
 	int i,j;
-	if((loc==0)||((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(!pMap->location[loc].force[playerNum][REFINERY])))
+	if((loc==0)||((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(!pMap->location[loc].force[0][REFINERY])))
 	{
 		for(j=5;j--;)
 			gasHarvestPerSecond[loc][j]=0;
 	}
-	else if((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(pMap->location[loc].force[playerNum][REFINERY]))
+	else if((!pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(pMap->location[loc].force[0][REFINERY]))
 	{
 	//nach naehestem command_center suchen
 	}
-	else if((pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(!pMap->location[loc].force[playerNum][REFINERY]))
+	else if((pMap->location[loc].force[playerNum][COMMAND_CENTER])&&(!pMap->location[loc].force[0][REFINERY]))
 	{
 	//nach naehesten Mineralien suchen
 	}
@@ -135,23 +194,67 @@ int PRERACE::adjustGasHarvest(int loc)
 		{
 			k=0;
 			for(j=0;j<5;j++)
-				if(i<=j*pMap->location[loc].force[0][REFINERY]) { k=j;j=5;}
-			gasHarvestPerSecond[loc][i]=(player->getBasicGasHarvestPerSecond(k)*pMap->location[loc].force[0][REFINERY]);
+				if(i<=j*pMap->location[loc].force[playerNum][REFINERY]) { k=j;j=5;}
+					gasHarvestPerSecond[loc][i]=(player->getBasicGasHarvestPerSecond(k)*pMap->location[loc].force[playerNum][REFINERY]);
 		}
 	}
 	return(1);
 };
 
-int PRERACE::loadPlayer(int num)
+
+int PRERACE::setPlayerNum(int num)
 {
 	if((num<0)||(num>=MAX_PLAYER))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setPlayerNum): Value [%i] out of range.",num);
 		return(0);
+	}
 	playerNum=num; //~```~  player[0]?
-	player=&pMap->player[num];	
-	pStats=player->goal->getpStats();
+	return(1);
+};
+
+PLAYER* PRERACE::getPlayer()
+{
+	if(!player->getInitialized())
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getPlayer): Variable not initialized.");
+		return(0);
+	}
+	return(player);
+};
+
+int PRERACE::setPlayer(PLAYER* player)
+{
+	if(!player->getInitialized())
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setPlayer): Variable not initialized.");
+		return(0);
+	}
+	this->player=player;
+	return(1);
+};
+
+int PRERACE::setpStats(const UNIT_STATISTICS* pStats)
+{
+	if(pStats[0].mins!=0)//~~
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setpStats): Variable not initialized.");
+		return(0);
+	}
+	this->pStats=pStats;
+	return(1);
+};
+
+
+int PRERACE::loadPlayer(int num)
+{
+	setPlayerNum(num);
+	setPlayer(&pMap->player[num]);
+	setpStats(player->goal->getpStats());
 	setMins(player->getMins());
 	setGas(player->getGas());
 	setTimer(player->getTimer());
+	resetLocations();
 	int i;
 	for(i=0;i<MAX_LOCATIONS;i++)
 	{
@@ -161,18 +264,14 @@ int PRERACE::loadPlayer(int num)
 	return(1);
 };
 
-int PRERACE::getRun()
-{
-	return(run);
-};
-
 void PRERACE::harvestResources()
 {
-	int i;
+	int i,s;
 //	int t=(rand()%10)-5;
 	for(i=1;i<MAX_LOCATIONS;i++)//~~
+	if(s=location[i].availible[SCV])
 	{
-		int s=location[i].availible[SCV];
+		//availible is 0, harvestSpeed ist ok!
 		if(s<56) //~~
 		{
 			mins+=mineralHarvestPerSecond[i][s];
@@ -196,20 +295,222 @@ void PRERACE::harvestResources()
 			harvestedGas+=gasHarvestPerSecond[i][4];
 		}
 	}
+};
+
+int PRERACE::resetLocations()
+{
+
+	//ok
+	if(!mapInitialized)
+		return(0);
+	setSupply(0);
+	setMaxSupply(0);
+	int i,j;
+	for(i=0;i<MAX_LOCATIONS;i++)
+		for(j=UNIT_TYPE_COUNT;j--;)
+		{
+			location[i].force[j]=pMap->location[i].force[getPlayerNum()][j];
+			location[i].availible[j]=pMap->location[i].force[getPlayerNum()][j];
+
+			if(i>0)
+			{
+				if(pStats[j].supply<0)
+				{
+					if(getMaxSupply()-pStats[j].supply*location[i].force[j]>MAX_SUPPLY)
+					{
+						if(getMaxSupply()<MAX_SUPPLY)
+						{
+							setSupply(getMaxSupply()+(MAX_SUPPLY-getMaxSupply()));
+							setMaxSupply(MAX_SUPPLY);
+						}
+					}
+					else
+					{
+						setSupply(getSupply()-pStats[j].supply*location[i].force[j]);
+						setMaxSupply(getMaxSupply()-pStats[j].supply*location[i].force[j]);
+					}
+				} else
+					setSupply(getSupply()-pStats[j].supply*location[i].force[j]);
+			}
+		};
+	return(1);
+};
+
+
+int PRERACE::getIP()
+{
+	if((IP<0)||(IP>MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getIP): Variable not initialized [%i].",IP);
+		return(0);
+	}
+	return(IP);
 }
 
+int PRERACE::getMineralHarvestPerSecond(int loc,int worker)
+{
+	if((loc<0)||(loc>=MAX_LOCATIONS)||(worker<0)||(worker>=45))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getMineralHarvestPerSecond): Value [%i/%i] out of range.",loc,worker);
+		return(0);
+	}
+
+	if((mineralHarvestPerSecond[loc][worker]<0)||(mineralHarvestPerSecond[loc][worker]>MAX_MINS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getMineralHarvestPerSecond): Variable not initialized [%i].",mineralHarvestPerSecond[loc][worker]);
+		return(0);
+	}
+	return(mineralHarvestPerSecond[loc][worker]);
+}
+
+int PRERACE::getGasHarvestPerSecond(int loc,int worker)
+{
+	if((loc<0)||(loc>=MAX_LOCATIONS)||(worker<0)||(worker>=5))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getGasHarvestPerSecond): Value [%i/%i] out of range.",loc,worker);
+		return(0);
+	}
+
+	if((gasHarvestPerSecond[loc][worker]<0)||(gasHarvestPerSecond[loc][worker]>MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getGasHarvestPerSecond): Variable not initialized [%i].",gasHarvestPerSecond[loc][worker]);
+		return(0);
+	}
+	return(gasHarvestPerSecond[loc][worker]);
+}
+
+int PRERACE::getHarvestedMins()
+{
+	if((harvestedMins<0)||(harvestedMins>MAX_MINS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getHarvestedMins): Variable not initialized [%i].",harvestedMins);
+		return(0);
+	}
+	return(harvestedMins);
+}
+
+int PRERACE::getHarvestedGas()
+{
+	if((harvestedGas<0)||(harvestedGas>MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getHarvestedGas): Variable not initialized [%i].",harvestedGas);
+		return(0);
+	}
+	return(harvestedGas);
+}
+
+int PRERACE::getFinalTime(int goal)
+{
+	if((goal<0)||(goal>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getFinalTime): Value [%i] out of range.",goal);
+		return(0);
+	}
+	if((ftime[goal]<0)||(ftime[goal]>MAX_TIME))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getFinalTime): Variable not initialized [%i].",ftime[goal]);
+		return(0);
+	}
+	return(ftime[goal]);
+}
+
+int PRERACE::getLength()
+{
+	if((length<0)||(length>MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::getLength): Variable not initialized [%i].",length);
+		return(0);
+	}
+	return(length);
+}
+
+int PRERACE::setIP(int num)
+{
+	if((num<0)||(num>=MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setIP): Value [%i] out of range.",num);
+		return(0);
+	}
+	IP=num;
+	return(1);
+};
+
+int PRERACE::setMineralHarvestPerSecond(int loc,int worker,int num)
+{
+	if((num<0)||(num>=MAX_MINS)||(loc<0)||(loc>=MAX_LOCATIONS)||(worker<0)||(worker>=45))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setMineralHarvestPerSecond): Value [%i/%i/%i] out of range.",loc,worker,num);
+		return(0);
+	}
+	mineralHarvestPerSecond[loc][worker]=num;
+	return(1);
+};
+
+int PRERACE::setGasHarvestPerSecond(int loc,int worker,int num)
+{
+	if((num<0)||(num>=MAX_GAS)||(loc<0)||(loc>=MAX_LOCATIONS)||(worker<0)||(worker>=5))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setGasHarvestPerSecond): Value [%i/%i/%i] out of range.",loc,worker,num);
+		return(0);
+	}
+	gasHarvestPerSecond[loc][worker]=num;
+	return(1);
+};
+
+int PRERACE::setHarvestedMins(int num)
+{
+	if((num<0)||(num>=MAX_MINS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setHarvestedMins): Value [%i] out of range.",num);
+		return(0);
+	}
+	harvestedMins=num;
+	return(1);
+};
+
+int PRERACE::setHarvestedGas(int num)
+{
+	if((num<0)||(num>=MAX_GAS))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setHarvestedGas): Value [%i] out of range.",num);
+		return(0);
+	}
+	harvestedGas=num;
+	return(1);
+};
+
+int PRERACE::setFinalTime(int goal, int num)
+{
+	if((num<0)||(num>MAX_TIME)||(goal<0)||(goal>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setFinalTime): Value [%i/%i] out of range.",goal,num);
+		return(0);
+	}
+	ftime[goal]=num;
+	return(1);
+};
+
+int PRERACE::setLength(int num)
+{
+	if((num<0)||(num>MAX_LENGTH))
+	{
+		debug.toLog(0,"DEBUG: (PRERACE::setLength): Value [%i] out of range.",num);
+		return(0);
+	}
+	length=num;
+	return(1);
+};
 
 
 PRERACE::PRERACE()
 {
 	int i,j;
-	run=0;
 	player=0;
 	mins=0;
 	gas=0;
-	timer=0;
-	supply=0;
-	maxSupply=0;
+	timer=MAX_TIME;
+	setSupply(0);
+	setMaxSupply(0);
 	IP=0;
 	harvestedGas=0;
 	harvestedMins=0;
@@ -229,7 +530,14 @@ PRERACE::PRERACE()
 	};
 };
 
+void PRERACE::resetMapInitialized()
+{
+	mapInitialized=0;	
+};
+
+void PRERACE::resetMapInitialized();
 int PRERACE::setMap(MAP* map);
+MAP* PRERACE::getMap();
 MAP* PRERACE::pMap;
-int PRERACE::run;
 GA* PRERACE::ga;
+int PRERACE::mapInitialized;

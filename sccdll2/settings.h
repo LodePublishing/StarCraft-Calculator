@@ -33,7 +33,6 @@ class SCCDLL_API SETTINGS
 
 		int setGoal(int goal, int player);
 
-
 //		int setHarvestSpeed(); //~~ maybe allow multiple harvest speeds later on
 
 		int getMaxTime();
@@ -48,21 +47,24 @@ class SCCDLL_API SETTINGS
 		int getHarvestGasSpeed(int r,int n);
 		int getDistance(int l1,int l2);
 
+		const GA* getGa();
+
 		int getGoalCount();
 		int getPlayerCount();
 		int getMapCount();
 		int getGoal(GOAL_ENTRY &goal,int num);
+
+		void loadDefaults();
 
 		int loadGoalFile(const char* goalFile);
 		int loadSettingsFile(const char* settingsFile);
 		int loadMapFile(const char* mapFile);
 		int loadHarvestFile(const char* harvestFile);
 
-		int newGeneration();
+		ANARACE* newGeneration();
 
 		int initSoup();
 
-		void toLog(const char* msg, ...);
 		SETTINGS();
 };
 #endif

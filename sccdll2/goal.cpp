@@ -1,5 +1,6 @@
 #include "goal.h"
 #include <string.h>
+#include "debug.h"
 
 const char* GOAL_ENTRY::getName()
 {
@@ -8,6 +9,11 @@ const char* GOAL_ENTRY::getName()
 
 int GOAL_ENTRY::getRace()
 {
+	if((race<0)||(race>2))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getRace): Variable not initialized [%i].",race);
+		return(0);
+	}
 	return race;
 };
 
@@ -27,8 +33,11 @@ int GOAL_ENTRY::isRaceInitialized()
 
 int GOAL_ENTRY::setRace(int num)
 {
-	if((num<0)||(num>=3))
+	if((num<0)||(num>2))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::setRace): Value [%i] out of range.",num);
 		return(0);
+	}
 	pStats=&(stats[race=num][0]);
 	raceInitialized=1;
 	return(1);
@@ -82,9 +91,17 @@ int GOAL_ENTRY::adjustGoals()
 //      isBuildable[WINDOW_MOVE_ADD_3]=1;isVariable[WINDOW_MOVE_ADD_3]=1;
 //      isBuildable[WINDOW_MOVE_ADD_1]=1;isVariable[WINDOW_MOVE_ADD_1]=1;
 //      isBuildable[WINDOW_MOVE_SUB_1]=1;isVariable[WINDOW_MOVE_SUB_1]=1;
-	isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
-	isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
-	isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
+//		isBuildable[MOVE_ONE_1_FORWARD]=1;isVariable[MOVE_ONE_1_FORWARD]=1;
+//		isBuildable[MOVE_ONE_3_FORWARD]=1;isVariable[MOVE_ONE_3_FORWARD]=1;
+//		isBuildable[MOVE_ONE_1_BACKWARD]=1;isVariable[MOVE_ONE_1_BACKWARD]=1;
+
+		switch(getRace())
+		{
+			case TERRA:isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
+			case PROTOSS:isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
+			case ZERG:isBuildable[OVERLORD]=1;isVariable[OVERLORD];break;
+			default:break;
+		}
 
 	maxBuildTypes=0;
 	for(i=UNIT_TYPE_COUNT;i--;)
@@ -112,6 +129,8 @@ int GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 		return(0);
 	allGoal[unit]+=count;
 
+	globalGoal[location][unit]+=count;
+
 	int i=0;
 	for(i=0;i<goalCount;i++)
 		if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
@@ -132,13 +151,55 @@ int GOAL_ENTRY::addGoal(int unit, int count, int time, int location)
 
 int GOAL_ENTRY::getMaxBuildTypes()
 {
+	if((maxBuildTypes<0)||(maxBuildTypes>UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::getMaxBuildTypes): Variable not initialized [%i].",maxBuildTypes);
+		return(0);
+	}
 	return(maxBuildTypes);
 };
 
 
+int GOAL_ENTRY::getInitialized()
+{
+	return(initialized);
+};
+
+int GOAL_ENTRY::toGeno(int num)
+{
+	if((num<0)||(num>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toGeno): Value [%i] out of range.",num);
+		return(0);
+	}
+	if((phaenoToGenotype[num]<0)||(phaenoToGenotype[num]>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toGeno): Variable not initialized [%i].",phaenoToGenotype[num]);
+		return(0);
+	}
+	return(phaenoToGenotype[num]);
+}
+
+int GOAL_ENTRY::toPhaeno(int num)
+{
+	if((num<0)||(num>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toPhaeno): Value [%i] out of range.",num);
+		return(0);
+	}
+	if((genoToPhaenotype[num]<0)||(genoToPhaenotype[num]>=UNIT_TYPE_COUNT))
+	{
+		debug.toLog(0,"DEBUG: (GOAL_ENTRY::toPhaeno): Variable not initialized [%i].",genoToPhaenotype[num]);
+		return(0);
+	}
+	return(genoToPhaenotype[num]);
+}
+
+
+
 GOAL_ENTRY::GOAL_ENTRY()
 {
-	int i;
+	int i,j;
 	raceInitialized=0;
 	strcpy(name,"Error!");
 	goalCount=0;
@@ -149,13 +210,15 @@ GOAL_ENTRY::GOAL_ENTRY()
 		goal[i].unit=0;
 		goal[i].location=0;
 	}
-	for(i=0;i<UNIT_TYPE_COUNT;i++)
-		allGoal[i]=0;
 	for(i=UNIT_TYPE_COUNT;i--;)
 	{
-	  isVariable[i]=0;
-	  isBuildable[i]=0;
-	  genoToPhaenotype[i]=0;
-	  phaenoToGenotype[i]=0;
+		allGoal[i]=0;
+		isVariable[i]=0;
+		isBuildable[i]=0;
+		genoToPhaenotype[i]=0;
+		phaenoToGenotype[i]=0;
+		for(j=0;j<MAX_LOCATIONS;j++)
+			globalGoal[j][i]=0;
 	}
+	initialized=1;
 };

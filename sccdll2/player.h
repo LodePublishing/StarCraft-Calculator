@@ -3,7 +3,6 @@
 
 #include "main.h"
 #include "goal.h"
-
 class SCCDLL_API PLAYER
 {
 	private:
@@ -12,31 +11,34 @@ class SCCDLL_API PLAYER
 		int timer;
 		int position;
 		int race;
-		int supply;
-		int maxSupply;
         const int* basicMineralHarvestPerSecond;
         const int* basicGasHarvestPerSecond;
+		int initialized;
+		int supply,maxSupply;
 	public:
 		GOAL_ENTRY* goal;
+		int getInitialized();
 		int getMins();
 		int getGas();
 		int getTimer();
 		int getPosition();
 		int getRace();
-		int getSupply();
-		int getMaxSupply();
 		int getBasicMineralHarvestPerSecond(int num);
 		int getBasicGasHarvestPerSecond(int num);
+		int getSupply();
+		int getMaxSupply();
 
+		int setSupply(int num);
+		int setMaxSupply(int num);
 		int setMins(int num);
 		int setGas(int num);
 		int setTimer(int num);
 		int setPosition(int num);
 		int setRace(int num);
-		int setSupply(int num);
-		int setMaxSupply(int num);
-		int setBasicHarvestPerSecond(int* mining, int* gasing);
+		int setHarvest(const int* mining, const int* gasing);
 		int setGoal(GOAL_ENTRY* goal);
+
+		PLAYER();
 };
 
 

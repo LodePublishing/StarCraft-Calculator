@@ -2,6 +2,7 @@
 #define __IO_H
 
 #include "C:\sc\sccdll2\anarace.h" 
+#include "C:\sc\sccdll2\ga.h" 
 
 #define HEIGHT 16 // Number of entries (build order list)
 #define WIDTH 11 // witdh of the entries
@@ -33,32 +34,32 @@ extern void print(const char * x);
 
 #endif
 
+struct BOLOG
+{
+	int count;
+	int order;
+}; 
 
 class IO
 {
-	public:
+	private:
         char tmp[255];
-	int pFitnessGraphicsCounter;
+		int pFitnessGraphicsCounter;
         int pFitnessDifference;
         int sFitnessGraphicsCounter;
         int sFitnessDifference;
         int tFitnessGraphicsCounter;
         int tFitnessDifference;
-        
         int oldsFitness;
         int oldpFitness;
-	int oldtFitness;
-	
+		int oldtFitness;
         int calc;
         int tgGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
-        struct boLog
-        {
-                int count;
-                int order;
-        } bolog[MAX_LENGTH],globalForcelog[UNIT_TYPE_COUNT];
-	
-
-	void screen(ANARACE* anaplayer);
-	IO();
-	~IO();
+		BOLOG bolog[MAX_LENGTH];
+		BOLOG globalForcelog[UNIT_TYPE_COUNT];
+		const GA* ga;
+	public:
+		void screen(ANARACE* anaplayer);
+		IO(const GA* ga);
+		~IO();
 };

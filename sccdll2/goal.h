@@ -2,6 +2,7 @@
 #define __GOAL_H
 
 #include "main.h"
+#include "location.h"
 
 #define MAX_GOAL_ENTRIES 25
 
@@ -13,31 +14,31 @@ class SCCDLL_API GOAL_ENTRY
 		int raceInitialized;
 		int maxBuildTypes;
 	 	const UNIT_STATISTICS* pStats;
-
-		int goalCount;
-		int allGoal[UNIT_TYPE_COUNT];
-	public:
-		int isBuildable[UNIT_TYPE_COUNT];
-        int isVariable[UNIT_TYPE_COUNT];
+		int initialized;
         int phaenoToGenotype[UNIT_TYPE_COUNT];
 		int genoToPhaenotype[UNIT_TYPE_COUNT];
+	public:
+		int goalCount;
+		int allGoal[UNIT_TYPE_COUNT];
+		int globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+		int isBuildable[UNIT_TYPE_COUNT];
+        int isVariable[UNIT_TYPE_COUNT];
 		GOAL goal[MAX_GOALS];
-
 		const char* getName();
+		const UNIT_STATISTICS* getpStats();
+
+		int toGeno(int num);
+		int toPhaeno(int num);
+
 		int getRace();
 		int getMaxBuildTypes();
-		const UNIT_STATISTICS* getpStats();
 		int isRaceInitialized();
-		
 		int setName(const char* line);
 		int setRace(int num);
-
 		int addGoal(int unit, int count, int time, int location);
-	
 		int adjustGoals();
-
 		int isGoal(int unit);
-
+		int getInitialized();
 
 		GOAL_ENTRY();
 };

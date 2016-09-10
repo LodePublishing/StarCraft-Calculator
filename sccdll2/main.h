@@ -9,20 +9,25 @@
 #define SCCDLL_API __declspec(dllimport)
 #endif
 
+#define MAX_MINS 5000000
+#define MAX_GAS 5000000
+
+#define MAX_TIME 3600
 #define MAX_LENGTH 96
-#define RUNNINGS 5
-#define MAX_PROGRAMS 128
+#define MAX_RUNS 10
+#define MAX_PROGRAMS 128 //must be multiplier of (16*player)
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
 #define UNIT_TYPE_COUNT 100
 #define MAX_GOALS 100 // count of possible different goals
 #define MAX_SUPPLY 200
-
+#define MAX_GENERATIONS 10000
+#define MAX_TIMEOUT 133
 
 //CODE INITIALISIEREN!
 
 
-struct Building
+struct BUILDING
 {
 	int RB; // Remaining Buildtime
 	int type; // Type of Building
@@ -500,7 +505,7 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {"    R_Cloaking Field",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"R_Personnel Cloaking",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"       R_Restoration",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
-{"    R_Optical Flatre",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
+{"     R_Optical Flare",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"      R_U-238 Shells",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"     R_Ion Thrusters",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
 {"     R_Titan Reactor",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 0},
