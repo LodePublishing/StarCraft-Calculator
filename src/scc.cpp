@@ -17,62 +17,35 @@
 
 // See www.clawsoftware.de for updates/news/faq/tutorials etc.
 
-// TODO: reorganize the CLASSes (private,protected,public entities...)
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
-#include "terra.h"
-#include "zerg.h"
-#include "protoss.h"
 #include "io.h"
-#include "init.h"
-
-#include "names.h"
+#include "race.h"
+#include "text.h"
 #include "settings.h"
 
-#define gizmowidth 35
+#define COLOR_1 34
+#define COLOR_2 36
+#define COLOR_3 37
 
 // Here are some global variables (accessible by any class due to 'extern' declaration in 'main.h'
-int mining[45],gasing[5];
-unsigned char buildable[MAX_GOALS],Build_Av[MAX_GOALS],Build_Bv[MAX_GOALS],tgoal[MAX_GOALS],Variabel[MAX_GOALS]; 
-unsigned char Vespene_Av,Max_Build_Types,race,colors;
-unsigned short total_goals;
-unsigned char num,Vespene_Extractors,need_Gas;
-GOAL goal[MAX_GOALS]; // GOAL := what buildings should be there AT THE END
-unsigned char Basic[MAX_LENGTH][2],Basic_Length;
 
+int RACE::isBuildable[UNIT_TYPE_COUNT];
+int RACE::isVariable[UNIT_TYPE_COUNT];
+int RACE::genoToPhaenotype[UNIT_TYPE_COUNT];
+int RACE::phaenoToGenotype[UNIT_TYPE_COUNT];
+int RACE::maxBuildTypes;
+int RACE::goalCount;
+int RACE::allGoal[UNIT_TYPE_COUNT]; //former goal...
+int  RACE::globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+GOAL RACE::goal[MAX_GOALS];
+int RACE::basicBuildOrder[2][MAX_LENGTH];
+int RACE::basicLength;
 
-/*
-void crossOver(int * parent1, int * parent2, int * child1, int * child2)
-{
-        unsigned char counter,i,num;
-        counter=MAX_LENGTH;
-        unsigned char * c;
-
-        for(i=0;i<MAX_LENGTH;i++)
-        {
-                if(rand()%counter<4)
-                {
-                        num=MAX_LENGTH-counter;
-                        memcpy(child1+i-num,parent1+i-num,num);
-                        memcpy(child1+i-num+MAX_LENGTH,parent2+i-num+MAX_LENGTH,num);
-                        memcpy(child2+i-num+MAX_LENGTH,parent1+i-num+MAX_LENGTH,num);
-                        memcpy(child2+i-num,parent2+i-num,num);
-                        counter=MAX_LENGTH;
-                        c=child1;
-                        child1=child2;
-                        child2=c;
-                }
-                counter--;
-        }
-        num=MAX_LENGTH-counter;
-        memcpy(child1+counter,parent1+counter,num);
-        memcpy(child1+counter+MAX_LENGTH,parent2+counter+MAX_LENGTH,num);
-        memcpy(child2+counter+MAX_LENGTH,parent1+counter+MAX_LENGTH,num);
-        memcpy(child2+counter,parent2+counter,num);
-}*/
-int compare(const void * a,const void * b)
+int compare(const void* a,const void* b)
 {
 	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<=(*(RACE*)b).sFitness)))
 		return (1);
@@ -81,54 +54,44 @@ int compare(const void * a,const void * b)
 	else return(0);
 };
 
-struct UNITT
+int determine(int g1,int y1,int g2,int y2,int g3,int y3)
 {
-	char text[162]; //or 161?
-} unit[MAX_GOALS];
-
-
-struct boLog
-{
-	unsigned char count;
-	unsigned char order;
-} bolog[MAX_LENGTH],forcelog[MAX_GOALS];
-
-	RACE * player[MAX_PLAYER];
-
+	if((y2-y1)*(g3-g2)==(g2-g1)*(y3-y2)) return(0);
+	return (((y3-y2)*(2*g2-g1-g3)*(g2-g1))/((y2-y1)*(g3-g2)-(g2-g1)*(y3-y2)));
+}
 
 int main(int argc, char* argv[])
 {	
-
-
-	// TODO: make some significant variables...	
-	int run,rfit,afit,sfit;
-	unsigned char counter,gcount;
 	char I[11],O[9],R[7];
 	char tmp[255];
-	int old_time,old_fit,old,old_t,old_sup,s,t,u,generation,calc;
-
+	
 	int race_size;
 
-	//TODO: Check unsigned char <> unsigned short counting variables (especially s,t,u)
+	unsigned char a;
+
+	gMap[0].mineralCount=0;gMap[0].geysirCount=0; // The wayne location... 
+	gMap[1].mineralCount=8;gMap[1].geysirCount=1; //Main
+	gMap[2].mineralCount=0;gMap[2].geysirCount=0; //Front
+	gMap[3].mineralCount=8;gMap[3].geysirCount=1; //Exe
+	gMap[4].mineralCount=0;gMap[4].geysirCount=0; //Center
+	gMap[5].mineralCount=8;gMap[5].geysirCount=1; //EnemyExe
+	gMap[6].mineralCount=0;gMap[6].geysirCount=0; //EnemyFront
+	gMap[7].mineralCount=8;gMap[7].geysirCount=1; //EnemyMain
+
+	gMap[1].distance[0]=0;gMap[1].distance[1]=15;gMap[1].distance[2]=25;gMap[1].distance[3]=50;gMap[1].distance[4]=75;gMap[1].distance[5]=85;gMap[1].distance[6]=100;
+
+	gMap[2].distance[0]=15;gMap[2].distance[1]=0;gMap[2].distance[2]=10;gMap[2].distance[3]=35;gMap[2].distance[4]=60;gMap[2].distance[5]=70;gMap[2].distance[6]=85;
+
+	gMap[3].distance[0]=25;gMap[3].distance[1]=10;gMap[3].distance[2]=0;gMap[3].distance[3]=40;gMap[3].distance[4]=65;gMap[3].distance[5]=75;gMap[3].distance[6]=90;
+
+	gMap[4].distance[0]=50;gMap[4].distance[1]=35;gMap[4].distance[2]=40;gMap[4].distance[3]=0;gMap[4].distance[4]=40;gMap[4].distance[5]=35;gMap[4].distance[6]=50;
+
+        gMap[5].distance[0]=90;gMap[5].distance[1]=75;gMap[5].distance[2]=65;gMap[5].distance[3]=40;gMap[5].distance[4]=0;gMap[5].distance[5]=10;gMap[5].distance[6]=25;
 	
-	unsigned char a,tunit;//,Test;
-	char * gizmo;
+	gMap[6].distance[0]=85;gMap[6].distance[1]=70;gMap[6].distance[2]=60;gMap[6].distance[3]=35;gMap[6].distance[4]=10;gMap[6].distance[5]=0;gMap[6].distance[6]=15;
 
-
-	Vespene_Extractors=0;
-// TODO: maybe put them to settings	
-	race=5;
-	gcount=16;
-	tunit=0;
-	generation=0;
-    run=0;
-    afit=0;
-    rfit=0;
-    sfit=0;
-	old=200;
-    counter=1;
-	old_fit=0;
-
+	gMap[7].distance[0]=100;gMap[7].distance[1]=85;gMap[7].distance[2]=75;gMap[7].distance[3]=50;gMap[7].distance[4]=25;gMap[7].distance[5]=15;gMap[7].distance[6]=0;
+//Lost Temple ohne Mins exen
 	
 	srand(time(NULL));
 	clrscr();
@@ -139,202 +102,53 @@ int main(int argc, char* argv[])
 	        return(1);
 	}
 
-	TranslateData(argc,argv);
-	
+	gRace=5;
+        printf("Press '1' for Terran, '2' for Protoss or '3' for Zerg.\n");
+        while(gRace==5)
+                {
+                        gRace=TERRA;
+                        a=getchar();
+                        if(((a-49)>=0)&&((a-49)<3)) gRace=a-49;
+                }
+        printf("RACE: %i",gRace);
 
-#define gizmolength 879
-//The green gizmo text at the top
-	gizmo = new char[gizmolength];
-	sprintf(gizmo,"                                        Attention Defenders of the United Earth Directorate!                                        This is Admiral DuGalle.                                        You were all briefed before we left earth, so you know that we have come here to conquer this sector in the name of humanity.                                        Should any of you have second thoughts about performing your assigned duties, be reminded that if we fail in our mission here, not one of us will be going home.                                        We stand or fall together in this forsaken wasteland.                                        Serve the directorate serve humanity...                                       All other priorities are secondary to victory!                                        Dugall out.                                        ");
 	
 	printf("Setting Race and initializing player models... ");
 	
-	switch(race)
+	switch(gRace)
 	{
 		case 0:sprintf(I,"goal_t.txt");sprintf(O,"bo_t.txt");sprintf(R,"Terran");break;
 		case 1:sprintf(I,"goal_p.txt");sprintf(O,"bo_p.txt");sprintf(R,"Protoss");break;
 		case 2:sprintf(I,"goal_z.txt");sprintf(O,"bo_z.txt");sprintf(R,"Zerg");break;
 		default:printf("not enough arguments");return 0;break;
 	}
+	
 	printf("[%s]",R);
 	setColor(32);
 	printf(" ok\n");
 	setColor(37);
 
-//	if(Test==0)
-//	{
-		if(settings.InitGoal(I)==1)
-		{
-			printf("Error during settings. Repair / Reinstall the %s file!\n",I);
-		        return(1);
-		}
-//	}
+	gpStats=&(stats[gRace][0]);
 
+	race_size=sizeof(RACE);
 	
-	RACE * temppp;
-	RACE * Save[RUNNINGS];
-// TODO: Looks pretty hacked... maybe implement a better method later to allow the virtual construction in RACE
-	if(race==TERRA)
-	{
-		Player_Terra playert[MAX_PLAYER];
-		Player_Terra Savet[RUNNINGS];
-
-		for(s=0;s<MAX_PLAYER;s++) player[s]=&playert[s];
-		for(s=0;s<RUNNINGS;s++) Save[s]=&Savet[s];
-		race_size=sizeof(Player_Terra);
-	}
-	else if(race==PROTOSS)
-	{
-	Player_Protoss playerp[MAX_PLAYER];
-	Player_Protoss Savep[RUNNINGS];
-
-		for(s=0;s<MAX_PLAYER;s++) player[s]=&playerp[s];
-		for(s=0;s<RUNNINGS;s++) Save[s]=&Savep[s];
-		race_size=sizeof(Player_Protoss);
-	}
-	else if(race==ZERG)
-	{
-	Player_Zerg playerz[MAX_PLAYER];
-	Player_Zerg Savez[RUNNINGS];
-
-		for(s=0;s<MAX_PLAYER;s++) player[s]=&playerz[s];
-		for(s=0;s<RUNNINGS;s++) Save[s]=&Savez[s];
-		race_size=sizeof(Player_Zerg);
-	}
-
-	Max_Build_Types=0;
+	// Sets additional gGoals, say the user enters "Guardien" Set_Goals will also set Hive, Greater Spire, Lair, Queens Nest, Extractor and Spawning Pool as a gGoal 
 	
-//	if(Test>0)
-//	{
-/*		for(s=0;s<MAX_GOALS;s++)
-		{
-			goal[s].what=0;
-			goal[s].time=0;
-		}
-		for(s=0;s<MAX_LENGTH;s++)
-			if(bo[s].count>0)
-				goal[bo[s].type].what+=bo[s].count;		*/
-//	}
+	pPlayer[0]->Set_Goals(I);
+	pPlayer[0]->AdjustMining();	
+	pPlayer[0]->generateBasicBuildorder();
 
-	// Sets additional goals, say the user enters "Guardien" Set_Goals will also set Hive, Greater Spire, Lair, Queens Nest, Extractor and Spawning Pool as a goal
-	player[0]->Set_Goals(); 
-	Init();
-
-	// Maybe just do 3 different functions instead of a function for every member of the class as it affects only global variables
-
-	settings.AdjustMining();
-
-	player[0]->generateBasicBuildorder();
-
-//	if(Test<2)
-		for(s=0;s<MAX_PLAYER;s++)
-			player[s]->Restart();
-	//Test == 2 => "-T" Parameter, just run a single run to determine the time it needs
-/*	else if(Test==2) 
-	{
-		z=0;
-		player[0]->Init();
-
-		for(t=0;t<MAX_LENGTH;t++)
-			if(bo[t-z].count>0)
-			{
-				u=bo[t-z].count; //Translate the build order say 1: "5 marines" in 1: Marine, 2: Marine, ..., 5: Marine
-				while((t<MAX_LENGTH)&&(u>0))
-				{
-					player[0]->program[t].order=Build_Bv[bo[t-z].type];
-					u--;z++;
-					player[0]->program[t].time=20000;
-					player[0]->program[t].built=0;
-					t++;
-
-					//~~~~
-				}
-				z--;t--;
-			}
-				else 
-				{
-					player[0]->program[t].order=255;
-					player[0]->program[t].time=20000;
-					player[0]->program[t].built=0;	
-				}
-		
-		// "scc -b Drone" results in a goal[DRONE].what == 5
-			for(s=0;s<MAX_GOALS;s++)
-				if(player[0]->force[s]>0)
-					goal[s].what+=player[0]->force[s];
-			player[0]->readjust_goals(); // actually affects only zerg (and archon of the protoss)
-
-			printf("Translated goals:\n");
-			for(s=0;s<MAX_GOALS;s++)
-				if(goal[s].what>0)
-					printf("%s : %i\n",stats[race][s].name,goal[s].what); 
-			printf("\nPress Enter to show time\n");
-
-			a=getchar();
-			player[0]->timer=settings.Max_Time;
-			player[0]->IP=0;
-
-			player[0]->Calculate();
-
-		//print out all orders that are executed without problems
-			printf("Successful build order:           [Requirement fulfilled]\n");
-			for(s=0;s<MAX_LENGTH;s++)
-				if(player[0]->program[s].built==1)
-			printf("    %s [%.2i:%.2i] %s\n",stats[race][Build_Av[player[0]->Code[s][player[0]->program[s].dominant]]].name,player[0]->program[s].time/60,player[0]->program[s].time%60,error_m[player[0]->program[s].success]);
-				else s=MAX_LENGTH;
-				
-			printf("Needed Time: ");	
-			setColor(32);
-			printf("[%.2i:%.2i] ",player[0]->timer/60,player[0]->timer%60);
-			setColor(37);
-	
-		// no solution? probably forgot a tech building or supply
-			if(player[0]->timer==settings.Max_Time)
-			{
-				printf("\n => invalid build order, goals not reached.\n");	
-				s=0;
-			//determine the order which could not be executed
-				while(s<MAX_LENGTH)
-					if((s+1<MAX_LENGTH)&&(player[0]->program[s+1].built==0))
-					{
-						printf("When trying to build ");
-					        setColor(32);
-				       		printf("%s",stats[race][Build_Av[player[0]->Code[s][player[0]->program[s].dominant]]].name);
-					        setColor(37);
-				                printf(" the following requirement failed : \n");
-						setColor(31);
-						printf("%80s\n",error_m[player[0]->program[s].success]);
-					        setColor(37);
-						printf("\nCheck your build order, reread the readme and/or contact ClawSoftware :)\n");
-						s=MAX_LENGTH;
-					} else s++;
-				}
-			printf("\n");
-			return(0);	
-	}*/
+	for(int s=MAX_PLAYER;s--;)
+		pPlayer[s]->Restart();
         old_time=settings.Max_Time;
 
-	// Creating Unit text... (right bottom corner)
-	for(s=0;s<MAX_GOALS;s++)
-sprintf(unit[s].text,"              Unit Name: %21s    Buildtime: %3i seconds    Minerals : %3i    Gas      : %3i    Supply   : %i    Type     : %i                     ",stats[race][s].name,stats[race][s].BT,stats[race][s].mins,stats[race][s].gas,stats[race][s].supply,stats[race][s].type);
+	for(int s=MAX_LENGTH;s--;) bolog[s].count=0;
 
-	
-	for(s=0;s<MAX_LENGTH;s++) bolog[s].count=0;
-	for(s=0;s<MAX_GOALS;s++) Variabel[s]=0;
-
-	
-//some blabla
-printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
-
+	//some blabla
+	printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
 	a=getchar();
-
-
-
-	
 	clrscr();
-	gotoxy(0,0);
-
-	printf("Welcome to StarCraftCalculator v1.02 [April/07/2003]!\n");
+	printf("Welcome to StarCraftCalculator v1.03 [August/14/2003]!\n");
 	printf("-------------------------------------\n\n");
 	printf("- Check the ""%s"" file to change goals of the BO\n",I);
 	printf("  You may change additional settings in the ""settings.txt"" file.\n");
@@ -350,22 +164,28 @@ printf("\n\n OK! System is ready to start. Press Enter to continue...\n");
 	printf("            you do not need to worry:\n");
 	printf("That is exactly how it should be :)\n\n");
 	printf("\nPress Enter to show the goals...\n");	
-    a=getchar();
+    	a=getchar();
 	clrscr();
 	gotoxy(0,0);
-printf("Goals\n");
-	for(s=0;s<MAX_GOALS;s++)
-		if(goal[s].what>0)
+	printf("Buildable items:\n");
+	
+	for(int s=0;s<UNIT_TYPE_COUNT;s++)
+		if((pPlayer[0]->allGoal[s]==0)&&(pPlayer[0]->isBuildable[s]>0))
+			printf("- %20s : %2i (%s)\n",gpStats[s].name,pPlayer[0]->allGoal[s],kurz[gRace][s].b);
+	
+	printf("\nGoals:\n");
+	
+	for(int s=0;s<MAX_GOALS;s++)
+		if(pPlayer[0]->goal[s].count>0)
 		{
-			if(goal[s].time==0)
-				printf("- %20s : %2i   (%s) \n",stats[race][s].name,goal[s].what,kurz[race][s].b);
-			else printf("- %20s : %2i   (%s) [%.2i:%.2i] \n",stats[race][s].name,goal[s].what,kurz[race][s].b,goal[s].time/60,goal[s].time%60);
+			printf("- %20s : %2i (%s) [at %2i]",gpStats[pPlayer[0]->goal[s].unit].name,pPlayer[0]->goal[s].count,kurz[gRace][pPlayer[0]->goal[s].unit].b,pPlayer[0]->goal[s].location);
+			if(pPlayer[0]->goal[s].time>0)
+				printf(" [%.2i:%.2i]",pPlayer[0]->goal[s].time/60,pPlayer[0]->goal[s].time%60);
+			printf("\n");
 		}
 
-	calc=0;
 	printf("\n\n");
 	printf("Press ENTER to let the calculation start!\n");
-	
 	a=getchar();
 	clrscr();
 
@@ -373,53 +193,33 @@ printf("Goals\n");
 #ifdef WIN32
 	SetConsoleActiveScreenBuffer(scr);
 #endif
+	calc=0;
 
 	while(run<RUNNINGS)
 	{
-		gotoxy(0,0);
-	
 	  	generation++;
                 rfit++;
-	        calc++;
-		  	  
-//TODO: player[0] is not yet initialized as the best build order ... (in the very first run)
-// probably the best thing to do is to move the block to the end 
-		old_time=player[0]->timer;
-		old_fit=player[0]->pFitness; 
-
-		for(s=0;s<MAX_PLAYER;s++)
-			(*player[s]).Init();
-
-		for(s=1;s<MAX_PLAYER;s++)
-			(*player[s]).Mutate();
+		old_time=pPlayer[0]->timer;
+		old_pFitness=pPlayer[0]->pFitness;
+	        old_sFitness=pPlayer[0]->sFitness;	
+		for(int s=MAX_PLAYER;s--;)
+			(*pPlayer[s]).Init();
+		for(int s=1;s<MAX_PLAYER;s++)
+			(*pPlayer[s]).Mutate();
+		for(int s=MAX_PLAYER;s--;)
+			(*pPlayer[s]).Calculate();
 		
-		for(s=0;s<MAX_PLAYER;s++)
-			(*player[s]).Calculate();
+// Determine the best build order depending on the primary fitness (needed time and completed gGoals) and the secondary fitness (gathered resources)
+		qsort(*pPlayer,MAX_PLAYER,race_size,compare);
 
-// Determine the best build order depending on the primary fitness (needed time and completed goals) and the secondary fitness (gathered resources)		
-		qsort(*player,MAX_PLAYER,race_size,compare);
-		/*for(s=0;s<MAX_PLAYER;s++)
-			for(t=0;t<MAX_PLAYER;t++)
-				if((player[s]->pFitness<player[t]->pFitness)||((player[s]->pFitness==player[t]->pFitness)&&(player[s]->sFitness<player[t]->sFitness)))
-				{
-					temppp=player[s];
-					player[s]=player[t];
-					player[t]=temppp;
-				};*/
-			
-		
 
-		// bigger than afit or sfit? good! We completed another goal or at least a part of it
+		// bigger than afit or sfit? good! We completed another gGoal or at least a part of it
 		// Maybe implement another parameter to deactivate sFitness... will (maybe!) cause faster calculation but worse build orders (in terms of resources)
-		if(player[0]->pFitness>afit)
+		if((pPlayer[0]->sFitness>sfit)||(pPlayer[0]->pFitness>afit))
 		{
-			afit=player[0]->pFitness;
-			sfit=player[0]->sFitness;
-			rfit=0;
-		}
-		else if(player[0]->sFitness>sfit)
-		{
-			sfit=player[0]->sFitness;
+			sfit=pPlayer[0]->sFitness;
+			if(pPlayer[0]->pFitness>afit)
+				afit=pPlayer[0]->pFitness;
 			rfit=0;
 		}
 		
@@ -427,69 +227,89 @@ printf("Goals\n");
 		if(settings.Verbose==1)
 		{
 			gotoxy(0,0);
-
-	   	print("Calculating ");
-
-		if(settings.Gizmo==1)
-		{
-			print("[");
-			setColor(32);
-			for(s=0;s<gizmowidth;s++)
-			{
-				sprintf(tmp,"%c",gizmo[(calc/2+s)%gizmolength]);
-				print(tmp);
-			}
 			setColor(37);
-			print("]");
-		}
-		print("  Status:");
+		   	print("Calculating Status:");
 
-		if(gcount<160) gcount++;
-		if(player[0]->timer<settings.Max_Time)
-		{
-			if(old_time>player[0]->timer) gcount=0;
-			if(gcount<=16)
-			print(" got faster solution! ");
+			if(time_graphics_counter<160) time_graphics_counter++;
+			if(resources_graphics_counter<160) resources_graphics_counter++;
+			if(old_sFitness<pPlayer[0]->sFitness)
+			{
+				resources_graphics_counter=0;
+				resources_difference=pPlayer[0]->sFitness-old_sFitness;
+			}
+			
+			if(pPlayer[0]->timer<settings.Max_Time)
+			{
+				if(old_time>pPlayer[0]->timer) 
+				{
+					time_graphics_counter=0;
+					time_difference=old_time-pPlayer[0]->timer;
+				}
+				if(time_graphics_counter<resources_graphics_counter)
+					setAt(time_graphics_counter);
+				else setAt(resources_graphics_counter);
+									
+				if(time_graphics_counter<=16)
+					printf(" got faster solution! [-%2i]  ",time_difference);
 				else
-			print(" optimizing resources.");
-		}
-		else			
-		{
-			if((old_fit/100)<(player[0]->pFitness/100)) gcount=0;
+				if(resources_graphics_counter<=16)
+					printf(" improved resources! [+%2i]   ",resources_difference/100);
+				else
+					 print(" optimizing resources...      ");
+			}
+			else			
+			{
+				if((old_pFitness/100)<(pPlayer[0]->pFitness/100)) 
+				{
+					time_graphics_counter=0;
+					time_difference=(pPlayer[0]->pFitness/100)-(old_pFitness/100);
+				}
 
-			if(gcount<=16)
-			print(" another goal complete");
-			else
-			print(" searching . . .      ");
-		}
-		
+				if(time_graphics_counter<resources_graphics_counter)
+					setAt(time_graphics_counter);
+				else setAt(resources_graphics_counter);
+				
+				if(time_graphics_counter<=16)
+					printf(" another gGoal complete! [+%2i]",time_difference);
+				else
+				if(resources_graphics_counter<=16)
+				        printf(" improved resources! [+%4i]",resources_difference/100);
+				else
+					 print(" searching . . .              ");
+			}
 		setColor(37);
 		gotoxy(1,2);sprintf(tmp,"%i runs and %i+ generations remaining. [Total %i generations]      ",RUNNINGS-run,settings.Max_Generations-rfit,generation);
 		print(tmp);
+		
 		gotoxy(0,4);
 		print("[resources] [time]");
 		gotoxy(0,5);
 		print("------------------");
-		gotoxy(2,6);sprintf(tmp,"  %5.4i",(/*player[0]->harvested_mins+*/player[0]->harvested_gas)/100);
+		setAt(resources_graphics_counter);
+		gotoxy(2,6);sprintf(tmp,"  %5.4i",(pPlayer[0]->harvested_mins+pPlayer[0]->harvested_gas)/100);
 		print(tmp);
-		setAt(gcount);
-		gotoxy(13,6);if(player[0]->timer<settings.Max_Time) { sprintf(tmp,"%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);print(tmp);} else { sprintf(tmp," %i ",player[0]->pFitness);print(tmp);};
 		
-	setColor(31);
-if((calc%80==0)||(calc%80==1)) setColor(37); else setColor(31);
-	gotoxy(20,3);print("     ooo    ooo   ooo   o      oo     ooo");
-if((calc%80==2)||(calc%80==3)) setColor(37); else setColor(31);
-	gotoxy(20,4);print("   o      o     o      o     o  o       o");
-if((calc%80==4)||(calc%80==5)) setColor(37); else setColor(31);
-	gotoxy(20,5);print("    o    o     o      o     o  o      o  ");
-if((calc%80==6)||(calc%80==7)) setColor(37); else setColor(31);
-	gotoxy(20,6);print("    o   o     o      o     o  o       o ");
-if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
-	gotoxy(20,7);print("ooo     ooo   ooo   o  o   oo     ooo  ");
+		setAt(time_graphics_counter);
+		gotoxy(13,6);if(pPlayer[0]->timer<settings.Max_Time) { sprintf(tmp,"%.2i:%.2i",pPlayer[0]->timer/60,pPlayer[0]->timer%60);print(tmp);} else { sprintf(tmp," %i ",pPlayer[0]->pFitness);print(tmp);};
 		
-		for(s=0;s<MAX_GOALS;s++)
-			tgoal[s]=goal[s].what;
-//bolog logs how long which build order stands there (you know, the colors ;-)
+	setColor(COLOR_1);
+if((calc%80==0)||(calc%80==1)) setColor(COLOR_3); else if((calc%80==78)||(calc%80==79)||(calc%80==2)||(calc%80==3)) setColor(COLOR_2);else setColor(COLOR_1);
+	gotoxy(20,3);print("     ***    ***   ***   *      **     ***");
+if((calc%80==2)||(calc%80==3)) setColor(COLOR_3); else if((calc%80==0)||(calc%80==1)||(calc%80==4)||(calc%80==5)) setColor(COLOR_2);else setColor(COLOR_1);
+	gotoxy(20,4);print("   *      *     *      *     *  *       *");
+if((calc%80==4)||(calc%80==5)) setColor(COLOR_3); else if((calc%80==2)||(calc%80==3)||(calc%80==6)||(calc%80==7)) setColor(COLOR_2); else setColor(COLOR_1);
+	gotoxy(20,5);print("    *    *     *      *     *  *      *  ");
+if((calc%80==6)||(calc%80==7)) setColor(COLOR_3); else if((calc%80==4)||(calc%80==5)||(calc%80==8)||(calc%80==9)) setColor(COLOR_2); else setColor(COLOR_1);
+	gotoxy(20,6);print("    *   *     *      *     *  *       * ");
+if((calc%80==8)||(calc%80==9)) setColor(COLOR_3); else if((calc%80==6)||(calc%80==7)||(calc%80==10)||(calc%80==11)) setColor(COLOR_2);else setColor(COLOR_1);
+	gotoxy(20,7);print("***     ***   ***   *  *   **     ***  ");
+		
+	for(int s=1;s<MAX_LOCATIONS;s++)
+		for(int t=UNIT_TYPE_COUNT;t--;)
+			tgGoal[s][t]=pPlayer[0]->globalGoal[s][t]; //reset the goals (to sign @ the unit list)
+
+	
+		//bolog logs how long which build order stands there (you know, the gColors ;-)
 		//TODO: recognize moved blocks to stress real Mutations
 		
 		old=200;
@@ -498,56 +318,57 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 		counter=1;
 		t=0;
 		setColor(37);
-			
+
+//The Build order List		
 		if(settings.Detailed_Output==1)
 		{
-			for(s=0;s<5;s++)
+			for(int s=0;s<5;s++)
                 	{
-		       			t=0;
-		                while((t<HEIGHT)&&(player[0]->program[(s+1)*HEIGHT-t].built==0)) t++;
+				t=0;
+		                while((t<HEIGHT)&&(pPlayer[0]->program[(s+1)*HEIGHT-t].built==0)) t++;
 		               	gotoxy(WIDTH*s+2,25-settings.Console24Lines);//WIN32 1 <> LINUX 0
-				if((t<HEIGHT)||(player[0]->program[s*HEIGHT].built>0))
+				if((t<HEIGHT)||(pPlayer[0]->program[s*HEIGHT].built>0))
 				{
-					sprintf(tmp,"[%.2i:%.2i]",player[0]->program[(s+1)*HEIGHT-t].time/60,player[0]->program[(s+1)*HEIGHT-t].time%60);
+					sprintf(tmp,"[%.2i:%.2i]",pPlayer[0]->program[(s+1)*HEIGHT-t].time/60,pPlayer[0]->program[(s+1)*HEIGHT-t].time%60);
 					print(tmp);
 				}
 				else print("       ");
 			}
 			
 			t=0;
-			for(s=0;s<MAX_LENGTH;s++)
+			for(int s=0;s<MAX_LENGTH;s++)
 			{
 				gotoxy((t/HEIGHT)*WIDTH,9+t%HEIGHT-settings.Console24Lines);
 				t++;
 				setColor(37);
-				if(player[0]->program[s].built==1)
+				if(pPlayer[0]->program[s].built==1)
 				{
-					if(bolog[s].order==player[0]->Code[s][player[0]->program[s].dominant])
-                   	{
+					if(bolog[s].order==pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s])
+        		           	{
 				        	if(bolog[s].count<160)
 							bolog[s].count++;
 					} else
 					{
 						bolog[s].count=0;
-						bolog[s].order=player[0]->Code[s][player[0]->program[s].dominant];
+						bolog[s].order=pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s];
 					}
 					
-					setColor(34);
-					if(tgoal[Build_Av[player[0]->Code[s][player[0]->program[s].dominant]]]>0)
+					if(tgGoal[pPlayer[0]->program[s].location][pPlayer[0]->genoToPhaenotype[pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s]]]>0) //~~~~~~ location=0?
 					{
+						setColor(34);
+						tgGoal[pPlayer[0]->program[s].location][pPlayer[0]->genoToPhaenotype[pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s]]]--;
 						print("@");
-						tgoal[Build_Av[player[0]->Code[s][player[0]->program[s].dominant]]]--;
 					} else print(" ");
 					setColor(35);
-					sprintf(tmp,"%c",error_sm[player[0]->program[s].success]);
+					sprintf(tmp,"%c",error_sm[pPlayer[0]->program[s].success]);
 					print(tmp);
 					setAt(bolog[s].count);
-					sprintf(tmp,"%s",kurz[race][Build_Av[player[0]->Code[s][player[0]->program[s].dominant]]].b);
+					sprintf(tmp,"%s",kurz[gRace][pPlayer[0]->genoToPhaenotype[pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s]]].b);
 					print(tmp);
 					setColor(37);
-					if(player[0]->program[s].need_Supply<100)
-						sprintf(tmp," %.2i",player[0]->program[s].need_Supply);
-					else sprintf(tmp,"%3i",player[0]->program[s].need_Supply);
+					if(pPlayer[0]->program[s].need_Supply<100)
+						sprintf(tmp," %.2i",pPlayer[0]->program[s].need_Supply);
+					else sprintf(tmp,"%3i",pPlayer[0]->program[s].need_Supply);
 					print(tmp);
 				}
 				else print(" ------    "); 
@@ -555,11 +376,11 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 		}
 		else
 		{
-		for(s=0;(s<MAX_LENGTH)&&(t<3*HEIGHT+3);s++)
+		for(int s=0;(s<MAX_LENGTH)&&(t<3*HEIGHT+3);s++)
 		{
-			while((player[0]->program[s].built==0)&&(s<MAX_LENGTH-1))
+			while((pPlayer[0]->program[s].built==0)&&(s<MAX_LENGTH-1))
                         	s++;
-                        if(old==Build_Av[player[0]->Code[s][player[0]->program[s].dominant]]) counter++;
+                        if(old==pPlayer[0]->genoToPhaenotype[pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s]]) counter++;
 			else if(old<200)
 			{
 				if(bolog[t].order==old)
@@ -577,58 +398,59 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 				if(counter>1) { sprintf(tmp,"%2i",counter);setColor(35);print(tmp);} else print("  ");
 					setAt(bolog[t].count);
 				t++;
-				sprintf(tmp,"%s",kurz[race][old].b);
+				sprintf(tmp,"%s",kurz[gRace][old].b);
 				print(tmp);
 				setColor(37);
-			    sprintf(tmp," %.2i:%.2i ",old_t/60,old_t%60);
+				sprintf(tmp," %.2i:%.2i ",old_t/60,old_t%60);
 				print(tmp);
 				setColor(35);
 				if(old_sup<100) sprintf(tmp,"%.2i",old_sup); else sprintf(tmp,"%3i",old_sup);
 				print(tmp);
 				setColor(37);
 				counter=1;
-				old=Build_Av[player[0]->Code[s][player[0]->program[s].dominant]];
-				old_t=player[0]->program[s].time;
-				old_sup=player[0]->program[s].need_Supply;
+				old=pPlayer[0]->genoToPhaenotype[pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s]];
+				old_t=pPlayer[0]->program[s].time;
+				old_sup=pPlayer[0]->program[s].need_Supply;
 			}
 			else
 			{
-				old=Build_Av[player[0]->Code[s][player[0]->program[s].dominant]];
-				old_t=player[0]->program[s].time;
-				old_sup=player[0]->program[s].need_Supply;
+				old=pPlayer[0]->genoToPhaenotype[pPlayer[0]->Code[pPlayer[0]->program[s].dominant][s]];
+				old_t=pPlayer[0]->program[s].time;
+				old_sup=pPlayer[0]->program[s].need_Supply;
 			}
 		}
-		for(s=t;(s<=MAX_LENGTH)&&(s<3*(HEIGHT+1));s++)
+		for(int s=t;(s<=MAX_LENGTH)&&(s<3*(HEIGHT+1));s++)
 		{
 			gotoxy((s/(HEIGHT+1))*17,9+s%(HEIGHT+1)-settings.Console24Lines);
 			print("  ------       x");
 		}
 		}
+		//TODO: In io rein!
 
 		setColor(37);
 
 		t=4;
 		gotoxy(66,3);print("Force:");
-		for(s=0;s<MAX_GOALS;s++)
-			if(goal[s].what>0)
+		for(int s=0;s<EXTRACTOR+2;s++)
+			if(pPlayer[0]->allGoal[s]>0)
 			{
-				if(forcelog[s].order==player[0]->force[s])
+				if(globalForcelog[s].order==pPlayer[0]->location[0].force[s])
                         	{
-		                      if(forcelog[s].count<160)
-								forcelog[s].count++;
+		                      if(globalForcelog[s].count<160)
+								globalForcelog[s].count++;
 			        }
                         	else
 			        {
-				 	forcelog[s].count=0;
-				        forcelog[s].order=player[0]->force[s];
+				 	globalForcelog[s].count=0;
+				        globalForcelog[s].order=pPlayer[0]->location[0].force[s];
 				}
 				
-				setAt(forcelog[s].count);
+				setAt(globalForcelog[s].count);
 				gotoxy(70,t);				
-				sprintf(tmp,"%s:%2i ",kurz[race][s].b,player[0]->force[s]);
+				sprintf(tmp,"%s:%2i ",kurz[gRace][s].b,pPlayer[0]->location[0].force[s]);
 				print(tmp);
 				t++;
-				if(t>23-settings.Console24Lines) s=MAX_GOALS;
+				if(t>23-settings.Console24Lines) s=EXTRACTOR+2;
 				
 				//Well... it can't print out more than ~20 goals :/ 
 			}
@@ -638,183 +460,141 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 			setColor(37);
 			print("non-goals:");
 			t++;
-			for(s=0;s<MAX_GOALS;s++)
-				if((goal[s].what==0)&&(player[0]->force[s]))
+			for(int s=0;s<EXTRACTOR+2;s++)
+				if((pPlayer[0]->allGoal[s]==0)&&(pPlayer[0]->location[0].force[s]))
 				{
-					if(forcelog[s].order==player[0]->force[s])
+					if(globalForcelog[s].order==pPlayer[0]->location[0].force[s])
 					{
-						if(forcelog[s].count<160)
-							forcelog[s].count++;
+						if(globalForcelog[s].count<160)
+							globalForcelog[s].count++;
 					}
 					else
 					{
-						forcelog[s].count=0;
-						forcelog[s].order=player[0]->force[s];
+						globalForcelog[s].count=0;
+						globalForcelog[s].order=pPlayer[0]->location[0].force[s];
 					}
-						setAt(forcelog[s].count);
-						gotoxy(70,t);
-						sprintf(tmp,"%s:%2i ",kurz[race][s].b,player[0]->force[s]);
-						print(tmp);
-						t++;
-						if(t>23-settings.Console24Lines) s=MAX_GOALS;
+					setAt(globalForcelog[s].count);
+					gotoxy(70,t);
+					sprintf(tmp,"%s:%2i ",kurz[gRace][s].b,pPlayer[0]->location[0].force[s]);
+					print(tmp);
+					t++;
+					if(t>23-settings.Console24Lines) s=EXTRACTOR+2;
 				}
-		for(s=0;s<23-t-settings.Console24Lines;s++)
+		for(int s=23-t-settings.Console24Lines;s--;)
 		{
 			gotoxy(70,t+s);
 			print("         ");
 		}
 		}
-		
-		if(settings.Gizmo==1)
-		{
-			setColor(37);
-			gotoxy(54,25-settings.Console24Lines);
-		 	print("[");
-			setColor(33);
-	     for(s=0;s<23;s++)
-			{
-				sprintf(tmp,"%c",unit[tunit].text[(calc/2+s)%(sizeof(unit[tunit].text)-1)]);
-				//sizeof correct? mmmh...
-				print(tmp);
-			}	
-
-			if((calc/2+1)%(sizeof(unit[tunit].text)-1)==0)
-			{
-//				clrscr(); // <- hacked to reduce graphic errors... D:
-				tunit=rand()%MAX_GOALS;
-				while(player[0]->force[tunit]==0)
-					tunit=rand()%MAX_GOALS;
-			}
-		
-                setColor(37);
-                print("]");
-			}
-		}
+		calc++; //Graphics counter
+	}
 
 // End of Verbose
 		
-// Core of the Program
-// It *works*... though there is probably a better algorithm (exchange of parts of the program instead of just overwriting other build orders that are worse)
-		// It's just a hill climbing algorithm... If the Fitness of one program is higher than the other, it is overwritten.
-		// Secondary fitness just comes in when primary fitness is equal
-// TODO: Test and implement better algorithms for reproduction		
-		for(s=1;s<10;s++)
+		for(int s=10;s--;)
 		{
 			t=rand()%(MAX_PLAYER-1)+1;
-			for(u=0;u<MAX_LENGTH;u++)
-			{
-				player[t]->Code[u][0]=player[0]->Code[u][0];
-				player[t]->Code[u][1]=player[0]->Code[u][1];
-			}
-			player[t]->pFitness=player[0]->pFitness;
-			player[t]->sFitness=player[0]->sFitness;
+			memcpy(pPlayer[t]->Code[0],pPlayer[0]->Code[0],MAX_LENGTH*4);    
+			memcpy(pPlayer[t]->Code[1],pPlayer[0]->Code[1],MAX_LENGTH*4);
+			pPlayer[t]->pFitness=pPlayer[0]->pFitness;
+			pPlayer[t]->sFitness=pPlayer[0]->sFitness;
 		}
 
-		for(s=1;s<MAX_PLAYER;s++)
+		for(int s=1;s<MAX_PLAYER/2;s++)
 		{
 			t=rand()%MAX_PLAYER;
-			if((player[s]->pFitness<player[t]->pFitness)||((player[s]->pFitness==player[t]->pFitness)&&(player[s]->sFitness<player[t]->sFitness)))
+			if((pPlayer[s]->pFitness<pPlayer[t]->pFitness)||((pPlayer[s]->pFitness==pPlayer[t]->pFitness)&&(pPlayer[s]->sFitness<pPlayer[t]->sFitness)))
 			{
-			for(u=0;u<MAX_LENGTH;u++)
-			{
-				player[s]->Code[u][0]=player[t]->Code[u][0];
-				player[s]->Code[u][1]=player[t]->Code[u][1];
+				memcpy(pPlayer[s]->Code[0],pPlayer[t]->Code[0],MAX_LENGTH*4);
+                        	memcpy(pPlayer[s]->Code[1],pPlayer[t]->Code[1],MAX_LENGTH*4);
 			}
-			
-			player[s]->pFitness=player[t]->pFitness;
-			player[s]->sFitness=player[t]->sFitness;
-			}
-			
+			pPlayer[s]->pFitness=pPlayer[t]->pFitness;
+			pPlayer[s]->sFitness=pPlayer[t]->sFitness;
 		}
-	// Save the program when 'Max_Generations' Generations were no change
+		
+		for(int s=0;s<MAX_PLAYER/4;s++)
+		{
+			t=rand()%(MAX_PLAYER/2);
+			int c1=rand()%(MAX_PLAYER/2)+MAX_PLAYER/2;
+			int c2=rand()%(MAX_PLAYER/2)+MAX_PLAYER/2;
+			pPlayer[s]->crossOver(pPlayer[t],pPlayer[c1],pPlayer[c2]);
+		}
+
+	
+		// Save the program when 'Max_Generations' Generations were no change
 	    if(rfit>=settings.Max_Generations)
 		{
 			rfit=0;
 			generation=0;
-			for(s=0;s<MAX_LENGTH;s++)
+			//evtl ==operator definieren in race.h/cpp
+			
+			memcpy(Save[run]->Code[0],pPlayer[0]->Code[0],MAX_LENGTH*4);
+	                memcpy(Save[run]->Code[1],pPlayer[0]->Code[1],MAX_LENGTH*4);
+			for(int s=MAX_LENGTH;s--;)
 			{
-				Save[run]->Code[s][0]=player[0]->Code[s][0];
-				Save[run]->Code[s][1]=player[0]->Code[s][1];
-				Save[run]->program[s].time=player[0]->program[s].time;
-				Save[run]->program[s].need_Supply=player[0]->program[s].need_Supply;
-				Save[run]->program[s].have_Supply=player[0]->program[s].have_Supply;
-				Save[run]->program[s].success=player[0]->program[s].success;
-				Save[run]->program[s].built=player[0]->program[s].built;
-				Save[run]->program[s].dominant=player[0]->program[s].dominant;
+				Save[run]->program[s].time=pPlayer[0]->program[s].time;
+				Save[run]->program[s].need_Supply=pPlayer[0]->program[s].need_Supply;
+				Save[run]->program[s].have_Supply=pPlayer[0]->program[s].have_Supply;
+				Save[run]->program[s].success=pPlayer[0]->program[s].success;
+				Save[run]->program[s].built=pPlayer[0]->program[s].built;
+				Save[run]->program[s].dominant=pPlayer[0]->program[s].dominant;
 			}
 
-			Save[run]->pFitness=player[0]->pFitness;
-			Save[run]->timer=player[0]->timer;
-			Save[run]->harvested_mins=player[0]->harvested_mins;
-			Save[run]->harvested_gas=player[0]->harvested_gas;
-			Save[run]->mins=player[0]->mins;
-			Save[run]->gas=player[0]->gas;
-			Save[run]->length=player[0]->length;
+			Save[run]->pFitness=pPlayer[0]->pFitness;
+			Save[run]->timer=pPlayer[0]->timer;
+			Save[run]->harvested_mins=pPlayer[0]->harvested_mins;
+			Save[run]->harvested_gas=pPlayer[0]->harvested_gas;
+			Save[run]->mins=pPlayer[0]->mins;
+			Save[run]->gas=pPlayer[0]->gas;
+			Save[run]->length=pPlayer[0]->length;
+			Save[run]->mutationRate=pPlayer[0]->mutationRate;
 
-			for(s=0;s<MAX_GOALS;s++)
-			{
-				Save[run]->force[s]=player[0]->force[s];
-				Save[run]->ftime[s]=player[0]->ftime[s];
-			}
+			for(int s=0;s<MAX_LOCATIONS;s++)
+				memcpy(Save[run]->location[s].force,pPlayer[0]->location[s].force,MAX_GOALS*4);
+			memcpy(Save[run]->ftime,pPlayer[0]->ftime,MAX_GOALS*4);
 
-//			if(Test<2)
-		        	for(s=0;s<MAX_PLAYER;s++)
-			        	player[s]->Restart();
-/*         	else
-		   {
-				for(s=0;s<MAX_PLAYER;s++)
-				{
-					for(t=0;t<MAX_LENGTH;t++)
-					{
-						player[s]->program[t].order=bo[t].type;
-						player[s]->program[t].time=20000;
-					}
-				player[s]->timer=settings.Max_Time;
-				player[s]->IP=0;
-				player[s]->length=MAX_LENGTH;
-				}
-			}*/
+		        for(int s=MAX_PLAYER;s--;)
+			       	pPlayer[s]->Restart();
 			
 			afit=0;
 			sfit=0;
 			old_time=settings.Max_Time; 
-			old_fit=0;
+			old_pFitness=0;
+			old_sFitness=0;
 			run++;
-			for(s=0;s<MAX_LENGTH;s++)
+			for(int s=MAX_LENGTH;s--;)
 				bolog[s].count=0;
 		}
-//	    if(player[0]->force[13]==255)
+//	    if(pPlayer[0]->location[0].force[13]==255)
 //		    a=getchar();
 	    
 	} // end while...
-
-	delete gizmo;
 
 	//start of the file output block...
 
 // Run canceled before all 5 runs were calculated? => Save the present run
 /*	if(run<RUNNINGS)
 	{
-		for(s=0;s<MAX_LENGTH;s++)
+		for(int s=0;s<MAX_LENGTH;s++)
 		{
-			Save[run]->Codeprogram[s].order=player[0]->Code[s][player[0]->program[s].dominant];
-			Save[run]->program[s].time=player[0]->program[s].time;
-			Save[run]->program[s].have_Supply=player[0]->program[s].have_Supply;
-			Save[run]->program[s].need_Supply=player[0]->program[s].need_Supply;
-			Save[run]->program[s].success=player[0]->program[s].success;
+			Save[run]->Codeprogram[s].order=pPlayer[0]->Code[s][pPlayer[0]->program[s].dominant];
+			Save[run]->program[s].time=pPlayer[0]->program[s].time;
+			Save[run]->program[s].have_Supply=pPlayer[0]->program[s].have_Supply;
+			Save[run]->program[s].need_Supply=pPlayer[0]->program[s].need_Supply;
+			Save[run]->program[s].success=pPlayer[0]->program[s].success;
 		}	
-		Save[run]->pFitness=player[0]->pFitness;
-		Save[run]->timer=player[0]->timer;
-		Save[run]->harvested_mins=player[0]->harvested_mins;
-		Save[run]->harvested_gas=player[0]->harvested_gas;	
-		Save[run]->mins=player[0]->mins;
-		Save[run]->gas=player[0]->gas;
-		Save[run]->length=player[0]->length;
+		Save[run]->pFitness=pPlayer[0]->pFitness;
+		Save[run]->timer=pPlayer[0]->timer;
+		Save[run]->harvested_mins=pPlayer[0]->harvested_mins;
+		Save[run]->harvested_gas=pPlayer[0]->harvested_gas;	
+		Save[run]->mins=pPlayer[0]->mins;
+		Save[run]->gas=pPlayer[0]->gas;
+		Save[run]->length=pPlayer[0]->length;
 
-		for(s=0;s<MAX_GOALS;s++)
+		for(int s=0;s<MAX_GOALS;s++)
 		{
-			Save[run]->force[s]=player[0]->force[s];
-			Save[run]->ftime[s]=player[0]->ftime[s];
+			Save[run]->location[0].force[s]=pPlayer[0]->location[0].force[s];
+			Save[run]->ftime[s]=pPlayer[0]->ftime[s];
 		}
 	}*/
 	
@@ -824,7 +604,7 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 	{
 		afit=0;
 		sfit=0;
-		for(s=0;s<RUNNINGS;s++)
+		for(int s=RUNNINGS;s--;)
 		{
 			if((Save[s]->pFitness>afit)&&(Save[s]->timer<settings.Max_Time))
 			{
@@ -850,7 +630,7 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 		printf("NO Solution found. This should not happen.\n");
 		printf("Please try the following:\n");
 		printf(" - Reread all WARNINGS carefully.\n");
-	        printf(" - Reduce the amount of goals in %s",I);
+	        printf(" - Reduce the amount of goals\n");
 		printf(" - Increase Max Time and/or adjust other settings depending on your task\n");
 		printf(" - Contact scc@clawsoftware.de. Please include all .txt files and a short description of the problem.\n");
 		printf(" - You might also want to check www.clawsoftware.de for updates or read the Forum/SCC page.\n");
@@ -863,62 +643,12 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 	FILE * pFile;
 	pFile = fopen(O,"w");
 	fprintf(pFile,"---------------------------------------------------\n");
-	fprintf(pFile,"---StarCraftCalculator by ClawSoftware.de [v1.02]--\n");
+	fprintf(pFile,"---StarCraftCalculator by ClawSoftware.de [v1.03 ALPHA]--\n");
 	fprintf(pFile,"---------------------------------------------------\n\n");
-	fprintf(pFile,"[----Best solution---]\n\n");
-	fprintf(pFile,"     Time used: %.2i:%.2i minutes\n",Save[t]->timer/60,Save[t]->timer%60);	
-	if(race!=2) fprintf(pFile,"     Scouting unit after %.2i:%.2i minutes\n",settings.Scout_Time/60,settings.Scout_Time%60);
-	if(settings.Time_to_Enemy>0) fprintf(pFile,"     Time to Enemy: %i seconds\n\n",settings.Time_to_Enemy);
-	
-	printf("\nHeader saved...");
-	
-	old=200;
-	counter=1;
-	for(s=0;s<=Save[t]->length;s++)
+	for(int u=0;u<run;u++)
 	{
-		if(settings.Detailed_Output==0)
-		{
-			while(((Save[t]->program[s].time>=Save[t]->timer)||(Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]>=MAX_GOALS))&&(s<MAX_LENGTH-1))
-				s++;
-			if(old==Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]) counter++;
-			else if(old<200)
-			{
-				fprintf(pFile,"     %.2i x %s\n",counter,stats[race][old].name);
-				counter=1;
-				old=Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]];
-			}
-			else
-				old=Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]];
-		}
-		else
-			if(Save[t]->program[s].built==1)
-				fprintf(pFile,"     [%.2i:%.2i] [%.2i/%.2i] %s [%s]\n",(Save[t]->program[s].time+0)/60,(Save[t]->program[s].time+0)%60,Save[t]->program[s].need_Supply,Save[t]->program[s].have_Supply,stats[race][Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]].name,error_m[Save[t]->program[s].success]);
-	}
-
-	printf("Build Order saved...\n");
-	
-        fprintf(pFile,"\n     ---Force at the end---\n");
-		 
-	for(s=0;s<MAX_GOALS;s++)
-		if(Save[t]->force[s]>0)
-			fprintf(pFile,"     %21s : %2i [Last one: %.2i:%.2i]\n",stats[race][s].name,Save[t]->force[s],Save[t]->ftime[s]/60,Save[t]->ftime[s]%60);
-	fprintf(pFile,"\n     Harvested Minerals : %i\n",(short)(Save[t]->harvested_mins));
-	fprintf(pFile,"     Harvested Gas      : %i\n",(short)(Save[t]->harvested_gas));
-	fprintf(pFile,"     Minerals at the end: %i\n",(short)(Save[t]->mins));
-	fprintf(pFile,"     Gas at the end     : %i\n",(short)(Save[t]->gas));
-	fprintf(pFile,"[---------end--------]\n\n");
-	printf("First solution [%.2i:%.2i] succesfully saved...\n",Save[t]->timer/60,Save[t]->timer%60);
-	printf("Checking for other solutions:\n");
-	fprintf(pFile,"Other solutions: \n\n");
-	unsigned char otherfound=0;
-	unsigned char newone=0;
-	
-	// print out other runs
-	if(run>0)
-	for(u=0;u<run;u++)
-	{
-		newone=1;
-		for(s=0;s<u;s++)
+		int newone=1;// tatsaechlich neue Loesung?
+		for(int s=0;s<u;s++)
 		{
 			newone=newone&&(((short)Save[u]->harvested_mins!=(short)Save[s]->harvested_mins)||
 				        ((short)Save[u]->harvested_gas!=(short)Save[s]->harvested_gas)||
@@ -929,42 +659,49 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 			
 		if((Save[u]->timer<settings.Max_Time)&&(t!=u)&&(newone==1))			
 		{
-			otherfound=1;
 			fprintf(pFile,"[-----%2i. solution---]\n\n",u+1);
+			fprintf(pFile,"MutationRate: %i\n",Save[t]->mutationRate);
 			fprintf(pFile,"     Time used: %.2i:%.2i minutes\n",Save[t]->timer/60,Save[u]->timer%60);
-			if(race!=2) fprintf(pFile,"     Scouting unit after %.2i:%.2i minutes\n",settings.Scout_Time/60,settings.Scout_Time%60);
-			if(settings.Time_to_Enemy>0) fprintf(pFile,"     Time to Enemy: %i seconds\n\n",settings.Time_to_Enemy);
 			printf("Header saved... ");
 			old=200;
 			counter=1;
-			for(s=0;s<=Save[u]->length;s++)
+			for(int s=0;s<=Save[u]->length;s++)
 			{
 				if(settings.Detailed_Output==0)
 				{
-					while(((Save[u]->program[s].time>=Save[u]->timer)||(Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]>=MAX_GOALS))&&(s<MAX_LENGTH-1))
+					while(((Save[u]->program[s].time>=Save[u]->timer)||(pPlayer[0]->genoToPhaenotype[Save[t]->Code[Save[t]->program[s].dominant][s]]>=MAX_GOALS))&&(s<MAX_LENGTH-1))
 						s++;
-			if(old==Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]) counter++;
+			if(old==pPlayer[0]->genoToPhaenotype[Save[t]->Code[Save[t]->program[s].dominant][s]]) counter++;
 			else if(old<200)
 			{
-				fprintf(pFile,"     %.2i x %s\n",counter,stats[race][old].name);
+				fprintf(pFile,"     %.2i x %s\n",counter,gpStats[old].name);
 				counter=1;
-				old=Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]];
+				old=pPlayer[0]->genoToPhaenotype[Save[t]->Code[Save[t]->program[s].dominant][s]];
 			}
 			else
-				old=Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]];
+				old=pPlayer[0]->genoToPhaenotype[Save[t]->Code[Save[t]->program[s].dominant][s]];
 		}
 		else
-		if((Save[u]->program[s].time<Save[u]->timer)&&(Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]<MAX_GOALS)&&((s==0)||(Save[u]->program[s].time>0)))
+		if((Save[u]->program[s].time<Save[u]->timer)&&(pPlayer[0]->genoToPhaenotype[Save[t]->Code[Save[t]->program[s].dominant][s]]<UNIT_TYPE_COUNT)&&((s==0)||(Save[u]->program[s].time>0)))
 			
-		fprintf(pFile,"     [%.2i:%.2i] [%.2i/%.2i] %s [%s]\n",(Save[u]->program[s].time+0)/60,(Save[u]->program[s].time+0)%60,Save[u]->program[s].need_Supply,Save[u]->program[s].have_Supply,stats[race][Build_Av[Save[t]->Code[s][Save[t]->program[s].dominant]]].name,error_m[Save[u]->program[s].success]);
+		fprintf(pFile,"     [%.2i:%.2i] [%.2i/%.2i] %s [%s] (%i)\n",(Save[u]->program[s].time+0)/60,(Save[u]->program[s].time+0)%60,Save[u]->program[s].need_Supply,Save[u]->program[s].have_Supply,gpStats[pPlayer[0]->genoToPhaenotype[Save[t]->Code[Save[t]->program[s].dominant][s]]].name,error_m[Save[u]->program[s].success],Save[u]->program[s].location);
 	}
 
 	printf("Build Order saved...\n");
 
 	fprintf(pFile,"\n     ---Force at the end---\n");
-	for(s=0;s<MAX_GOALS;s++)
-		if(Save[u]->force[s]>0)
-			fprintf(pFile,"     %21s : %3i [Last one: %.2i:%.2i]\n",stats[race][s].name,Save[u]->force[s],Save[u]->ftime[s]/60,Save[u]->ftime[s]%60);
+	for(int s=0;s<MAX_GOALS;s++)
+		if(Save[u]->location[pPlayer[0]->goal[s].location].force[pPlayer[0]->goal[s].unit]>0)
+			fprintf(pFile,"     %21s : %3i [Last one: %.2i:%.2i]\n",gpStats[pPlayer[0]->goal[s].unit].name,Save[u]->location[pPlayer[0]->goal[s].location].force[pPlayer[0]->goal[s].unit],Save[u]->ftime[s]/60,Save[u]->ftime[s]%60);
+
+	fprintf(pFile,"\n     ---Overview locations---\n");
+	for(int s=0;s<MAX_LOCATIONS;s++)
+	{
+		fprintf(pFile," Location %i:\n",s);
+		for(int v=0;v<UNIT_TYPE_COUNT;v++)
+			if(Save[u]->location[s].force[v]>0)
+				fprintf(pFile,"     %21s : %3i \n",gpStats[v].name,Save[u]->location[s].force[v]);
+	}
 
 	fprintf(pFile,"\n     Harvested Minerals : %i\n",(short)(Save[u]->harvested_mins));
 	fprintf(pFile,"     Harvested Gas      : %i\n",(short)(Save[u]->harvested_gas));
@@ -974,12 +711,6 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 	printf("%i. solution [%.2i:%.2i] succesfully saved...\n",u+1,Save[u]->timer/60,Save[u]->timer%60);
 		}
 	}
-	if(otherfound==0)
-	{
-		fprintf(pFile,"None found\n");
-		printf("None found!\n");
-	}
-       
 	fclose (pFile);
 	printf("%s closed. All Data were saved.\n\n Thank you for using StarCalc!\n",O);
 	printf("Have a nice day and visit www.clawsoftware.de!\n");
@@ -988,9 +719,9 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 	
 	//TODO: Recheck the code whether REALLY all pointers / data are deleted/freed...
 	
-	for(s=0;s<MAX_PLAYER;s++)
-		player[s]=NULL;
-	for(s=0;s<RUNNINGS;s++)
+	for(int s=0;s<MAX_PLAYER;s++)
+		pPlayer[s]=NULL;
+	for(int s=0;s<RUNNINGS;s++)
 		Save[s]=NULL;
  
 	return 0;

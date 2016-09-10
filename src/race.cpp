@@ -1,148 +1,595 @@
 #include "race.h"
 #include "settings.h"
 #include <stdlib.h>
+#include <string.h>
 
-// TODO: recheck the speed of the units in zerg.cpp, protoss.cpp and terra.cpp
-// TODO: Implement the locations of buildings (expansion, wallin, ...)
+// TODO: reimplement/recheck the speed of the units
+
+
+void RACE::AddGoal(int unit, int count, int time, int location)
+{
+	allGoal[unit]+=count;
+
+	globalGoal[location][unit]+=count;
+
+	int i=0;
+	for(i=0;i<goalCount;i++)
+		if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
+		{
+			goal[i].count+=count;
+			i=goalCount;
+		}
+	if(i==goalCount)
+	{
+		goal[goalCount].unit=unit;
+		goal[goalCount].time=time;
+		goal[goalCount].location=location;
+		goal[goalCount].count=count;
+		goalCount++;
+	}
+	printf("Added goal %ix %s (%i) [%i] [@%i]\n",count,stats[gRace][unit].name,unit,time,location);
+}
+
+void RACE::Calculate()
+{
+//ZERG: Larvenproduktion!  CREEP!
+//PROTOSS: Bauen: Hin und rueckfahren! PYLON!
+	int timeout=0;
+	int time=0;
+        ready=0;
+//	int tSupply,tMax_Supply;
+                for(time=0;(time<settings.Max_Time)&&(!ready)&&(IP<MAX_LENGTH);time++)
+                {
+
+//TODO: evtl ueberlegen IP zu springen... also erstmal feststellen, warum nicht gebuildet werden kann und dann in einem Ruck resources und btimes hochsetzen...
+                        if(Code[0][IP]>Code[1][IP]) //dominance
+                        {
+                                program[IP].dominant=0;
+                                Build(genoToPhaenotype[Code[0][IP]]);
+                                if(ok==0)
+                                        {program[IP].dominant=1;Build(genoToPhaenotype[Code[1][IP]]);}
+                        }
+                        else
+                        {
+                                program[IP].dominant=1;
+                                Build(genoToPhaenotype[Code[1][IP]]);
+                                if(ok==0) {program[IP].dominant=0;Build(genoToPhaenotype[Code[1][IP]]);}
+                        }
+                        timeout++;//evtl versuchen umzuschreiben, dass er mehrere Befehle pro Sekunde machen kann ... TODO
+                        if(suc) program[IP].success=suc; //TODO ???
+                        else
+                        if((ok==1)||(timeout>133)) //~~~~Well... 266 is the max time for battle cruisers... so if the program will come to a battle cruiser queue, a value of 267 is probably important... on the other hand it totally slows down any other things... Well let's try 2 minutes...
+                                //and: also problems when there aren't many drones around...
+                                //evtl eine Rueckverfolgung einbauen...
+                                //mmmh... oder erst neu versuchen, wenn sich etwas geaendert hat... z.B. Gebaeude fertig! TODO
+                        {
+                                if(timeout<=133) program[IP].time=time;
+                                else
+                                {
+//                                        program[IP].success=TIME_OUT;
+                                        program[IP].time=20000;
+                                }
+                                program[IP].need_Supply=Max_Supply-Supply;//tMax_Supply-tSupply;
+                                program[IP].have_Supply=Max_Supply;//tMax_Supply;
+                                timeout=0;
+                                IP++;
+                        }
+
+//TODO: in bo_t wird location (program[].location) immer 0...
+
+//			tSupply=Supply;
+//			tMax_Supply=Max_Supply;
+                        BuildingRunning=0;
+                        Harvest_Resources();
+			Building* build=&building[MAX_BUILDINGS-1];
+                        for(int j=MAX_BUILDINGS;j--;build=&building[j])
+                                if(build->RB)
+                                {
+                                        BuildingRunning=1;
+                                        if(!(--build->RB))
+                                        {
+                                                const Stats* stat=&gpStats[build->type];
+						switch(stat->facility_type)
+                                                {
+                                                        case IS_LOST:
+                                                                if(build->facility)
+								{
+									location[build->location].force[build->facility]--;
+									location[0].force[build->facility]--;
+									//availible was already taken account when starting the building
+								}
+                                                                if(stat->facility2)
+								{
+									location[build->location].force[stat->facility2]--;
+                                                                        location[0].force[stat->facility2]--;
+								}
+                                                                break;
+                                                        case NEEDED_ONCE:break;
+                                                        case NEEDED_UNTIL_COMPLETE:
+                                                                if(build->facility)
+								{
+                                                                        location[build->location].availible[build->facility]++;
+                                                                        location[0].availible[build->facility]++;
+								}
+                                                                break; // fuer spaeter mal: Wenn in 2 Fabriken produziert wuerde wirds probmelatisch, da
+//in Building nur eine facility gespeichert wird...
+                                                        case NEEDED_ONCE_IS_LOST:
+                                                                if(stat->facility2)
+								{
+									location[build->location].force[stat->facility2]--;
+                                                                        location[0].force[stat->facility2]--;
+								}
+                                                                break;
+                                                        case NEEDED_UNTIL_COMPLETE_IS_LOST:
+                                                                if(build->facility)
+								{
+	                                                                location[build->location].availible[build->facility]++;
+                                                                        location[0].availible[build->facility]++;
+								}
+                                                                if(stat->facility2)
+								{
+                                                                        location[build->location].force[stat->facility2]--;
+									location[0].force[stat->facility2]--;
+								}
+                                                                break;
+							case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
+								{
+									if(build->facility)
+									{
+	                                                                        location[build->location].availible[build->facility]++;
+                	                                                        location[0].availible[build->facility]++;
+									}
+									if(stat->facility2) // special rule for upgrades!
+									{
+										location[build->location].force[stat->facility2]--;
+	                                                                        location[build->location].availible[stat->facility2]++;
+        	                                                                location[0].force[stat->facility2]--;
+                	                                                        location[0].availible[stat->facility2]++;
+									};
+								}
+								break;
+							case NEEDED_ALWAYS:break;
+							default:break;
+                                                }
+						if(stat->supply<0) {Supply-=stat->supply;Max_Supply-=stat->supply;};
+						//~~~~
+						location[0].force[build->type]+=build->unitCount;
+						location[0].availible[build->type]+=build->unitCount;
+						location[build->location].force[build->type]+=build->unitCount;
+						location[build->location].availible[build->type]+=build->unitCount;
+						if(gpStats[build->type].create>0) //one additional unit (zerglings, scourge, comsat, etc.)
+					        { //here no unitCount! ~~~
+							location[build->location].force[gpStats[build->type].create]++;
+                                                        location[build->location].availible[gpStats[build->type].create]++;
+                                                        location[0].force[gpStats[build->type].create]++;
+                                                        location[0].availible[gpStats[build->type].create]++;
+					                // ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
+					        }
+						program[build->IP].built=1;
+						program[build->IP].location=build->location;
+//					        if((  location[build->location].force[build->type]
+						
+						//evtl noch location==0 als 'egal wo' einfuehren
+						for(int i=0;i<MAX_GOALS;i++)
+							if((goal[i].unit>0)&&((goal[i].location==0)||(build->location==goal[i].location))&&(build->type==goal[i].unit)&&((goal[i].time==0)||(time<=goal[i].time)))
+							{
+//								i=MAX_GOALS;			->Mehrere Goals  koennen auf einen Schlag erfuellt werden!
+								ftime[build->type]=time;
+							}
+						
+					        ready=1;
+					        for(int i=MAX_GOALS;i--;)
+							
+							ready&=( ( ((goal[i].location==0)&&(goal[i].count<=location[0].force[goal[i].unit]))||((goal[i].location>0)&&(goal[i].count<=location[goal[i].location].force[goal[i].unit])) )&&((goal[i].time>=ftime[i])||(goal[i].time==0)));
+						// oder: irgendeine location... TODO: Problem: die Einheiten koennen irgendwo sein, also nicht gesammelt an einem Fleck...
+                                        }
+                                }
+                //Scoutpeon
+/*              if((settings.Scout_Time>0)&&(timer==settings.Scout_Time)&&((peonmins>0)||(peongas>0)))
+                {
+                        if(peonmins>0)
+                                peonmins--;
+                        else peongas--;
+                }*/
+
+        }
+        length=IP;
+	timer=time;
+        CalculateFitness();
+	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
+	//Also quasi eine zweite Goalreihe rein um scvs/Einheiten zu belohnen die bestimmte Orte besetzen... erstmal nur scvs... also z.B. int tempGoal...
+	//mmmh... aber was reinschreiben? baue barracks bei Ort bla => belohne EINMAL ein scv bei ort bla
+}
+
+// falschen Standort ueber distances abrechnen! (100-distance oder so... je nach dem wieviele am falschen Ort sind!)
+
 
 void RACE::CalculateFitness()
 {
-	unsigned char i;
-	unsigned char bonus[MAX_GOALS]; // temporary data to check whether a bonus is already given (only applies if force > goal)
+	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
 	pFitness=0;
 	sFitness=0;
-		
-	sFitness=(harvested_mins*settings.Mineral_Blocks*settings.Mineral_Mod/800+harvested_gas/settings.Vespene_Geysirs);
+	sFitness=(harvested_mins+harvested_gas); //TODO: evtl gas und mins (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...
+
+//TODO: Nicht alle Einheiten am Ort? => Ort egal sein lassen aber zur Zeit hinzuzaehlen
+	// Nicht alle Einheiten ueberhaupt gebaut UND nicht alle am Ort => nur viertel Bonus fuer Einheiten die nicht am Ort sind
+
 	if(ready==0)
         {
 	         timer=settings.Max_Time;
-		 for(i=0;i<MAX_GOALS;i++)
-                 	if(goal[i].what>0)
+		 for(int i=MAX_GOALS;i--;)
+                 	if(goal[i].count>0)
 	        	{
-	                	if(goal[i].what>force[i])
+	                	if( ((goal[i].location==0)&&(goal[i].count>location[0].force[goal[i].unit])) || ( (goal[i].location>0)&&(goal[i].count>location[goal[i].location].force[goal[i].unit])) )
 				{
-					if(ftime[i]>0) // ftime => when the last item is built 
+					//total points: (Am Ort befindliche Einheiten + (Summe aller Locations(100-distance)/100)) / Goalcount
+					//TODO: Absteigen und markieren der benutzten wbfs! Also zuerst die eigentliche location abchecken, dann nach links und rechts die naehesten hinzuziehen
+					//evtl direkt von den locations die wbfs erstmal abziehen und am Schluss nochmal alle goals durchlaufen und den Rest verteilen!
+					int sumup=0;
+					int bon=0;
+					if(goal[i].location==0)
+						sumup=location[0].force[goal[i].unit]*100;
+					else
 					{
-			//not all goals met and not below time
-						if(goal[i].time>0)
-							pFitness+=(100*goal[i].time*force[i])/(goal[i].what*ftime[i]);
-						else pFitness+=(100*force[i])/goal[i].what;
-					}
-					else 
+						sumup=location[goal[i].location].force[goal[i].unit];
+						bon=goal[i].count-location[goal[i].location].force[goal[i].unit];
+					for(int j=1;(j<MAX_LOCATIONS)&&(bon>0);j++)
+						if(j!=goal[i].location)
 					{
-						if(goal[i].time>0)
-							pFitness+=(100*goal[i].time*force[i])/(goal[i].what*settings.Max_Time);
-			        		else pFitness+=(100*force[i])/goal[i].what;
+						if(bon>location[j].force[goal[i].unit])
+						{
+							sumup+=location[j].force[goal[i].unit]*(100-gMap[j].distance[goal[i].location]);
+							bon-=location[j].force[goal[i].unit];
+						}
+						else 
+						{
+							sumup+=bon*(100-gMap[j].distance[goal[i].location]);
+							bon=0;
+						}
 					}
-				}
-				else //force >= goal
-				{
-				if((goal[i].time>0)&&(ftime[i]>goal[i].time))
-					pFitness+=(goal[i].time*100/ftime[i]);
-				else pFitness+=100;
+					}
+					//TODO: Hier gibts Probleme wenn mehrere goals gleicher Units an unterschiedlichen Orten existieren...
+					// evtl funktionsglobales bonus System wie bei den '@' in scc.cpp einfuegen
+					// bissl komplex da mans ja den einzelnen goals verteilen muss...
+					if(goal[i].time>0)
+					{
+						if(ftime[i]>0)
+							pFitness+=(goal[i].time*sumup)/(goal[i].count*ftime[i]);
+						else
+							pFitness+=(goal[i].time*sumup)/(goal[i].count*settings.Max_Time);
+					}
+					else pFitness+=sumup/goal[i].count;
 					
-					if(goal[i].what<force[i])
-						sFitness-=(force[i]-goal[i].what)*(stats[race][i].mins+stats[race][i].gas);
+					
+				}
+				else if( ((goal[i].location==0)&&(goal[i].count<=location[0].force[goal[i].unit])) || ( (goal[i].location>0)&&(goal[i].count<=location[goal[i].location].force[goal[i].unit])) )
+						//force >= goal
+				{
+					if((goal[i].time>0)&&(ftime[i]>goal[i].time))
+						pFitness+=(goal[i].time*100/ftime[i]);
+					else pFitness+=100;
+//				if(goal[i].count<location[goal[i].location].force[goal[i].unit])
+//					sFitness-=(location[goal[i].location].force[goal[i].unit])*(gpStats[i].mins+gpStats[i].gas);
 				}
 		}
-// TODO: Check for very small 'goal.time' values, probably in scc.cpp!!	 
-	for(i=0;i<MAX_GOALS;i++)
-		bonus[i]=goal[i].what-force[i];
-	for(i=0;i<MAX_BUILDINGS;i++)
-                if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type])&&(bonus[building[i].type]>0))
+// TODO: Check for very small 'goal.time' values, probably in scc.cpp!!	
+	
+
+
+//Bonus: Sind noch Plaetze offen?
+	for(int i=MAX_LOCATIONS;i--;)
+	       for(int j=UNIT_TYPE_COUNT;j--;)
+		       bonus[i][j]=0;
+	
+	for(int i=MAX_GOALS;i--;)
+		if(location[goal[i].location].force[goal[i].unit]<goal[i].count)
+			bonus[goal[i].location][goal[i].unit]+=goal[i].count-location[goal[i].location].force[goal[i].unit];
+	
+	for(int i=MAX_BUILDINGS;i--;)
+                if((building[i].RB>0)&&(bonus[building[i].type][building[i].location]>0))
 		{
-			if((goal[building[i].type].time>0)&&(force[building[i].type]==0))
-	                	pFitness+=(building[i].RB*100*goal[building[i].type].time*force[i])/(goal[building[i].type].what*stats[race][building[i].type].BT*settings.Max_Time);
+		//erstmal ohne Zeit...
+			pFitness+=((building[i].RB*100)/((location[building[i].location].force[building[i].type]+bonus[building[i].type][building[i].location])*gpStats[building[i].type].BT));
+			/*
+			
+			if((goal[building[i].type].time>0)&&(location[building[i].location].force[building[i].type]==0))
+				
+				
+
+				
+	                	pFitness+=(building[i].RB*100*goal[building[i].type].time*location[0].force[i])/(goal[building[i].type].count*gpStats[building[i].type].BT*settings.Max_Time);
 			else 				   		
-				pFitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[race][building[i].type].BT));
-			bonus[building[i].type]--;
+				pFitness+=((building[i].RB*100)/(goal[building[i].type].count*gpStats[building[i].type].BT));*/
+			bonus[building[i].location][building[i].type]--;
 		}
 	}
 	else   // all goals fulfilled, fitness <- timer 
 	{
 		pFitness=settings.Max_Time-timer;
-		for(i=0;i<MAX_GOALS;i++)
-	               	if(goal[i].what>0)
+		for(int i=MAX_GOALS;i--;)
+			if(goal[i].count>0)
 	                	pFitness+=100;
 	}
 }
 
 
-//Check whether all goals are reached and do some after-completion stuff 
-void RACE::CheckReady(unsigned char j)
-{
-	unsigned char i;
-
-	force[building[j].type]++;
-	
-	program[building[j].IP].built=1;
-	if(((force[building[j].type]>=goal[building[j].type].what)&&(ftime[building[j].type]==0))||(goal[building[j].type].what==0))
-		ftime[building[j].type]=timer;
-	
-	if(stats[race][building[j].type].type<RESEARCH)
-		availible[building[j].type]++;
-	else
-		availible[building[j].type]=1;
-	ready=1;
-	for(i=0;i<MAX_GOALS;i++)
-		ready&=((goal[i].what<=force[i])&&((goal[i].time>=ftime[i])||(goal[i].time==0)));
-}
 
 void RACE::Build(int what)
 {
-        const Stats * stat;
-        stat=&stats[race][what];
+        const Stats* stat=&gpStats[what];
         ok=0;
-	if(what<EXTRACTOR-1)
+	suc=OK;
+	if(what<=EXTRACTOR+1)
 	{
 //TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
 
-	if(((stat->prerequisite[0]==0)||(force[stat->prerequisite[0]]>0))&&((stat->prerequisite[1]==0)||(force[stat->prerequisite[1]]>0))&&((stat->prerequisite[2]==0)||(force[stat->prerequisite[2]]>0))&&((stat->facility==0)||(availible[stat->facility]>0))&&(mins>=(stat->mins+(stat->type==UPGRADE)*force[what]*stat->tmp))&&(gas>=(stat->gas+(stat->type==UPGRADE)*force[what]*stat->tmp))&&( (Supply>=stat->supply) || (stat->supply==0))&&((stat->type!=RESEARCH)||((force[what]==0)&&(availible[what]==1))) &&((stat->type!=UPGRADE)||((force[what]<=2)&&(availible[what]==1)))&&(peonmins+peongas*(race!=PROTOSS)>=1*(stat->type==BUILDING))&&(nr<255)&&((what!=EXTRACTOR)||(Vespene_Av>0)))
-	
-                {
-                        Produce(what);
-                        if(stat->facility>0) availible[stat->facility]--;
-                }
+        if(
+((stat->prerequisite[0]==0)||(location[0].force[stat->prerequisite[0]]>0))&&
+((stat->prerequisite[1]==0)||(location[0].force[stat->prerequisite[1]]>0))&&
+((stat->prerequisite[2]==0)||(location[0].force[stat->prerequisite[2]]>0))&&
+( ((stat->facility[0]>0)&&(location[0].availible[stat->facility[0]]>0))||
+  ((stat->facility[1]>0)&&(location[0].availible[stat->facility[1]]>0))||
+  ((stat->facility[2]>0)&&(location[0].availible[stat->facility[2]]>0))||
+  ((stat->facility[0]==0)&&(stat->facility[1]==0)&&(stat->facility[2]==0))
+)&&
+(mins>=stat->mins+stat->upgrade_cost*location[0].force[what])&&
+(gas>=stat->gas+stat->upgrade_cost*location[0].force[what])&&
+((Supply>=stat->supply)||(stat->supply<=0))&&
+(nr<255)&&
+((stat->facility2==0)||(location[0].availible[stat->facility2]>0)))
+ 
+/*
+		
+if(
+((stat->prerequisite[0]>0)&&(location[0].force[stat->prerequisite[0]]==0))||
+((stat->prerequisite[1]>0)&&(location[0].force[stat->prerequisite[1]]==0))||
+((stat->prerequisite[2]>0)&&(location[0].force[stat->prerequisite[2]]==0)))
+	suc=ENOUGH_FORCE;
+else 
+if( 
+((stat->facility[0]>0)&&(location[0].availible[stat->facility[0]]==0))||
+((stat->facility[1]>0)&&(location[0].availible[stat->facility[1]]==0))||
+((stat->facility[2]>0)&&(location[0].availible[stat->facility[2]]==0))||
+((stat->facility2>0)&&(location[0].availible[stat->facility2]==0)))
+	suc=ENOUGH_AVAILIBLE;	
+else 
+if(mins>=stat->mins+stat->upgrade_cost*location[0].force[what])
+	suc=ENOUGH_MINERALS;
+else
+if(gas>=stat->gas+stat->upgrade_cost*location[0].force[what])
+	suc=ENOUGH_GAS;
+else
+if((Supply>=stat->supply)||(stat->supply<=0))
+	suc=SUPPLY_SATISFIED;
+else
+if(nr<255)
+	suc=TOO_MANY_BUILDINGS;
+else*/
+		{
+			//Zuerst: availible pruefen ob am Ort gebaut werden kann
+			//Wenn nicht => +/- absteigen bis alle locations durch sind
+			int fac,loc,kk;
+			kk=0;
+			loc=window;fac=0;
+			if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
+				for(fac=3;fac--;)
+					if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
+					{
+						kk=1;
+						break; // ?
+					}
+			if(kk==0)
+			{
+				for(loc=1;loc<MAX_LOCATIONS;loc++)
+				{
+					if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
+					{
+						for(fac=3;fac--;)
+	        		                        if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0)))
+        	        		                {
+                	        				kk=1;
+	                	        	                break;
+        	                	        	}
+						break;
+					}	
+				}
+			}
+//			bewegliche Sachen ueberdenken...
+//				evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
+//				auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
+//	Phagen ueber Phagen...			
+			if(kk==1)
+				{
+					building[nr].facility=stat->facility[fac];
+					building[nr].location=loc;
+					building[nr].unitCount=1; //~~
+				        building[nr].RB=stat->BT+3200*(stat->facility2==what); //~~ hack :/
+				        mins-=stat->mins+stat->upgrade_cost*location[0].force[what];
+				        gas-=stat->gas+stat->upgrade_cost*location[0].force[what];
+				        building[nr].type=what;
+				        if((stat->supply>0)||((gpStats[stat->facility[0]].supply<0)&&(stat->facility_type==IS_LOST))) Supply-=stat->supply;
+				        switch(stat->facility_type)
+				        {
+						case IS_LOST:
+							if(stat->facility[fac]>0)
+							{
+								location[loc].availible[stat->facility[fac]]--;
+								location[0].availible[stat->facility[fac]]--;
+								Supply+=gpStats[stat->facility[fac]].supply; 
+							}
+							if(stat->facility2>0)
+							{
+								location[loc].availible[stat->facility2]--;
+								location[0].availible[stat->facility2]--;
+								Supply+=gpStats[stat->facility2].supply;
+							}
+							break;
+				                case NEEDED_ONCE:
+							break;
+				                case NEEDED_UNTIL_COMPLETE:
+							if(stat->facility[fac]>0)
+							{
+								location[loc].availible[stat->facility[fac]]--;
+								location[0].availible[stat->facility[fac]]--;
+							}
+							if(stat->facility2>0)
+							{
+								location[loc].availible[stat->facility2]--;
+								location[0].availible[stat->facility2]--; //kommt glaub nicht vor...
+							}
+							break;
+						case NEEDED_ONCE_IS_LOST:
+							if(stat->facility2>0)
+							{
+								location[loc].availible[stat->facility2]--;
+								location[0].availible[stat->facility2]--;
+								Supply+=gpStats[stat->facility2].supply; // <- nicht noetig :/
+							}
+							break;
+						case NEEDED_UNTIL_COMPLETE_IS_LOST:
+							if(stat->facility2>0)
+							{
+								location[loc].availible[stat->facility2]--;
+								location[0].availible[stat->facility2]--;
+								Supply+=gpStats[stat->facility2].supply; // <- nicht noetig :/
+							}
+							if(stat->facility[fac]>0)
+							{
+								location[loc].availible[stat->facility[fac]]--;
+								location[0].availible[stat->facility[fac]]--;
+							}
+							break;
+						case NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE:
+							if(stat->facility2>0)
+							{
+								location[loc].availible[stat->facility2]--;						
+								location[0].availible[stat->facility2]--; // no supply gain as the item is recovered... well or not? mmmh... ~~~~
+							}
+							if(stat->facility[fac]>0)
+							{
+								location[loc].availible[stat->facility[fac]]--;
+								location[0].availible[stat->facility[fac]]--;
+							}
+							break;
+						case NEEDED_ALWAYS:
+							if(stat->facility[fac]>0)
+							{
+								location[loc].availible[stat->facility[fac]]--;
+								location[0].availible[stat->facility[fac]]--;
+								// Supply?
+							}
+							if(stat->facility2>0)
+							{
+								location[loc].availible[stat->facility2]--;
+								location[0].availible[stat->facility2]--;
+							}
+							break;
+						default:break;
+				        }
+
+//				        building[nr].on_the_run=0;
+				        building[nr].IP=IP;
+				        ok=1;
+				} //kk!=1?
+				else suc=ENOUGH_AVAILIBLE;
+		}
 	}
 else
+{
+	switch(what)
+	{
+		
+		case WINDOW_MOVE_ADD_3:
+			{
+				ok=1;
+				prev=window;
+				if(window<MAX_LOCATIONS-3) window+=3;
+				else window=window+4-MAX_LOCATIONS;
+			};break;
+		case WINDOW_MOVE_ADD_1:
+			{
+				ok=1;
+				prev=window;
+				if(window<MAX_LOCATIONS-1) window++;
+				else window=1;
+			};break;				
+		case WINDOW_MOVE_SUB_1:
+			{
+				ok=1;
+				prev=window;
+				if(window>1) window--;
+				else window=MAX_LOCATIONS-1;
+			};break;
+		case WINDOW_MOVE_PREV:
+			if(window!=prev)
+			{
+				ok=1;
+				int temp=window;window=prev;prev=temp;
+			};break;
+		case MOVE_FROM_HERE:
+			if(start!=window)
+			{
+				ok=1;
+				start=window;
+			};break;
+		case MOVE_TO_HERE:if((start!=window)&&(nr<255)&&(IP+1<MAX_LENGTH))
+					  //move ALL units (type specified in IP+1) at that location!
+				{
+					IP++;
+					int what=0;
+					if((Code[0][IP]>Code[1][IP])&&(gpStats[genoToPhaenotype[Code[0][IP]]].speed>0)&&(location[start].availible[genoToPhaenotype[Code[0][IP]]]>0))
+	                        	{
+       		                        	program[IP].dominant=0;
+						what=genoToPhaenotype[Code[0][IP]];
+						ok=1;
+	                        	}
+                		        else if((gpStats[genoToPhaenotype[Code[1][IP]]].speed>0)&&(location[start].availible[genoToPhaenotype[Code[1][IP]]]>0))
+		                        {
+               	             			program[IP].dominant=1;
+						what=genoToPhaenotype[Code[1][IP]];
+						ok=1;
+					}
+					else if(location[start].availible[SCV]>0) 
+					{
+						what=SCV;
+						ok=1;
+					}
+//					else  ?? alle durchsuchen bis ein scv gefunden wurde? mmmh...
+						
+					if(ok)
+					{
+						program[IP-1].built=1;
+	                                        building[nr].facility=0;
+        	                                building[nr].location=window;
+                        	               	building[nr].type=what;
+						building[nr].RB=gMap[start].distance[window]*100/gpStats[what].speed;
+						building[nr].IP=IP;
+						if((IP+1<MAX_LENGTH)&&((Code[0][IP+1]==Code[program[IP].dominant][IP])||(Code[1][IP+1]==Code[program[IP].dominant][IP])))
+							{
+								if(location[start].availible[what]>12)
+									building[nr].unitCount=12;
+								else building[nr].unitCount=location[start].availible[what];
+								//TODO dominance... und 12 checken... evtl weniger
+							}
+						else 
+							building[nr].unitCount=1;
+						location[start].availible[building[nr].type]-=building[nr].unitCount;
+						location[start].force[building[nr].type]-=building[nr].unitCount;
+	                                        location[0].force[building[nr].type]-=building[nr].unitCount;
+        	                                location[0].availible[building[nr].type]-=building[nr].unitCount;
+					}
+				};break;//move the units!
+		default:break;
+	}
+	if(ok) program[IP].built=1;
+}
 
-        if(what==ONE_MINERAL_DRONE_TO_GAS)
-        {
-                if((force[EXTRACTOR]>0)&&(peonmins>0))
-	        {
-                                ok=1;
-                                peonmins--;
-                                peongas++;
-                                program[IP].built=1;
-	        }
-        }
-        else
-        if(what==ONE_GAS_DRONE_TO_MINERAL)
-        {
-                if(peongas>0)
-         {
-                        ok=1;
-                        peonmins++;
-                        peongas--;
-                        program[IP].built=1;
-        }
-        }
-        else
-        if(what==EXTRACTOR)
-        {
-                if(Vespene_Av>0)
-                {
-                        Vespene_Av--;
-                        Vespene_Extractors++;
-                        Produce(what);
-                }
-        }
-      else
-      if((race==ZERG)&&(what==BREAK_UP_BUILDING)&&(BuildingRunning>0))
+/*      else
+      if((gRace==ZERG)&&(what==BREAK_UP_BUILDING)&&(BuildingRunning>0))
                         {
-                                min=5000;
-                                n=0;
-                                for(i=0;i<MAX_BUILDINGS;i++)
+                                int min=5000;
+                                int n=0;
+                                for(int i=0;i<MAX_BUILDINGS;i++)
                                         if(building[i].RB>0)
                                         {
                                                 if((stats[2][building[i].type].type==2) && (stats[2][building[i].type].BT-building[i].RB<min))
@@ -157,8 +604,21 @@ else
 
                                         if(min<5000)
                                         {
-                                                ok=1;
-
+                                                peonmins++;
+                                                mins+=stats[2][building[n].type].mins*0.75;
+                                                gas+=stats[2][building[n].type].gas*0.75;
+                                                Supply--;
+                                                force[DRONE]++;
+                                                if(building[n].type==EXTRACTOR)
+                                                {
+                                                        Vespene_Extractors--;
+                                                        Vespene_Av++;
+                                                }
+                                                building[n].type=255;
+                                                building[n].RB=0;
+                                                program[IP].built=1;
+                                                program[building[n].IP].built=1;
+                                        }*/
 //        if((suc==OK)&&(ok==0))
   //              suc=TECHNOLOGY_AVAILIBLE;
 /*        if(suc==OK)
@@ -166,201 +626,212 @@ else
                 protein[what]++;
                 totalProteins[what]++;
         }*/
+//TODO: Verwandtschaftsgrad fuer crossing over feststellen!	
+	if(ok)
+	{
+		nr=255;
+                for(int j=MAX_BUILDINGS;j--;)
+                	if(building[j].RB==0) // calculate new position for new building (some kind of hash table function...)
+                        {
+                        	nr=j;
+                                break;
+                        }
+	}
+
 }
 
 
 void RACE::Harvest_Resources()
 			
 {
-	if(peonmins<56)
+//	int t=(rand()%10)-5;
+	for(int i=1;i<MAX_LOCATIONS;i++)//~~
 	{
-		mins+=mining[peonmins];
-		harvested_mins+=mining[peonmins];
-	} else
-	{
-		mins+=mining[56];
-		harvested_mins+=mining[56];
-	}
-	if(peongas>0)//peongas<5*Vespene_Extractors)
-	{
-		if(peongas<4)
+		if((location[i].force[MINERALS]>0)&&(location[i].force[COMMAND_CENTER]>0))			
+				//TODO: Fernsammeln einbauen! also z.B. gas von entfernter Exe ohne Hauptgebaeude...
+				//TODO!! Protoss/Zerg Hauptgebaeude!
 		{
-			//TODO: Mehrere VespExt beachten!
-			gas+=gasing[peongas/*/Vespene_Extractors*/]/**Vespene_Extractors*/;
-			harvested_gas+=gasing[peongas/*Vespene_Extractors*/]/*Vespene_Extractors*/;
+			int s=location[i].availible[SCV];
+			if(s>0)
+			{
+				if(s<56) //~~
+				{
+					mins+=mineralHarvestPerSecond[i][s]; //~~~ neu berechnen / Tabelle anlegen! sind ja nicht bei jeder Exe gleichviel Mineralien...
+					harvested_mins+=mineralHarvestPerSecond[i][s]; //~~~
+				}
+				else
+				{
+					mins+=mineralHarvestPerSecond[i][56];
+					harvested_mins+=mineralHarvestPerSecond[i][56];
+				}
+			}
 		}
-		else
+		if(location[i].force[EXTRACTOR]>0) //mehrere extractoren noch ermoeglichen!!!
+			//evtl auch einfach die location updaten sobald ein extraktor gebaut wird......
 		{
-			gas+=gasing[4];//*Vespene_Extractors;
-        	        harvested_gas+=gasing[4];//*Vespene_Extractors;
-      		
+			int s=location[i].availible[GAS_SCV];
+			if(s>0)
+			{
+				if(s<4)
+				{
+					gas+=gasHarvestPerSecond[i][s];
+					harvested_gas+=gasHarvestPerSecond[i][s];
+				}
+				else
+				{
+					gas+=gasHarvestPerSecond[i][4];;
+        			        harvested_gas+=gasHarvestPerSecond[i][4];
+				}
+			}
 		}
 	}
-/*	} else if(Vespene_Extractors>0)
-	{
-		gas+=gasing[4]*Vespene_Extractors;
-		harvested_gas+=gasing[4]*Vespene_Extractors;
-	}*/
-}
-
-// Account the costs of a production
-void RACE::Produce(unsigned char what)
-{
-	int i;
-	building[nr].RB=stats[race][what].BT;
-	mins-=stats[race][what].mins;
-	gas-=stats[race][what].gas;
-	building[nr].type=what;
-	Supply-=stats[race][what].supply;
-	building[nr].on_the_run=0;
-	if(stats[race][what].type>2) // Researches, Upgrades
-		availible[what]=0;
-	if(stats[race][what].type==UPGRADE)
-	{
-		building[nr].RB+=force[what]*3200;
-		mins-=stats[race][what].tmp*force[what];
-		gas-=stats[race][what].tmp*force[what];
-        }
-					
-	building[nr].IP=IP;
-	ok=1;
-        nr=255;
-        for(i=0;i<MAX_BUILDINGS;i++) if(building[i].RB==0)
-        {
-                nr=i;
-                i=MAX_BUILDINGS;
-        }
 }
 
 void RACE::Mutate()
 {
-        unsigned char k,ta,tb,i,x,y,tmp[MAX_LENGTH];
-        //length=MAX_LENGTH;
         if(length==0) return;
+	if(rand()%100==0)
+        {
+       		if(mutationRate>100)
+                	mutationRate-=rand()%100;
+                else mutationRate+=rand()%100;
+        }
 
-        for(x=0;x<MAX_LENGTH;x++)
-                if(rand()%1000==0)
-                {
-
-                        switch(rand()%3)
+        for(int x=length;x--;)
+                if(rand()%mutationRate==0)//mutationRate==0)
+                        switch(rand()%6)
                         {
                                 //TODO: wenn generateBuildOrder==1 dann bleibts stehen!
                                 case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
-                                        if((settings.generateBuildOrder==0)||((Variabel[Build_Bv[Code[x][0]]]==1)&&(Variabel[Build_Bv[Code[x][1]]]==1)))
-                                        for(y=x;y<MAX_LENGTH-1;y++)
+                                        if((settings.generateBuildOrder==0)||((isVariable[phaenoToGenotype[Code[0][x]]]==1)&&(isVariable[phaenoToGenotype[Code[1][x]]]==1)))
+                                        for(int y=x;y<MAX_LENGTH-1;y++)
                                         {
-                                                Code[y][0]=Code[y+1][0];
-                                                Code[y][1]=Code[y+1][1];
+                                                Code[0][y]=Code[0][y+1];
+                                                Code[1][y]=Code[1][y+1];
                                         };
                                         break;
                                 case 1://add one variabel entry
-                                        for(y=MAX_LENGTH-1;y>x;y--)
+                                        for(int y=MAX_LENGTH-1;y>x;y--)
                                         {
-                                                Code[y][0]=Code[y-1][0];
-                                                Code[y][1]=Code[y-1][1];
+                                                Code[0][y]=Code[0][y-1];
+                                                Code[1][y]=Code[1][y-1];
                                         }
-                                        y=rand()%Max_Build_Types;
+					{
+					int y=rand()%maxBuildTypes;
                                         if(settings.generateBuildOrder==1)
-                                                while(Variabel[y]==0) y=rand()%Max_Build_Types;
-                                        Code[x][0]=y;
-                                        y=rand()%Max_Build_Types;
+                                                while(isVariable[y]==0) y=rand()%maxBuildTypes;
+                                        Code[0][x]=y;
+                                        y=rand()%maxBuildTypes;
                                         if(settings.generateBuildOrder==1)
-                                                while(Variabel[y]==0) y=rand()%Max_Build_Types;
-                                        Code[x][1]=y;
-                                        break;
-
+                                                while(isVariable[y]==0) y=rand()%maxBuildTypes;
+                                        Code[1][x]=y;
+					};break;
                                 case 2://change one entry
-                                        k=rand()%2;
-                                        if(Variabel[Build_Bv[Code[x][k]]]==1)
-                                        {
-                                                y=rand()%Max_Build_Types;//Optimieren
-                                                if(settings.generateBuildOrder==1)
-                                                        while(Variabel[y]==0) y=rand()%Max_Build_Types;
-                                                Code[x][k]=y;
-                                        };break;
-                        }
-                }
-                else
-                if(rand()%MAX_LENGTH==0)
-                {
-                //exchange two entries
-                        y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-                        if(x!=y)
-                        {
-                                k=rand()%2;
-                                ta=Code[x][k];
-                                Code[x][k]=Code[y][k];
-                                Code[y][k]=ta;
-                        }
-                }
-                else
-                if(rand()%MAX_LENGTH==0)
-                {
-                //exchange two entries
-                        y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-                        if(x!=y)
-                        {
-                                ta=Code[x][0];
-                                Code[x][0]=Code[y][0];
-                                Code[y][0]=ta;
-                                ta=Code[x][1];
-                                Code[x][1]=Code[y][1];
-                                Code[y][1]=ta;
-                        }
-                } else
-
-                //move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
-                //TODO switch ta and tb if tb<ta
-                if(rand()%MAX_LENGTH==0)
-                {
-                        ta=rand()%length;
-                        tb=rand()%length;
-                        x=rand()%length; //move it here
-                        if((ta<tb)&&(x>tb))
-                        {
-                                for(i=0;i<x-tb;i++) tmp[i]=Code[i+tb][0];
-                                for(i=ta;i<tb;i++) Code[i+x-tb][0]=Code[i][0];
-                                for(i=0;i<x-tb;i++) Code[ta+i][0]=tmp[i];
-                                for(i=0;i<x-tb;i++) tmp[i]=Code[i+tb][1];
-                                for(i=ta;i<tb;i++) Code[i+x-tb][1]=Code[i][1];
-                                for(i=0;i<x-tb;i++) Code[ta+i][1]=tmp[i];
-                }
-                        else
-                        if((ta<tb)&&(x<ta))
-                        {
-                                for(i=0;i<ta-x;i++)     tmp[i]=Code[i+x][0];
-                                for(i=ta;i<tb;i++) Code[x+i-ta][0]=Code[i][0];
-                                for(i=0;i<ta-x;i++) Code[tb-x][0]=tmp[i];
-                                for(i=0;i<ta-x;i++)     tmp[i]=Code[i+x][1];
-                                for(i=ta;i<tb;i++) Code[x+i-ta][1]=Code[i][1];
-                                for(i=0;i<ta-x;i++) Code[tb-x][1]=tmp[i];
-                        }
-                }
-
+					{
+	                                        int k=rand()%2;
+        	                                if(isVariable[phaenoToGenotype[Code[k][x]]]==1)
+                	                        {
+                        	                        int y=rand()%maxBuildTypes;//Optimieren
+                                	                if(settings.generateBuildOrder==1)
+                                        	                while(isVariable[y]==0) y=rand()%maxBuildTypes;
+	                                                Code[k][x]=y;
+        	                                };
+					};break;
+				case 3://exchange two entries
+					{
+						int y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+			                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
+			                        if(x!=y)
+			                        {
+			                                int k=rand()%2;
+			                                int ta=Code[k][x];
+			                                Code[k][x]=Code[k][y];
+			                                Code[k][y]=ta;
+			                        }
+			                };break;
+				case 4://exchange two entries
+					{
+			                        int y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+			                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
+			                        if(x!=y)
+			                        {
+			                                int ta=Code[0][x];
+			                                Code[0][x]=Code[0][y];
+			                                Code[0][y]=ta;
+			                                ta=Code[1][x];
+			                                Code[1][x]=Code[1][y];
+			                                Code[1][y]=ta;
+			                        }
+			                };break;
+				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
+					//~~~
+					if(length>2)
+			                {
+						int ttt;
+			                        int ta=rand()%(length-2)+1; //>0    <length-2
+			                        int tb=rand()%(length-1)+2; //>1   <length-1 
+						while(ta==tb) tb=rand()%(length-1)+2;
+						if(ta>tb) {ttt=tb;tb=ta;ta=ttt;}; //~~
+			                        int y=rand()%length; //move it here
+						while((y<=tb)&&(y>=ta)) y=rand()%length;
+						int tmp[MAX_LENGTH];
+			                        if(y>tb)
+			                        {
+			                                for(int i=0;i<y-tb;i++) tmp[i]=Code[0][i+tb];
+			                                for(int i=ta;i<tb;i++) Code[0][i+y-tb]=Code[0][i];
+				                        for(int i=0;i<y-tb;i++) Code[0][ta+i]=tmp[i];
+			                                for(int i=0;i<y-tb;i++) tmp[i]=Code[1][i+tb];
+			                                for(int i=ta;i<tb;i++) Code[1][i+y-tb]=Code[1][i];
+			                                for(int i=0;i<y-tb;i++) Code[1][ta+i]=tmp[i];
+				                }
+			                        else
+			                        if(y<ta)
+			                        {
+			                                for(int i=0;i<ta-y;i++) tmp[i]=Code[0][i+y];
+			                                for(int i=ta;i<tb;i++) Code[0][y+i-ta]=Code[0][i];
+                        			        for(int i=0;i<ta-y;i++) Code[0][tb-y]=tmp[i];
+			                                for(int i=0;i<ta-y;i++) tmp[i]=Code[1][i+y];
+			                                for(int i=ta;i<tb;i++) Code[1][y+i-ta]=Code[1][i];
+			                                for(int i=0;i<ta-y;i++) Code[1][tb-y]=tmp[i];
+			                        }
+			                };break;
+			}
 }
 
 // Reset all ongoing data (between two runs)
 void RACE::Init()
 {
-	unsigned char i;
-	for(i=0;i<MAX_GOALS;i++)
-        {
-               force[i]=0;
-	       ftime[i]=0;
-               if(stats[race][i].type<RESEARCH)
-	               availible[i]=0;
-	       else
-	               availible[i]=1;//Researches that can be researched only once
+	mutationRate=500+rand()%1000;
+	for(int j=0;j<MAX_LOCATIONS;j++)
+	{
+		for(int i=UNIT_TYPE_COUNT;i--;)
+		{
+			location[j].force[i]=0;
+			location[j].availible[i]=0;
+		}
+		location[j].force[MINERALS]=gMap[j].mineralCount;
+		location[j].availible[MINERALS]=gMap[j].mineralCount;
+		location[j].force[VESPENE_GEYSIR]=gMap[j].geysirCount;
+		location[j].availible[VESPENE_GEYSIR]=gMap[j].geysirCount;
+		location[0].force[MINERALS]+=gMap[j].mineralCount;
+		location[0].availible[MINERALS]+=gMap[j].mineralCount;
+		location[0].force[VESPENE_GEYSIR]+=gMap[j].geysirCount;
+		location[0].availible[VESPENE_GEYSIR]+=gMap[j].geysirCount;
 	}
-	for(i=0;i<MAX_BUILDINGS;i++)
+
+	for(int i=UNIT_TYPE_COUNT;i--;)
+		ftime[i]=0;
+	
+	for(int i=MAX_BUILDINGS;i--;)
 	{
 	       building[i].RB=0;
 	       building[i].type=255;
 	       building[i].IP=0;
+	       building[i].location=0;
+	       building[i].unitCount=0;
 	}
-	for(i=0;i<MAX_LENGTH;i++)
+
+	for(int i=MAX_LENGTH;i--;)
 	{
 		program[i].built=0;
 		program[i].success=0;
@@ -372,176 +843,486 @@ void RACE::Init()
 		program[i].temp=0;
 		program[i].dominant=0;
 	}
+	
         pFitness=0;
 	sFitness=0;
-        mins=50;
+        harvested_gas=0;
+	harvested_mins=0;
+	mins=50;
         gas=0;
-	peonmins=4;
-	peongas=0;
-	IP=0;ok=0;timer=0;n=0;min=0;suc=0;ready=0;nr=0;
-	availible[VESPENE_GEYSIRS]=settings.Vespene_Geysirs;
-	InitRaceSpecific();
+	IP=0;ok=0;timer=0;suc=0;ready=0;nr=0;
+	start=1;window=1;prev=1; //location 0 is for globalForce!
+	
+	switch(gRace)
+	{
+		case TERRA:
+			location[1].force[COMMAND_CENTER]=1;
+			location[1].availible[COMMAND_CENTER]=1;
+			location[0].force[COMMAND_CENTER]=1;
+			location[0].availible[COMMAND_CENTER]=1;
+			Supply=6;Max_Supply=10;
+			for(int i=R_STIM_PACKS;i<=R_CHARON_BOOSTER;i++)
+			{
+				for(int j=MAX_LOCATIONS;j--;)
+				{
+					location[j].availible[i]=1;
+					location[j].force[i]=1;
+				}
+			};
+			for(int i=R_INFANTRY_ARMOR;i<=R_SHIP_WEAPONS;i++)
+			{
+				for(int j=MAX_LOCATIONS;j--;)
+				{
+					location[j].availible[i]=3;
+					location[j].force[i]=3;
+				}
+			};
+			break;
+		case PROTOSS:
+			location[1].force[NEXUS]=1;
+			location[1].availible[NEXUS]=1;
+			location[0].force[NEXUS]=1;
+			location[0].availible[NEXUS]=1;
+			Supply=5;Max_Supply=9;
+			   for(int i=R_PSIONIC_STORM;i<=R_ARGUS_TALISMAN;i++)
+                           {
+				for(int j=MAX_LOCATIONS;j--;)
+                                {
+                                        location[j].availible[i]=3;
+                                        location[j].force[i]=3;
+                                }
+                           }
+                           for(int i=R_ARMOR;i<=R_PLASMA_SHIELDS;i++)
+                           {
+				for(int j=MAX_LOCATIONS;j--;)
+                                {
+                                        location[j].availible[i]=3;
+                                        location[j].force[i]=3;
+                                }
+                           }
+			   break;
+		case ZERG:
+			   location[1].force[HATCHERY]=1;
+			   location[1].availible[HATCHERY]=1;
+			   location[0].force[HATCHERY]=1;
+			   location[0].availible[HATCHERY]=1;
+				
+			   location[1].force[OVERLORD]=1;
+                           location[1].availible[OVERLORD]=1;
+                           location[0].availible[OVERLORD]=1;
+                           location[0].force[OVERLORD]=1;
+
+                           location[1].force[LARVA]=1;
+                           location[1].availible[LARVA]=1;
+                           location[0].availible[LARVA]=1;
+                           location[0].force[LARVA]=1;
+
+			   Supply=5;Max_Supply=9;
+
+			   for(int i=R_VENTRAL_SACKS;i<=R_LURKER_ASPECT;i++)
+                           {
+				for(int j=MAX_LOCATIONS;j--;)
+                                {
+                                        location[j].availible[i]=3;
+                                        location[j].force[i]=3;
+                                }
+                           }
+                           for(int i=R_CARAPACE;i<=R_FLYER_ATTACKS;i++)
+                           {
+				for(int j=MAX_LOCATIONS;j--;)
+                                {
+                                        location[j].availible[i]=3;
+                                        location[j].force[i]=3;
+                                }
+                           }
+			break;
+		default:printf("Wheee!\n");break;
+	}
+	location[1].availible[SCV]=4;
+	location[1].force[SCV]=4;
+ 	location[0].force[SCV]=4;
+	location[0].availible[SCV]=4;
 }
 
 
 void RACE::generateBasicBuildorder()
 {
 	//problem wieder mit keep/castle
-	unsigned char i,j,k,pre[MAX_GOALS],build_max,sup;
+	//pre[GOALS]
+	int build_max,sup;
 	build_max=0;
-	for(j=0;j<2;j++)
-	for(i=0;i<MAX_LENGTH;i++)
-		Basic[i][j]=0;
-	Basic_Length=0;
+	for(int i=MAX_LENGTH;i--;)
+	{
+		basicBuildOrder[0][i]=0;
+		basicBuildOrder[1][i]=0;
+	}
+	basicLength=0;
 
-	switch(race)
+	switch(gRace)
 	{
 		case TERRA:
-			Basic[0][0]=Build_Bv[SCV];
-			Basic[1][0]=Build_Bv[SCV];
-			Basic[2][0]=Build_Bv[SCV];
-			Basic[3][0]=Build_Bv[SCV];
-			Basic[4][0]=Build_Bv[SCV];
-			Basic[5][0]=Build_Bv[SCV];
-			Basic[6][0]=Build_Bv[SUPPLY_DEPOT];
-			if(need_Gas==1)
+			basicBuildOrder[0][0]=phaenoToGenotype[SCV];
+			basicBuildOrder[0][1]=phaenoToGenotype[SCV];
+			basicBuildOrder[0][2]=phaenoToGenotype[SCV];
+			basicBuildOrder[0][3]=phaenoToGenotype[SCV];
+			basicBuildOrder[0][4]=phaenoToGenotype[SCV];
+			basicBuildOrder[0][5]=phaenoToGenotype[SCV];
+			basicBuildOrder[0][6]=phaenoToGenotype[SUPPLY_DEPOT];
+			if(isBuildable[REFINERY]==1)
 			{
-				Basic[7][0]=Build_Bv[REFINERY];
-				Basic[8][0]=Build_Bv[ONE_MINERAL_SCV_TO_GAS];
-				Basic[9][0]=Build_Bv[ONE_MINERAL_SCV_TO_GAS];
-				Basic[10][0]=Build_Bv[ONE_MINERAL_SCV_TO_GAS];
+				basicBuildOrder[0][7]=phaenoToGenotype[REFINERY];
+				basicBuildOrder[0][8]=phaenoToGenotype[GAS_SCV];
+				basicBuildOrder[0][9]=phaenoToGenotype[GAS_SCV];
+				basicBuildOrder[0][10]=phaenoToGenotype[GAS_SCV];
 			};
-			i=10;sup=8;
+			basicLength=10;sup=8;
 			break;
 		case PROTOSS:
-			Basic[0][0]=Build_Bv[PROBE];
-			Basic[1][0]=Build_Bv[PROBE];
-			Basic[2][0]=Build_Bv[PROBE];
-			Basic[3][0]=Build_Bv[PROBE];
-			Basic[4][0]=Build_Bv[PROBE];
-			Basic[5][0]=Build_Bv[PYLON];
-			if(need_Gas==1)
+			basicBuildOrder[0][0]=phaenoToGenotype[PROBE];
+			basicBuildOrder[0][1]=phaenoToGenotype[PROBE];
+			basicBuildOrder[0][2]=phaenoToGenotype[PROBE];
+			basicBuildOrder[0][3]=phaenoToGenotype[PROBE];
+			basicBuildOrder[0][4]=phaenoToGenotype[PROBE];
+			basicBuildOrder[0][5]=phaenoToGenotype[PYLON];
+			if(isBuildable[ASSIMILATOR]==1)
 			{
-				Basic[6][0]=Build_Bv[ASSIMILATOR];
-				Basic[7][0]=Build_Bv[ONE_MINERAL_PROBE_TO_GAS];
-				Basic[8][0]=Build_Bv[ONE_MINERAL_PROBE_TO_GAS];
-				Basic[9][0]=Build_Bv[ONE_MINERAL_PROBE_TO_GAS];
+				basicBuildOrder[0][6]=phaenoToGenotype[ASSIMILATOR];
+				basicBuildOrder[0][7]=phaenoToGenotype[GAS_PROBE];
+				basicBuildOrder[0][8]=phaenoToGenotype[GAS_PROBE];
+				basicBuildOrder[0][9]=phaenoToGenotype[GAS_PROBE];
 			};
-			i=9;sup=8;
+			basicLength=9;sup=8;
 			break;
 		case ZERG:
-			Basic[0][0]=Build_Bv[DRONE];
-			Basic[1][0]=Build_Bv[DRONE];
-			Basic[2][0]=Build_Bv[DRONE];
-			Basic[3][0]=Build_Bv[DRONE];
-			Basic[4][0]=Build_Bv[DRONE];
-			Basic[5][0]=Build_Bv[OVERLORD];
+			basicBuildOrder[0][0]=phaenoToGenotype[DRONE];
+			basicBuildOrder[0][1]=phaenoToGenotype[DRONE];
+			basicBuildOrder[0][2]=phaenoToGenotype[DRONE];
+			basicBuildOrder[0][3]=phaenoToGenotype[DRONE];
+			basicBuildOrder[0][4]=phaenoToGenotype[DRONE];
+			basicBuildOrder[0][5]=phaenoToGenotype[OVERLORD];
 
-			if(need_Gas==1)
+			if(isBuildable[EXTRACTOR]==1)
 			{
-				Basic[6][0]=Build_Bv[EXTRACTOR];
-				Basic[7][0]=Build_Bv[ONE_MINERAL_DRONE_TO_GAS];
-				Basic[8][0]=Build_Bv[ONE_MINERAL_DRONE_TO_GAS];
-				Basic[9][0]=Build_Bv[ONE_MINERAL_DRONE_TO_GAS];
+				basicBuildOrder[0][6]=phaenoToGenotype[EXTRACTOR];
+				basicBuildOrder[0][7]=phaenoToGenotype[GAS_DRONE];
+				basicBuildOrder[0][8]=phaenoToGenotype[GAS_DRONE];
+				basicBuildOrder[0][9]=phaenoToGenotype[GAS_DRONE];
 			};
-			i=9;sup=8;
+			basicLength=9;sup=8;
 			break;
 	}
+	//bis hier: 08/15 Start
 
-	for(j=0;j<MAX_GOALS;j++)
-		if(force[j]>0) pre[j]=force[j]; else pre[j]=0;	
+//	for(int j=0;j<MAX_GOALS;j++)
+//		if(force[j]>0) pre[j]=force[j]; else pre[j]=0;	
 //TODO: Problem bei KEEPs
-	if(settings.generateBuildOrder==1)
+/*	if(settings.generateBuildOrder==1)
 	{
 	for(k=0;k<MAX_LENGTH;k++)
 	{
 		j=0;
 		while((j<build_max)&&(i<MAX_LENGTH-20))
 		{
-			if(((pre[j]<goal[j].what)&&(goal[j].what>0))||((buildable[j]>0)&&(force[j]==0)&&(pre[j]<buildable[j])))
+			if(((pre[j]<goal[j].count)&&(goal[j].count>0))||((isBuildable[j]>0)&&(force[j]==0)&&(pre[j]<isBuildable[j])))
 			{
-				if((stats[race][j].facility>0)&&(pre[stats[race][j].facility]==0))
-					j=stats[race][j].facility;
-                	        else if((stats[race][j].prerequisite[0]>0)&&(pre[stats[race][j].prerequisite[0]]==0))
-	                                j=stats[race][j].prerequisite[0];
-        	                else if((stats[race][j].prerequisite[1]>0)&&(pre[stats[race][j].prerequisite[1]]==0))
-                	                j=stats[race][j].prerequisite[1];
-				else if((stats[race][j].prerequisite[2]>0)&&(pre[stats[race][j].prerequisite[2]]==0))
-					j=stats[race][j].prerequisite[2];
-/*				else if((stats[race][j].type==UPGRADE)&&(stats[race][j].special>0)&&(pre[TIER3]==0))
+				if((gpStats[j].facility>0)&&(pre[gpStats[j].facility]==0))
+					j=gpStats[j].facility;
+                	        else if((gpStats[j].prerequisite[0]>0)&&(pre[gpStats[j].prerequisite[0]]==0))
+	                                j=gpStats[j].prerequisite[0];
+        	                else if((gpStats[j].prerequisite[1]>0)&&(pre[gpStats[j].prerequisite[1]]==0))
+                	                j=gpStats[j].prerequisite[1];
+				else if((gpStats[j].prerequisite[2]>0)&&(pre[gpStats[j].prerequisite[2]]==0))
+					j=gpStats[j].prerequisite[2];
+				else if((gpStats[j].type==UPGRADE)&&(gpStats[j].special>0)&&(pre[TIER3]==0))
 					j=TIER3;
-				else if((stats[race][j].special>0)&&(pre[TIER2]==0))
+				else if((gpStats[j].special>0)&&(pre[TIER2]==0))
 					j=TIER2;
-				else if((stats[race][j].special>0)&&(pre[TIER3]==0))
-					j=TIER3;*/
+				else if((gpStats[j].special>0)&&(pre[TIER3]==0))
+					j=TIER3;
 				else
 				{
 					//building!
-					if(stats[race][j].type==BUILDING)//&&(race=ZERG))
+					if(gpStats[j].type==BUILDING)//&&(gRace=ZERG))
 					{
 						i++;
-						Basic[i][0]=Build_Bv[DRONE];
+						basicBuildOrder[i][0]=phaenoToGenotype[DRONE];
 					} else
 					
-					if((stats[race][j].type==UNIT)&&(stats[race][j].supply>sup))
+					if((gpStats[j].type==UNIT)&&(gpStats[j].supply>sup))
 					{
 						i++;
-						switch(race)
+						switch(gRace)
 						{
-							case TERRA:Basic[i][0]=Build_Bv[SUPPLY_DEPOT];pre[SUPPLY_DEPOT]++;sup+=8;break;
-							case PROTOSS:Basic[i][0]=Build_Bv[PYLON];pre[PYLON]++;sup+=8;break;
-							case ZERG:Basic[i][0]=Build_Bv[OVERLORD];pre[OVERLORD]++;sup+=8;break;
+							case TERRA:basicBuildOrder[i][0]=phaenoToGenotype[SUPPLY_DEPOT];pre[SUPPLY_DEPOT]++;sup+=8;break;
+							case PROTOSS:basicBuildOrder[i][0]=phaenoToGenotype[PYLON];pre[PYLON]++;sup+=8;break;
+							case ZERG:basicBuildOrder[i][0]=phaenoToGenotype[OVERLORD];pre[OVERLORD]++;sup+=8;break;
 							default:break;
 						};
 					};
 					i++;
-					if((stats[race][j].type==UNIT)&&(stats[race][j].supply>0)) sup-=stats[race][j].supply;
-					Basic[i][0]=Build_Bv[j];
+					if((gpStats[j].type==UNIT)&&(gpStats[j].supply>0)) sup-=pStats[j].supply;
+					basicBuildOrder[i][0]=phaenoToGenotype[j];
 					pre[j]++;
 					j++;
 				}
 			} else j++;
 		}
 	}
-	}
-	Basic_Length=i+1;
-	for(j=0;j<MAX_LENGTH;j++)
-		Basic[j][1]=Basic[j][0];
+	}*/
+	basicLength++;
+	memcpy(basicBuildOrder[1],basicBuildOrder[0],MAX_LENGTH*4);
 }
 
 
 //Reinitialize programs with random orders
 void RACE::Restart()
 {
-	unsigned char i;
-	for(i=0;i<MAX_LENGTH;i++)
+	if(settings.generateBuildOrder==1)
 	{
-		if(settings.generateBuildOrder==1)
+		memcpy(Code[0],basicBuildOrder[0],MAX_LENGTH*4);
+		memcpy(Code[1],basicBuildOrder[1],MAX_LENGTH*4);
+	}
+	else
+		for(int i=MAX_LENGTH;i--;)
 		{
-			Code[i][0]=Basic[i][0];
-			Code[i][1]=Basic[i][1];
+			Code[0][i]=rand()%maxBuildTypes;
+			Code[1][i]=rand()%maxBuildTypes;
 		}
-		else
-		{
-			Code[i][0]=rand()%Max_Build_Types;
-			Code[i][1]=rand()%Max_Build_Types;
-		}
+	for(int i=MAX_LENGTH;i--;)
+	{
 		program[i].built=0;
 		program[i].success=0;
-	// TODO: Maybe later implement a whole function to create a start list
-	// ... mmmh... maybe just something with Set_Goals...
-	// would decrease the time until the program can start time-optimization
-	// but maybe we loose a possible solution... well...
 		program[i].time=20000;
 		program[i].temp=0;
-	// TODO: Maybe implement later researches / updates / certain buildings only one time per build order... Trying to research things more than once is senseless...
 	}
 	timer=settings.Max_Time;
 	IP=0;
 	length=MAX_LENGTH;
 }
 
+//Egal Standort einfuehren!!
+
+
+void RACE::Set_Goals(char I[11]) //~~~
+{
+        const int power[4]={1,10,100,1000};
+        int size;
+        char * buffer;
+        FILE * pFileS;
+        int s;
+
+
+	for(int i=0;i<MAX_GOALS;i++)
+	{
+		goal[i].count=0;
+		goal[i].time=0;
+		goal[i].unit=0;
+		goal[i].location=0;
+	}
+	for(int i=0;i<UNIT_TYPE_COUNT;i++)
+		allGoal[i]=0;
+	for(int i=0;i<MAX_LOCATIONS;i++)
+		for(int j=0;j<UNIT_TYPE_COUNT;j++)
+			globalGoal[i][j]=0;
+        printf("Moving on to %s...\n",I);
+//Aufbau der goal datei: Einheitnummer LEER Anzahl LEER Zeit LEER Ort
+
+        printf("Checking input file [%s]...\n",I);
+        pFileS = fopen (I,"rb");
+        if(pFileS==NULL)
+        {
+                printf("[%s]:",I);settings.Fatal("Goal file not found!");
+//                return(1); !!!
+        };
+        printf("File found. Reading... ");
+        fseek (pFileS, 0, SEEK_END);
+        size = ftell (pFileS);
+        printf("[%i Bytes]\n",size);
+        buffer = new char [size];
+        fseek (pFileS, 0, SEEK_SET);
+        fread(buffer,1,size,pFileS);
+        fclose(pFileS);
+        printf("File closed, data saved.\n");
+
+        s=0;
+        int line=0;
+        int coloumn=0;
+        int data[4];
+
+	//goal format: "<Einheitnummer> <Anzahl> <Zeit> <Ort>"
+	while((s<size)&&(line<MAX_GOALS))
+        {
+                for(int j=0;j<4;j++)
+                {
+                        coloumn=0;
+                        data[j]=0;
+                        while((s<size)&&(buffer[s]!=' ')) {s++;coloumn++;}
+                        for(int i=0;i<coloumn;i++)
+                                data[j]+=power[i]*(buffer[s-1-i]-48);
+			s++;
+                        //Todo: Fehlerpruefung noch rein
+                }
+		s++; //Dos format +=2 ?
+		line++;
+                AddGoal(data[0],data[1],60*data[2],data[3]);
+        }
+	
+        delete buffer;
+        printf("Buffer freed and saved...\n");
+        printf("Analyzing data and setting gGoals...\n");
+// TODO: Maybe additional checks of the data sets here...
+
+//Anfangsforce checken
+//goals checken (wird irgendwie nicht eingelesen...)
+	
+	for(int i=UNIT_TYPE_COUNT;i--;)
+	{
+		isVariable[i]=0;
+		isBuildable[i]=0;
+	}
+        for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) 
+        	for(int i=UNIT_TYPE_COUNT;i--;)
+                	if((allGoal[i]>0)||(isBuildable[i]>0))
+                        {
+                                isBuildable[i]=1;
+                                for(int k=0;k<3;k++)
+                                        if((gpStats[i].prerequisite[k]>0)&&(allGoal[gpStats[i].prerequisite[k]]==0))
+						AddGoal(gpStats[i].prerequisite[k],1,0,0);
+				if((gpStats[i].facility2>0)&&(allGoal[gpStats[i].facility2]==0)&&(gpStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(gpStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST))
+				{
+					isVariable[gpStats[i].facility2]=1;
+					if(gpStats[i].facility_type!=IS_LOST) //do not set those morph-facilities as goals...
+						AddGoal(gpStats[i].facility2,1,0,0);
+					else isBuildable[gpStats[i].facility2]=1;// ... but make them buildable :)
+				}
+                                if((gpStats[i].facility[0]>0)&&(allGoal[gpStats[i].facility[0]]==0)&&((gpStats[i].facility[1]==0)||(allGoal[gpStats[i].facility[1]]==0))&&((gpStats[i].facility[2]==0)||(allGoal[gpStats[i].facility[2]]==0)))
+// only facility[0] is important
+                                {
+                                        isVariable[gpStats[i].facility[0]]=1;
+                                        if((gpStats[i].facility_type==NEEDED_ONCE)||(gpStats[i].facility_type==NEEDED_UNTIL_COMPLETE)||(gpStats[i].facility_type==NEEDED_ALWAYS))
+						AddGoal(gpStats[i].facility[0],1,0,0);
+					else isBuildable[gpStats[i].facility[0]]=1; // ... same as above...
+                                }
+                        }
+	long Need_Gas=0;
+        for(int i=UNIT_TYPE_COUNT;i--;)
+        	Need_Gas+=(allGoal[i]*gpStats[i].gas);
+	if(Need_Gas>0)
+                {
+                        isBuildable[REFINERY]=1;
+                        if(allGoal[REFINERY]==0)
+			       AddGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
+                        isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
+                        isVariable[GAS_SCV]=1;
+                };
+//	isBuildable[WINDOW_MOVE_ADD_3]=1;isVariable[WINDOW_MOVE_ADD_3]=1;
+	isBuildable[WINDOW_MOVE_ADD_1]=1;isVariable[WINDOW_MOVE_ADD_1]=1;
+	isBuildable[WINDOW_MOVE_SUB_1]=1;isVariable[WINDOW_MOVE_SUB_1]=1;
+//	isBuildable[WINDOW_MOVE_PREV]=1;isVariable[WINDOW_MOVE_PREV]=1;
+        isBuildable[MOVE_FROM_HERE]=1;isVariable[MOVE_FROM_HERE]=1;
+        isBuildable[MOVE_TO_HERE]=1;isVariable[MOVE_TO_HERE]=1;
+
+	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
+					
+	switch(gRace)
+	{
+		case TERRA:
+			isBuildable[SCV]=1;isVariable[SCV]=1;
+	                isBuildable[COMMAND_CENTER]=1;isVariable[COMMAND_CENTER]=1;
+	                isBuildable[SUPPLY_DEPOT]=1;isVariable[SUPPLY_DEPOT]=1;break;
+		case PROTOSS:
+			isBuildable[PROBE]=1;isVariable[PROBE]=1;
+			isBuildable[NEXUS]=1;isVariable[NEXUS]=1;
+		        isBuildable[PYLON]=1;isVariable[PYLON]=1;break;
+		case ZERG:
+	                isBuildable[OVERLORD]=1;isVariable[OVERLORD]=1;
+           	        isBuildable[DRONE]=1;isVariable[DRONE]=1;
+                	isBuildable[HATCHERY]=1;isVariable[HATCHERY]=1;
+	                isBuildable[BREAK_UP_BUILDING]=1;isVariable[BREAK_UP_BUILDING]=1;break;
+//~~			allGoal[BREAK_UP_BUILDING].count=0;break;
+		default:break;
+	}
+        maxBuildTypes=0;
+        for(int i=0;i<UNIT_TYPE_COUNT;i++)
+                if(isBuildable[i]==1)
+                {
+                        genoToPhaenotype[maxBuildTypes]=i;
+                        phaenoToGenotype[i]=maxBuildTypes;
+                        maxBuildTypes++;
+                }
+}
+
+
+void RACE::AdjustMining()// location.force benutzen und Routine in nicht-static wandeln: Mineralien und Vespinegas kann verbraucht werden!
+{
+        const int* miningp[45];
+        switch(gRace)
+        {
+                case 0:for(int i=0;i<45;i++) miningp[i]=&mining_t[i];
+			       for(int j=0;j<MAX_LOCATIONS;j++) 
+				       for(int i=0;i<5;i++) 
+					       gasHarvestPerSecond[j][i]=gasing_t[i];break;
+                case 1:for(int i=0;i<45;i++) miningp[i]=&mining_p[i];
+			       for(int j=0;j<MAX_LOCATIONS;j++)
+				       for(int i=0;i<5;i++) 
+					       gasHarvestPerSecond[j][i]=gasing_p[i];break;
+                case 2:for(int i=0;i<45;i++) miningp[i]=&mining_z[i];
+			       for(int j=0;j<MAX_LOCATIONS;j++)
+				       for(int i=0;i<5;i++) 
+					       gasHarvestPerSecond[j][i]=gasing_z[i];break;
+        }
+
+	for(int s=0;s<MAX_LOCATIONS;s++)
+		for(int i=0;i<45;i++)
+			if(gMap[s].mineralCount>0)//TODO Check auf Hauptgebaeude machen! Fernsammeln!
+			{
+		 		if(i*8<45*gMap[s].mineralCount)
+        	        	{
+	                	        int k=0;
+        	                	for(int j=0;j<45;j++)
+                		                if(i*8<=j*gMap[s].mineralCount) { k=j;j=45;}
+	                	        mineralHarvestPerSecond[s][i]=*miningp[k]*gMap[s].mineralCount/8;//*Mineral_Mod/800;
+	        	        }
+		            else mineralHarvestPerSecond[s][i]=*miningp[44]*gMap[s].mineralCount/8;//*Mineral_Mod/800;
+			}
+	//TODO: Gas!
+}
+
+void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
+{
+        int counter,num;
+        counter=MAX_LENGTH;
+        RACE* c;
+
+        for(int i=0;i<MAX_LENGTH;i++)
+        {
+                if(rand()%counter<4)
+                {
+                        num=MAX_LENGTH-counter;
+                        memcpy(&child1->Code[0][i-num],&Code[0][i-num],num*2);
+                        memcpy(&child1->Code[1][i-num],&parent2->Code[1][i-num],num*2);
+                        memcpy(&child2->Code[1][i-num],&Code[1][i-num],num*2);
+			memcpy(&child2->Code[0][i-num],&parent2->Code[0][i-num],num*2);
+                        counter=MAX_LENGTH;
+                        c=child1;
+                        child1=child2;
+                        child2=c;
+                }
+                counter--;
+        }
+        num=MAX_LENGTH-counter;
+	memcpy(&child1->Code[0][counter],&Code[0][counter],num*2);
+        memcpy(&child1->Code[1][counter],&parent2->Code[1][counter],num*2);
+        memcpy(&child2->Code[1][counter],&Code[1][counter],num*2);
+        memcpy(&child2->Code[0][counter],&parent2->Code[0][counter],num*2);
+	
+	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
+	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;
+}
+
+
 RACE::RACE()
 {
+	goalCount=0;
 }
 
