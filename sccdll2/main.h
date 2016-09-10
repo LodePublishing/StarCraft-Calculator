@@ -1,16 +1,43 @@
 //Problem: auf goals muessen sowohl ueber jeweiligen Ort (also gGoal[MAX_LOCATIONS][MAX_GOALS]), als auch einzelne Goals, wenn z.B. nach 5 und 10 Minuten 3 und 5 Marines an einem Ort sein sollen...
 
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef __MAIN_H
+#define __MAIN_H
+
+#ifdef SCCDLL2_EXPORTS
+#define SCCDLL_API __declspec(dllexport)
+#else
+#define SCCDLL_API __declspec(dllimport)
+#endif
 
 #define MAX_LENGTH 96
 #define RUNNINGS 5
-#define MAX_PLAYER 128
+#define MAX_PROGRAMS 128
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
-
 #define UNIT_TYPE_COUNT 100
 #define MAX_GOALS 100
+#define MAX_SUPPLY 200
+
+
+struct Building
+{
+	int RB; // Remaining Buildtime
+	int type; // Type of Building
+	int unitCount; //number of units which are moving... currently ONLY for movements...
+	int facility; // in what facility it was produced
+	int IP; // ~~ wird von race nicht gebraucht...
+	int location;
+	int goal; //For movement!
+	int onTheRun;
+        // TODO: Aus Optimierungsgruenden: Eine logforce Variable die _Alle_ Einheiten mitzaehlt
+};
+
+/*struct LAST
+{
+	int what;
+	int location;
+	int count;
+};*/
 
 
 struct LOCATION
@@ -22,11 +49,53 @@ struct LOCATION
 
 struct GOAL
 {
-        int unit;//!
-        int time;
-        int count;
-        int location;
+	int unit;//!
+	int time;
+	int count;
+	int location;
 };
+
+#define ERROR_MESSAGES 8
+
+#define OK 0
+#define ENOUGH_MINERALS 1
+#define ENOUGH_GAS 2
+#define SUPPLY_SATISFIED 3
+#define PREREQUISITE_FAILED 4
+#define FACILITY_FAILED 5
+#define TIMEOUT 6
+#define UNKNOWN 7
+
+#define NAME_LENGTH 21
+
+struct UNIT_STATISTICS
+{
+	char name[NAME_LENGTH];
+	int BT;
+	int mins,gas;
+	int supply;
+	int upgrade_cost; //fuer Upgrades erstmal nur.. 50, 75, 100
+	int upgrade[2];  //what building is needed to go level 2 and level 3 (templar archives, science facility, fleet beacon, lair, hive)
+	
+	int prerequisite[3];
+	int facility[3]; //where _can_ the unit be produced? //primariliy for zerg and terra
+			// for upgrades: fac[2] and fac[3] are places to hold prequerisities for additional upgrading beyond level 1
+	int facility2; // additional facilities, primarily for drones or morphing templars
+	int facility_type; // 0: facilities are lost (templars, drones, command center/comsat, ...), 1: facility is needed at this place, but only once (probes!), 2: facility is needed until the item is complete (Scvs, buildings in general)
+	int create; // Additional building created when this item is completed (only for add-ons)
+	int speed;
+};
+
+
+#define IS_LOST 0
+#define NEEDED_ONCE 1
+#define NEEDED_UNTIL_COMPLETE 2
+#define NEEDED_ONCE_IS_LOST 3 // Special, probes in facility0!
+#define NEEDED_UNTIL_COMPLETE_IS_LOST 4 // Special, scvs in facility0!
+#define NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE 5 //availible returns to 1 but one item is lost... kinda hack for upgrades :)
+#define NEEDED_ALWAYS 6 //nuke silos/nukes, reaver/scarabs, carrier/interceptors, ...
+
+// TODO: Alternativ Prerequisites!!!
 
 #define TERRA 0
 #define PROTOSS 1
@@ -99,12 +168,15 @@ struct GOAL
 #define SHIP_WEAPONS 			63
 #define REFINERY 			64 // <- must be set constant to 64
 #define GAS_SCV				65
-#define WINDOW_MOVE_ADD_3		66
-#define WINDOW_MOVE_ADD_1		67
-#define WINDOW_MOVE_SUB_1		68
-#define WINDOW_MOVE_PREV		69
-#define MOVE_FROM_HERE			70
-#define MOVE_TO_HERE			71
+
+#define MOVE_ONE_3_FORWARD		66
+#define MOVE_ONE_1_FORWARD		67
+#define MOVE_ONE_1_BACKWARD		68
+
+#define ROTATE		69 //~~
+#define FOLLOW		70 //~~
+#define RESET		71 //~~
+
 #define VESPENE_GEYSIR 			72 
 #define MINERALS			73
 #define R_STIM_PACKS 			74
@@ -340,107 +412,8 @@ struct GOAL
 //evtl ueberlegen einfach mehrere goals mit unit, anzahl zu nehmen...
 //some global variables
 
-const int gasing_z[5]=
-{
-0,
-112,
-203,
-320,
-352
-};
 
-const int mining_z[45]=
-{
-0,
-83,165,244,314,385,450,520,583,
-645,701,765,819,853,879,911,938,
-995,1041,1070,1092,1121,1143,1200,1253, // [Claw,4/4/03] changed 1149 -> 12
-1266,1276,1283,1288,1292,1294,1296,1297,
-1298,1298,1299,1299,1299,1299,1300,1300,
-1300,1300,1300,1300
-};
 
-const int gasing_p[5]=
-{
-0,
-117,
-219,
-336,
-352	
-};
-
-const int mining_p[45]=
-{
-0,
-80,159,244,314,384,447,520,584,
-651,706,767,817,847,872,902,927,
-1000,1050,1085,1111,1144,1173,1223,1263,
-1272,1282,1287,1291,1293,1295,1297,1298,
-1299,1299,1299,1299,1299,1300,1300,1300,
-1300,1300,1300,1300
-};
-
-const int gasing_t[5]=
-{
-0,
-123,
-235,
-352,
-352
-};
-
-const int mining_t[45]={
-0,
-72,143,219,295,369,442,506,570, //1-8
-626,682,725,767,807,847,878,909, //9-16
-943,977,1012,1046,1073,1101,1142,1183, //17-24
-1203,1223,1233,1243,1251,1259,1266,1274, //25-32
-1277,1279,1281,1282,1283,1283,1284,1284, //33-40
-1284,1284,1285,1285 //41-44
-};
-
-#define ERROR_MESSAGES 8
-
-#define OK 0
-#define ENOUGH_MINERALS 1
-#define ENOUGH_GAS 2
-#define SUPPLY_SATISFIED 3
-#define PREREQUISITE_FAILED 4
-#define FACILITY_FAILED 5
-#define TIMEOUT 6
-#define UNKNOWN 7
-
-#define NAME_LENGTH 21
-
-struct UNIT_STATISTICS
-{
-	char name[NAME_LENGTH];
-	int BT;
-	int mins,gas;
-	int supply;
-	int upgrade_cost; //fuer Upgrades erstmal nur.. 50, 75, 100
-	int upgrade[2];  //what building is needed to go level 2 and level 3 (templar archives, science facility, fleet beacon, lair, hive)
-	
-	int prerequisite[3];
-	int facility[3]; //where _can_ the unit be produced? //primariliy for zerg and terra
-			// for upgrades: fac[2] and fac[3] are places to hold prequerisities for additional upgrading beyond level 1
-	int facility2; // additional facilities, primarily for drones or morphing templars
-	int facility_type; // 0: facilities are lost (templars, drones, command center/comsat, ...), 1: facility is needed at this place, but only once (probes!), 2: facility is needed until the item is complete (Scvs, buildings in general)
-	int create; // Additional building created when this item is completed (only for add-ons)
-	int speed;
-};
-
-#define MAX_LOCATIONS 8
-
-#define IS_LOST 0
-#define NEEDED_ONCE 1
-#define NEEDED_UNTIL_COMPLETE 2
-#define NEEDED_ONCE_IS_LOST 3 // Special, probes in facility0!
-#define NEEDED_UNTIL_COMPLETE_IS_LOST 4 // Special, scvs in facility0!
-#define NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE 5 //availible returns to 1 but one item is lost... kinda hack for upgrades :)
-#define NEEDED_ALWAYS 6 //nuke silos/nukes, reaver/scarabs, carrier/interceptors, ...
-
-// TODO: Alternativ Prerequisites!!!
 
 const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {
@@ -761,12 +734,8 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 };
 
 
-
-
-
-
-
-
 #endif
+
+
 
 

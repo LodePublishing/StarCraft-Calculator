@@ -1,8 +1,13 @@
-#ifndef IO_H
-#define IO_H
+#ifndef __IO_H
+#define __IO_H
+
+#include "e:\scc\sccdll2\anarace.h" 
 
 #define HEIGHT 16 // Number of entries (build order list)
 #define WIDTH 11 // witdh of the entries
+#define COLOR_1 34
+#define COLOR_2 36
+#define COLOR_3 37
 
 inline int UpperCase(char x) {if(x>91) return (x-32); else return(x);}
 extern void setColor(unsigned char c);
@@ -29,5 +34,31 @@ extern void print(const char * x);
 #endif
 
 
+class IO
+{
+	public:
+        char tmp[255];
+	int pFitnessGraphicsCounter;
+        int pFitnessDifference;
+        int sFitnessGraphicsCounter;
+        int sFitnessDifference;
+        int tFitnessGraphicsCounter;
+        int tFitnessDifference;
+        
+        int oldsFitness;
+        int oldpFitness;
+	int oldtFitness;
+	
+        int calc;
+        int tgGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
+        struct boLog
+        {
+                int count;
+                int order;
+        } bolog[MAX_LENGTH],globalForcelog[UNIT_TYPE_COUNT];
+	
 
-
+	void screen(ANARACE* anaplayer);
+	IO();
+	~IO();
+};
