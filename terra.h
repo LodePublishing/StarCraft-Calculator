@@ -1,4 +1,4 @@
-#include "scc\main.h"
+#include "main.h"
 
 #define BUILDING_TYPES_TERRA 60
 
@@ -163,10 +163,13 @@ class Player_Terra: public RACE
 public:
 	void Set_Goals()
 	{
+		unsigned char i;
+		//total_goals=0;
 		building_types=BUILDING_TYPES_TERRA;
 		for(i=0;i<BUILDING_TYPES_TERRA;i++)
 			if(goal[i].what>0)
 			{
+			//	total_goals++;
 				Ziel[i]=1;
 				if(stats[0][i].tech[0]==1) Ziel[FACTORY]=1;
 				if(stats[0][i].tech[1]==1) Ziel[MACHINE_SHOP]=1;
@@ -183,19 +186,37 @@ public:
 		Ziel[SCV]=1;
 		Ziel[COMMAND_CENTER]=1;
 
-		if((goal[INFANTRY_WEAPONS].what>1)||(goal[INFANTRY_ARMOR].what>1)||(goal[VEHICLE_WEAPONS].what>1)||(goal[VEHICLE_PLATING].what>1)||(goal[SHIP_WEAPONS].what>1)||(goal[SHIP_PLATING].what>1))
+		if((goal[INFANTRY_WEAPONS].what>1)||(goal[INFANTRY_ARMOR].what>1)||(goal[VEHICLE_WEAPONS].what>1)||(goal[VEHICLE_PLATING].what>1)||(goal[SHIP_WEAPONS].what>1)||(goal[SHIP_PLATING].what>1)||(goal[NUCLEAR_WARHEAD].what>0)||(goal[GHOST].what>0))
 		{
 			Ziel[BARRACKS]=1;
 			Ziel[FACTORY]=1;
 			Ziel[STARPORT]=1;
 			Ziel[SCIENCE_FACILITY]=1;
 		}
+		if(goal[NUCLEAR_WARHEAD].what>0)
+		{
+			Ziel[COVERT_OPS]=1;
+			Ziel[NUCLEAR_SILO]=1;
+		}
+		if(goal[GHOST].what>0)
+		{
+			Ziel[COVERT_OPS]=1;
+			Ziel[ACADEMY]=1;
+		}
+		for(i=0;i<BUILDING_TYPES_TERRA;i++)
+			   if(Ziel[i]>goal[i].what)
+		        	  goal[i].what=Ziel[i];
+		
 
+		if((goal[MARINE].what>0)||(goal[FACTORY].what>0)||(goal[ACADEMY].what>0)||(goal[BUNKER].what>0))
+			Ziel[BARRACKS]=1;
+		// Noch rein: goals -> ziele -> ziele !!!!!!!!!!!!!!!
+		// ok ;)
 		for(i=0;i<BUILDING_TYPES_TERRA;i++)
 			if(Ziel[i]>goal[i].what)
 				goal[i].what=Ziel[i];
 
-		Ziel[BARRACKS]=1;
+		//Ziel[BARRACKS]=1;
 		Ziel[SUPPLY_DEPOT]=1;
 
 		for(i=0;i<BUILDING_TYPES_TERRA;i++)
@@ -213,6 +234,7 @@ public:
 			Goal_Harvested_Mins+=(goal[i].what*stats[0][i].mins);
 		Goal_Harvested_Mins*=1.1;
 
+		Max_Build_Types=0;
 		for(i=0;i<BUILDING_TYPES_TERRA;i++)
 		if(Ziel[i]==1)
 		{
@@ -228,6 +250,7 @@ public:
 	{
 		if((who>=INFANTRY_ARMOR)&&(who<=SHIP_WEAPONS))
 		{
+			//On The Run??
 			building[nr].RB=stats[0][who].BT+force[who]*32;
 			switch(who)
 			{
@@ -266,7 +289,7 @@ public:
 	void Build(unsigned short what)
 	{
 		unsigned char m;
-		
+
 			if((what==ONE_MINERAL_SCV_TO_GAS)&&(force[REFINERY]>0)&&(peonmins>0))
 			{
 				ok=1;
@@ -289,12 +312,13 @@ public:
 					nr=m;
 					m=MAX_BUILDINGS;			
 				}
-
+// hier liegt irgendwo der Fehler mit den Upgrades...
 		if( ((Supply>=stats[0][what].supply) || (stats[0][what].supply==0)) &&
 			( mins>=stats[0][what].mins+((what>=INFANTRY_ARMOR)&&(what<=SHIP_PLATING))*force[what]*75+(what==SHIP_WEAPONS)*force[what]*50) &&
 			( gas>=stats[0][what].gas+((what>=INFANTRY_ARMOR)&&(what<=SHIP_PLATING))*force[what]*75+(what==SHIP_WEAPONS)*force[what]*50) &&
 			(nr<255) && 
 			(peonmins+peongas>=1*(stats[0][what].type==2))
+		//Pruefe ob nicht schon erforscht bzw. mehr als 2x upgegradet is	
 			&&
 			(
 			 (stats[0][what].type<3)||
@@ -474,7 +498,8 @@ public:
 									};break;
 
 				case INFANTRY_ARMOR:
-				case INFANTRY_WEAPONS:if((force[ENGINEERING_BAY]>0)&&(availible[ENGINEERING_BAY]>0)&&( (force[what]==0)||(force[SCIENCE_FACILITY]>0)) ) 
+				case INFANTRY_WEAPONS:
+						    if((force[ENGINEERING_BAY]>0)&&(availible[ENGINEERING_BAY]>0)/*&&( (force[what]==0)||(force[SCIENCE_FACILITY]>0)) */) 
 									   {
 											Produce(what);
 											availible[what]=0;
@@ -484,7 +509,7 @@ public:
 				case VEHICLE_PLATING:
 				case VEHICLE_WEAPONS:
 				case SHIP_PLATING:
-				case SHIP_WEAPONS:if((force[ARMORY]>0)&&(availible[ARMORY]>0)&&( (force[what]==0)|| ((force[what]>0)&&(force[SCIENCE_FACILITY]>0)))) 
+				case SHIP_WEAPONS:if((force[ARMORY]>0)&&(availible[ARMORY]>0)&&((force[what]==0)|| ((force[what]>0)&&(force[SCIENCE_FACILITY]>0)))) 
 								  {
 									   Produce(what);
 									   availible[what]=0;
@@ -505,25 +530,28 @@ public:
 	
 	void Calculate()
 	{
-		unsigned char ready,tt,scout;
+		unsigned char tt,i,j;
 		ready=0;
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
-		Vespene_Av=Max_Vespene;		
+	//	gasready=0;
+	//	minsready=0;
+		Vespene_Av=setup.Vespene_Geysirs;		
 		tt=0;
 
-		while((timer<Max_Time) && (ready==0) && (IP<MAX_LENGTH))
+		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{			
 			
-			if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
+		/*	if((Scout_Time<9999)&&(scout==0)&&(timer>Scout_Time))
 			{
 				scout=1;
 				if(peonmins>0)
 					peonmins--;
 				else peongas--;
 				Scout_Time=timer;
-			}
+			}*/
+
 
 			BuildingRunning=0;
 			ok=0;
@@ -558,29 +586,29 @@ public:
 					building[j].RB--;
 					if(building[j].RB==0)
 					{
-						if((Attack==1)&&(building[j].type<COMMAND_CENTER)&&(building[j].on_the_run==0)&&(building[j].type!=SCV)&&(building[j].type!=DROPSHIP))
+						if((setup.Time_to_Enemy>0)&&(building[j].type<COMMAND_CENTER)&&(building[j].on_the_run==0)&&(building[j].type!=SCV)&&(building[j].type!=DROPSHIP))
 						{
 							building[j].on_the_run=1;
 							if(building[j].type==VULTURE)
 							{
 								if(force[ION_THRUSTERS]>0)
-									building[j].RB+=(unsigned short)(Time_to_Enemy*0.75);
+									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
 								else
-									building[j].RB+=Time_to_Enemy;
+									building[j].RB+=setup.Time_to_Enemy;
 							}
 							else if((building[j].type==MARINE)||(building[j].type==FIREBAT))
 							{
 								if((force[STIM_PACKS]>0)&&(force[MARINE]<4*force[MEDIC]))
-									building[j].RB+=(unsigned short)(Time_to_Enemy*0.75);
+									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
 								else
-									building[j].RB+=Time_to_Enemy;
+									building[j].RB+=setup.Time_to_Enemy;
 							}
 							else if(building[j].type==WRAITH)
-								building[j].RB+=(unsigned short)(Time_to_Enemy*0.75);
+								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
 							else if((building[j].type<SIEGE_TANK)||(building[j].type==MEDIC)||(building[j].type==VULTURE)||(building[j].type==SCV)||(building[j].type==GOLIATH)||(building[j].type==GHOST)||(building[j].type==VALKYRIE)||(building[j].type==SCIENCE_VESSEL))
-								building[j].RB+=Time_to_Enemy;
+								building[j].RB+=setup.Time_to_Enemy;
 							else if(building[j].type==BATTLE_CRUISER)
-								building[j].RB+=(unsigned short)(Time_to_Enemy*1.25);
+								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
 						}
 						switch(building[j].type)
 						{
@@ -647,6 +675,10 @@ public:
 						if(building[j].RB==0)
 						{
 							force[building[j].type]++;
+							if((force[building[j].type]>=goal[building[j].type].what)&&(ftime[building[j].type]==0))
+								ftime[building[j].type]=timer;
+							
+							
 							if(stats[0][building[j].type].type<3)
 								availible[building[j].type]++;
 							else
@@ -656,9 +688,12 @@ public:
 								peonmins++;
 								peonbuilding--;
 							}
+							
 							ready=1;
 							for(i=0;i<BUILDING_TYPES_TERRA;i++)
-								ready&=((goal[i].what<=force[i])&&((goal[i].time>timer)||(goal[i].time==0)));
+								ready&=((goal[i].what<=force[i])&&((goal[i].time==0)||(goal[i].time>=ftime[i])));
+//							if((harvested_mins >= Goal_Harvested_Mins)&&(minsready==0)) minsready=(timer*100)/Max_Time;
+//							if((harvested_gas >= Goal_Harvested_Gas)&&(gasready==0)) gasready=(timer*100)/Max_Time;
 						}
 					}
 				}
@@ -673,134 +708,31 @@ public:
 				tt=0;
 				IP++;
 			}
-
-
+		//Scoutpeon
+		if((setup.Scout_Time>0)&&(timer==setup.Scout_Time)&&((peonmins>0)||(peongas>0)))
+		{
+			if(peonmins>0)
+				peonmins--;
+			else peongas--;			
+		}
+		
 		timer++;
 	}
 
-	fitness=0;
-
 	length=IP;
-
-	if(ready==0)
-	{
-		timer=Max_Time;
-		//Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
-		
-		for(i=0;i<BUILDING_TYPES_TERRA;i++)		
-		if(goal[i].what>0)
-		{
-			if(goal[i].what>force[i])
-				fitness+=((force[i]*100)/goal[i].what);
-			else fitness+=100;
-		}
-			
-	// Ziele unterschiedlich bewerten!
-	// sqrt nochmal ueberlegen mmmh :| programm muss halt schritt fuer schritt belohnt werden ^^ vielleicht je nach techstufe, also z.B. pool: 1, lair: 2, spire: 3~~~~
-
-		if(Goal_Harvested_Gas>harvested_gas)
-			fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
-		else fitness+=100;
-
-		if(Goal_Harvested_Mins>harvested_mins)
-			fitness+=(unsigned short)(harvested_mins*100/Goal_Harvested_Mins);
-		else fitness+=100;
-
-		for(i=0;i<MAX_BUILDINGS;i++)
-			if(building[i].RB>0)
-				if(goal[building[i].type].what>force[building[i].type])
-					fitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[0][building[i].type].BT));
-	}
-	else
-	{
-		fitness=Max_Time-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
-		fitness+=200;//mins, gas
-		for(i=0;i<BUILDING_TYPES_TERRA;i++)
-	 		if(goal[i].what>0)
-				fitness+=100;
-	}
+	CalculateFitness();
 }
 
 
-void Mutate()
+void InitRaceSpecific()
 {
-	unsigned char ttt,ta,tb;
-//loeschen, einfuegen, veraendern
-	for(i=0;i<Mutations;i++)
-	{
-	if(rand()%Mutations==0)
-	{
-		x=rand()%MAX_LENGTH;
-		for(y=x;y<MAX_LENGTH-1;y++)
-			program[y].order=program[y+1].order;
-	}
-	
-	if(rand()%Mut_Rate==0)
-	{
-		x=rand()%MAX_LENGTH;
-		for(y=MAX_LENGTH-1;y>x;y--)
-			program[y].order=program[y-1].order;
-		program[x].order=rand()%Max_Build_Types;
-	}
-
-	if(rand()%Mut_Rate==0)
-	{
-		x=rand()%MAX_LENGTH;
-		program[x].order=rand()%Max_Build_Types;
-	}
-	if(rand()%Mut_Rate==0)
-	{
-		ta=rand()%MAX_LENGTH;
-		tb=rand()%MAX_LENGTH;
-		ttt=program[ta];
-		program[ta].order=program[tb].order;
-		program[tb].order=ttt;
-	}
-	if(rand()%(Mut_Rate/2)==0)
-	{
-		ta=rand()%MAX_LENGTH;
-		tb=rand()%MAX_LENGTH;
-		if(ta>tb)
-		{
-		ttt=program[ta].order;
-		for(i=ta;i<tb;i++)
-			program[i].order=program[i+1].order;
-		program[tb].order=ttt;
-		}
-	}
-	}
-}
-
-void Init()
-{
-	for(i=0;i<BUILDING_TYPES_TERRA;i++)
-	{
-		force[i]=0;
-		if(stats[0][i].type<3)
-			availible[i]=0;
-		else
-			availible[i]=1;
-	}
-	for(i=0;i<MAX_BUILDINGS;i++)
-	{
-		building[i].RB=0;
-		building[i].type=255;
-		building[i].on_the_run=0;
-	}
-	
 	av_starport=0;
 	av_factory=0;
-	fitness=0;
-	mins=50;
-	gas=0;
 	force[COMMAND_CENTER]=1;
 	availible[COMMAND_CENTER]=1;
 	force[SCV]=4;
 	Supply=6;
-	peonmins=4;
-	peongas=0;
 	peonbuilding=0;
-	IP=0;
 }
 
 };

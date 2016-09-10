@@ -1,12 +1,14 @@
 Remember: only *change* numbers, do not add or remove them. 
 These settings are fail-safe settings.
 You might want to change it in certain circumstances.
+Oh... and do not write 'Zero' or 'One' instead of the actual number ;-).
+
 
 ---------------
 Input / Output:
 ---------------
 
-Numbers 1
+Numbers 0
 -- a 'One' means: The build order is printed with the number of the item
 -- this will cost some space on the screen and only the first sixty out of 
 -- hundred items will be printed. A 'Zero' will result in a brief presentation 
@@ -16,7 +18,7 @@ Colors 1
 -- You might want to turn this to 'Zero' if your screen does not support
 -- colors.
 
-Detailed Output 0
+Detailed Output 1
 -- a 'One' means that the build order in the output file 'bo_*.txt' will be
 -- printed with a timestamp [min:sec] in front of each order.
 -- a 'Zero' will result in a compact view of the build order which is probably
@@ -27,7 +29,7 @@ Detailed Output 0
 Map Options:
 ------------
 
-Time to Enemy 50
+Time to Enemy 0
 -- This is the time in seconds a 'normal' unit will need to reach the base of
 -- the enemy. This setting is especially useful when trying a rush.
 -- SCC will adjust the time to each unit as the speed is different.
@@ -57,6 +59,14 @@ Time to wallin 0
 -- first.
 -- A 'Zero' deactivates this function.
 
+Scout Time 160
+-- At which time a probe / scv should be dispatched to scout the enemy.
+-- In program mechanics this means: This probe/scv is lost after 'Scout Time'
+-- seconds. Set it to 'Zero' to deactivate it.
+-- It is deactivated for the Zerg.
+-- Note: The scout probe still needs supply and it is not mentioned in the
+-- build order directly
+
 -----------------
 Internal Options:
 -----------------
@@ -70,7 +80,7 @@ Max Time 45 (in minutes)
 -- solution (which fulfills the goals stated in goals_*.txt)
 -- A good thumb rule: Set it to thrice the value you would need to build it.
 
-Max Generations 150
+Max Generations 250
 -- Max Generations define the time how long a build order should be optimized.
 -- After *Max Generations* Generations without change in time and gathered
 -- resources, the current run will end and saved.
@@ -90,6 +100,10 @@ Mutation Rate 50
 -- of a mutation and visa versa a small value will result in a high
 -- probability.
 
+Verbose Messages 1
+-- You probably want to let this at its default setting...
+-- Setting it to 'Zero' will cause the program to just output the file and
+-- that's about it. NO Debug messages etc.
 
 
 Did you miss something? Write me!

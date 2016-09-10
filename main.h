@@ -6,8 +6,13 @@
 #define MAX_LENGTH 100
 #define RUNNINGS 5
 #define MAX_PLAYER 100
-#define LARVA_MAX 500
+#define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
+#define MAX_GOALS 60
+#define DATA_SET_SIZE 14
+
+using namespace std;
+
 
 struct Namen
 {
@@ -55,15 +60,11 @@ struct GOAL
 };
 
 unsigned short Ziel[60],Build_Av[60],Build_Bv[60]; 
-unsigned char Vespene_Av,Max_Build_Types,Max_Vespene;
-unsigned short Max_Time,Max_Generations,Mut_Rate,Mutations;
-unsigned short afit;
-unsigned short generation;
-unsigned char num,Attack;
-unsigned short x,y,i,j,A,B;
-GOAL goal[60];
+unsigned char Vespene_Av,Max_Build_Types,race;
+unsigned short total_goals,building_types;
+unsigned char num;
+GOAL goal[MAX_GOALS];
 double Goal_Harvested_Gas,Goal_Harvested_Mins;
-unsigned short Time_to_Enemy;
 
 struct Stats
 {
@@ -268,33 +269,354 @@ const Stats stats[3][60]=
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
+
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0},
 	{"NULL",0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0}
 	}
-};	
+};
+
+unsigned long power(signed char t)
+{
+	if(t>0)
+		return (power(t-1)*10);
+	else return (1);
+}
+	
+
+class Settings
+{
+	public:
+	//Output Switches 0/1
+	unsigned short numbers,colors,Detailed_Output;
+	//Map Data
+	unsigned short Time_to_Enemy,Mineral_Mod,Time_to_Wallin,Scout_Time;
+	unsigned short Mineral_Blocks,Vespene_Geysirs,Verbose;
+	//Internal Options
+	unsigned short Max_Time,Max_Generations,Mutations,Mutation_Rate;
+
+	unsigned short s;
+	
+	unsigned char d;
+	signed char t;
+	
+	char * buffer;
+
+	unsigned short data[2*MAX_GOALS];
+	unsigned long size;
+
+	unsigned char Init(char I[11])
+	{
+		printf("Checking input file [settings.txt]...\n");
+	FILE * pFileS;
+        pFileS = fopen ("settings.txt","rb");
+	// Auf Error checken! Evtl nciht da!
+	printf("File opened... reading...\n");
+	
+	fseek (pFileS, 0, SEEK_END);
+	size = ftell (pFileS);
+	buffer = new char [size];
+	fseek (pFileS, 0, SEEK_SET);
+	fread(buffer,1,size,pFileS);
+	fclose(pFileS);
+	printf("File closed, data saved.\n");
+	s=0;d=0;
+
+	while(s<size)
+	{
+		if((buffer[s]>=48)&&(buffer[s]<58)&&(d<DATA_SET_SIZE))
+		{
+			t=0;
+			s++;
+			while((buffer[s]>=48)&&(buffer[s]<58)&&(s<size))
+			{
+				t++;s++;
+			}
+			if(t>3)
+			{
+				printf("FATAL ERROR: Do not use numbers bigger than 9999 in the settings.txt file!\n");
+				printf("Freeing Buffer, Exiting...\n");
+				free(buffer);
+				return(1);
+			}
+			while(t>=0)
+			{
+				data[d]+=(buffer[s-t-1]-48)*power(t);
+				t--;
+			}
+			d++;
+		}
+		s++;
+	}
+	free(buffer);
+	printf("Buffer freed and saved...\n");
+	printf("Checking data:\n");
+	
+	if(d<DATA_SET_SIZE)
+	{
+		printf("Not enough Data sets found (%i out of expected %i).\n",d,DATA_SET_SIZE);
+		printf("Please report this to ClawSoftware and/or get an original copy of the 'settings.txt'\n");
+		printf("Using defaults...\n");
+		numbers=1;
+		colors=1;
+		Detailed_Output=1;
+		Time_to_Enemy=50;
+		Vespene_Geysirs=1;
+		Mineral_Mod=100;
+		Mineral_Blocks=8;
+		Time_to_Wallin=0;
+		Scout_Time=160;
+		Max_Time=45;
+		Max_Generations=150;
+		Mutations=50;
+		Mutation_Rate=50;
+		Verbose=1;
+	}
+	else
+	{
+		numbers=data[0];
+		colors=data[1];
+		Detailed_Output=data[2];
+		Time_to_Enemy=data[3];
+		Vespene_Geysirs=data[4];
+		Mineral_Mod=data[5];
+		Mineral_Blocks=data[6];
+		Time_to_Wallin=data[7];
+		Scout_Time=data[8];
+		Max_Time=data[9];
+		Max_Generations=data[10];
+		Mutations=data[11];
+		Mutation_Rate=data[12];
+		Verbose=data[13];
+	}
+
+	if((numbers!=0)&&(numbers!=1))
+	{
+		printf("ERROR: 'Numbers' not correctly initialized [%i].\n",numbers);
+		printf("Please use 0 (no numbers) or 1 (numbers in front of the orders)!\n");
+		printf("Falling back to default: Numbers = 1\n");
+		numbers=1;
+	}
+
+        if((colors!=0)&&(colors!=1))
+        {
+               printf("ERROR: 'Colors' not correctly initialized [%i].\n",colors);
+	       printf("Please use 0 (white/black) or 1 (colors to stress changes in the BO)!\n");
+	       printf("Falling back to default: Colors = 1\n");
+	       colors=1;
+	}
+	
+	if((Detailed_Output!=0)&&(Detailed_Output!=1))
+	 {
+	       printf("ERROR: 'Detailed_Output' not correctly initialized [%i].\n",Detailed_Output);
+	       printf("Please use 0 (more readable) or 1 (timestamp in front of each order)!\n");
+	       printf("Falling back to default: Detailed_Output = 0\n");
+	       Detailed_Output=0;
+	 }
+	if(Time_to_Enemy>300)
+	{
+		printf("WARNING: 'Time to Enemy' is larger than 5 minutes! [%i]\n",Time_to_Enemy);
+		printf("This is not recommended. Try to change the 'settings.txt'\n");	      	
+	}
+	if(Vespene_Geysirs==0)
+	{
+		printf("WARNING: 'Vespene Geysirs' is set to 0.\n");
+		printf("This is not recommended. No gas can be gathered!\n");
+		printf("Try to change the 'settings.txt'\n");
+	}
+	if(Mineral_Mod<10)
+	{
+		printf("WARNING: 'Mineral Gathering modificator' is set below 10.\n");
+		printf("This is not recommended. Almost no minerals can be gathered!\n");
+		printf("Try to change the settings.txt'\n");
+	}
+	if(Mineral_Blocks==0)
+	{
+		printf("ERROR: 'Mineral Blocks' is set to zero.\n");
+		printf("Are you crazy or what? ;-)\n");
+		printf("Falling back to default: Mineral Blocks = 8\n");
+	       Mineral_Blocks=8;	
+	}
+	if(Max_Time<5)
+	{
+		printf("ERROR: 'Max Time' is set too low. [%i]\n",Max_Time);
+		printf("Please use at least 10 minutes.\n");
+		printf("Falling back to default: Max Time = 45\n");
+		Max_Time=45;
+	}
+	else
+	if(Max_Time<10)
+	{
+		printf("WARNING: 'Max Time' is set very low. [%i]\n",Max_Time);
+		printf("The program will probably not work very well.\n");
+		printf("Try to change the 'settings.txt'\n");
+	}
+	if(Scout_Time/60 >Max_Time)
+	{
+		printf("ERROR: 'Scout Time' is set too high. [%i]\n",Scout_Time);
+		printf("Please keep it below 'Max Time'.\n");
+		printf("Falling back to default: Scout Time = 160\n");
+		Scout_Time=160;
+	}
+	if(Max_Generations<10)
+	{
+		printf("ERROR: 'Max Generations' is set too low. [%i]\n",Max_Generations);
+		printf("The program is useless with this setting.\n");
+		printf("Falling back to default: Max Generations = 150");
+		Max_Generations=150;
+	}
+	else if(Max_Generations<50)
+	{
+		printf("WARNING: 'Max Generations' is set very low. [%i]\n",Max_Generations);
+		printf("It is not very likely that the program will find an optimal solution.\n");
+	       printf("Try to change the 'settings.txt'.\n");
+	}	       
+	
+	if(Mutations==0)
+	{
+		printf("WARNING: 'Mutations' is set to zero.\n");
+		printf("This is only useful if you want to test an own build order and determine its speed\n");
+		printf("Optimization is set OFF!\n");
+	} else
+	if(Mutations<10)
+	{
+		printf("WARNING: 'Mutations' is set very low.\n");
+		printf("The program will probably not be able to determine the optimal solution!\n");
+		printf("Try to change the 'settings.txt'.\n");
+	}
+
+	if(Mutation_Rate<5)
+	{
+		printf("ERROR: 'Mutation Rate' is set too low. [%i]\n",Mutation_Rate);
+		printf("Please use at least 5! Remember: 1/Mutation Rate = Probability of a Mutation\n");
+	       printf("Falling back to default: Mutation Rate = 50");
+       		Mutation_Rate=50;	       
+	}
+	if((Verbose!=0)&&(Verbose!=1))
+	{
+		printf("ERROR: 'Numbers' not correctly initialized [%i].\n",numbers);
+                printf("Please use 0 (no numbers) or 1 (numbers in front of the orders)!\n");
+		printf("Falling back to default: Verbose = 1\n");
+	        Verbose=1;
+								
+	}
+
+	printf("Reformatting Data Minutes -> Seconds\n");
+	Max_Time*=60;
+
+	printf("'settings.txt' succesfully checked!\n");
+	printf("Moving on to %s...\n",I);
+
+	for(s=0;s<MAX_GOALS;s++)
+	{
+		goal[s].what=0;
+		goal[s].time=0;
+		Ziel[s]=0;
+		data[2*s]=0;
+		data[2*s+1]=0;
+	}
+
+	printf("Checking input file [%s]...\n",I);
+	
+        pFileS = fopen (I,"rb");
+	// Auf Error checken! Evtl nciht da!
+	printf("File opened... reading...\n");
+	
+	fseek (pFileS, 0, SEEK_END);
+	size = ftell (pFileS);
+	buffer = new char [size];
+	fseek (pFileS, 0, SEEK_SET);
+	fread(buffer,1,size,pFileS);
+	fclose(pFileS);
+	printf("File closed, data saved [%i Bytes].\n",size);
+	s=0;d=0;
+	while(s<size)
+	{
+		if((buffer[s]>=48)&&(buffer[s]<58))
+		{
+			t=0;
+			s++;
+			while((buffer[s]>=48)&&(buffer[s]<58)&&(s<size))
+			{
+				t++;s++;
+			}
+			if(t>3)
+			{
+				printf("FATAL ERROR: Do not use numbers bigger than 9999 in the %s file!\n",I);
+                                printf("Freeing Buffer, Exiting...\n");
+			        free(buffer);
+				 return(1);
+			}
+			while(t>=0)
+			{
+				data[d]+=(buffer[s-t-1]-48)*power(t);
+				t--;
+			}
+			d++;
+		}
+		s++;
+	}
+	free(buffer);
+	printf("Buffer freed and saved...\n");
+	printf("Analyzing data and setting goals...\n");
+// Noch eine Ueberpruefung auf die Anzahl der gefundenen Datensaetze machen!
+	// 	
+	unsigned long count_goals;
+	count_goals=0;
+
+	for(s=0;s<60;s++)
+	{
+		if((stats[race][s].type==3)&&(data[s*2]>1))
+		{
+			printf("ERROR: Research projects cannot be build more than a single time.\n");
+			printf("Section %s in %s: Using 1 instead of %i...\n",stats[race][s].name,I,data[s*2]);
+			data[s*2]=1;
+		}
+		if((data[s*2+1]>0)&&(data[s*2+1]*60+stats[race][s].BT >= Max_Time))
+		{
+			printf("ERROR: Build Time nearly exceeds Max Time!\n");
+			printf("Try to increase Max Time [%i] in 'settings.txt' or reduce the goal time [%i] in %s!\n",Max_Time/60,data[s*2+1],I);
+			printf("Disabling goal time for %s...\n",stats[race][s].name);
+			data[s*2+1]=0;
+		}
+		goal[s].what=data[s*2];
+		goal[s].time=data[s*2+1];
+		count_goals+=goal[s].what;
+	}
+	
+	printf("Reformatting Data Minutes -> Seconds\n");
+	for(s=0;s<60;s++)
+		goal[s].time*=60;
+	
+	printf("All goals [%i] succesfully initialized!\n\n",count_goals);
+	
+	return(0);
+	};
+} setup;
+
+
 
 class RACE
 {
 public:
-	unsigned char force[60];
+	unsigned force[60];
+	unsigned short ftime[60]; //when the goal is reached...
 	unsigned char availible[60];
-
 	double mins,gas;
 	unsigned short larvae,IP,min,n;
 	unsigned short peonmins,peongas, peonbuilding, length,BuildingRunning;
 	short Supply;
 
 	unsigned char av_starport,av_factory;
-	//hacked: man kann in nem kompletten Starport sowohl erforschen, als auch valkyries baun etc.
+	//hacked: man kann sonst in nem kompletten Starport sowohl erforschen, als auch valkyries baun etc.
 
+	unsigned char ready;
 	struct Program
 	{
-		unsigned char order,location,supply;
-		unsigned short time,mins,gas;
+		unsigned char order,location,supply;//supply noch aendern... Verbrauch/Verfuegbar
+		unsigned short time,mins,gas,temp;
 	} program[MAX_LENGTH];
-	
 	struct Building
 	{
 		unsigned short RB; // Remaining Buildtime
@@ -310,32 +632,202 @@ public:
 	unsigned char larvacounter;
 
 	double harvested_gas,harvested_mins;
-	unsigned short fitness,timer;
+	unsigned short pFitness,sFitness,timer,gasready,minsready;
 
 	virtual void Set_Goals() {};
 	virtual inline void Produce() {};
 	virtual void Build() {};
 	virtual void Calculate() {};
-	virtual void Mutate() {};
-	virtual void Init() {};
+	virtual void InitRaceSpecific() {};
 
+	void CalculateFitness()
+	{
+		unsigned char i;
+		unsigned short verschwendung;
+		unsigned char bonus[MAX_GOALS]; // ob schon Bonus fuer halbfertige Einheit vergeben wurde
+		pFitness=0;
+		sFitness=0;
+		sFitness=(unsigned short)(harvested_mins+harvested_gas);
+		//Problem: Verschwendung... viele Science Labors etc
+		 if(ready==0)
+	         {
+	                 timer=setup.Max_Time;
+	         //Bei Zeit: Zwischenziele rein, z.B. Lair, Hive, etc. ??
+		// HAEE??? WARUM HIER MAX_BUILD_TYPES!?
+			 for(i=0;i<building_types;i++)
+                                if(goal[i].what>0)
+	        	             {
+	                              if(goal[i].what>force[i])
+				      {
+				      //nicht alle erledigt & ueber der Zeit
+					      if(goal[i].time>0)
+					      	pFitness+=(100*goal[i].time*force[i])/(goal[i].what*setup.Max_Time);
+					      else pFitness+=(100*force[i])/goal[i].what;
+				      }
+				      else
+				      {
+					if((goal[i].time>0)&&(ftime[i]>goal[i].time))
+						pFitness+=(goal[i].time*100/ftime[i]);
+					else	pFitness+=100;
+			//		if(goal[i].what<force[i])
+			//			sFitness-=(force[i]-goal[i].what)*(stats[race][i].mins+stats[race][i].gas);
+				      }
+				     }
+// Obacht vor sehr kleinen goal[i].times vielleicht nochmal in der scc.cpp checken
+				      
+				      
+		//if(Goal_Harvested_Gas>harvested_gas)
+                  //      fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
+             //   else
+	//	{
+	//		fitness+=100;
+	//		fitness+=gasready;
+	//	};
+	
+     	//	if(Goal_Harvested_Mins>harvested_mins)
+          //              fitness+=(unsigned short)(harvested_mins*100/Goal_Harvested_Mins);
+            //    else 
+	//	{
+	//		fitness+=100;
+	//		fitness+=minsready;
+	//	};
+//Problem hier: wenn Programm viele nichtfertige Gebaeude kurz vor Ende hat wirds nicht abgefangen...
+		for(i=0;i<MAX_GOALS;i++)
+			bonus[i]=goal[i].what-force[i];
+		for(i=0;i<MAX_BUILDINGS;i++)
+                        if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type])&&(bonus[building[i].type]>0))
+			{
+	                          pFitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[race][building[i].type].BT));
+				  bonus[building[i].type]--;
+			}
+	       }
+	        else
+		 {
+		            pFitness=setup.Max_Time-timer;//~~~~~~~~~Zeit staerker ins gewicht fallen lassen!
+		            
+			    // pFitness+=400;//mins, gas
+		            // Warum hier Max_Build_Types!? 
+			    for(i=0;i<building_types;i++)
+	                      if(goal[i].what>0)
+		                   pFitness+=100;
+		   }
+		
+	}
+	
+	void Mutate()
+{
+	unsigned char ttt,ta,tb,i,x,y;
+//loeschen, einfuegen, veraendern
+	for(i=0;i<setup.Mutations;i++)
+	{
+	if(rand()%setup.Mutation_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		for(y=x;y<MAX_LENGTH-1;y++)
+			program[y].order=program[y+1].order;
+	}
+	
+	if(rand()%setup.Mutation_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		for(y=MAX_LENGTH-1;y>x;y--)
+			program[y].order=program[y-1].order;
+		program[x].order=rand()%Max_Build_Types;
+	}
+
+	if(rand()%setup.Mutation_Rate==0)
+	{
+		x=rand()%MAX_LENGTH;
+		program[x].order=rand()%Max_Build_Types;
+	}
+	if(rand()%setup.Mutation_Rate==0)
+	{
+		ta=rand()%MAX_LENGTH;
+		tb=rand()%MAX_LENGTH;
+		ttt=program[ta].order;
+		program[ta].order=program[tb].order;
+		program[tb].order=ttt;
+	}
+	if(rand()%(setup.Mutation_Rate/2)==0)
+	{
+		ta=rand()%MAX_LENGTH;
+		tb=rand()%MAX_LENGTH;
+		if(ta>tb)
+		{
+		ttt=program[ta].order;
+		for(i=ta;i<tb;i++)
+			program[i].order=program[i+1].order;
+		program[tb].order=ttt;
+		}
+	}
+	}
+}
+
+void Init()
+{
+	unsigned char i;
+	for(i=0;i<building_types;i++)
+        {
+               force[i]=0;
+	       ftime[i]=0;
+               if(stats[race][i].type<3)
+	               availible[i]=0;
+	       else
+	               availible[i]=1;
+	}
+	for(i=0;i<MAX_BUILDINGS;i++)
+	{
+	       building[i].RB=0;
+	       building[i].type=255;
+	}
+        pFitness=0;
+	sFitness=0;
+        mins=50;
+        gas=0;
+	peonmins=4;
+	peongas=0;
+	IP=0;
+	InitRaceSpecific();
+}
+	
+	
 	void Restart()
 	{
+		unsigned char i;
+		/*unsigned char randliste[100],xxx,xy,i;
+		xxx=0;xy=0;
+		for(i=0;i<building_types;i++)
+		{
+			xy=0;
+			while(Ziel[i]-xy>0)
+			{
+				randliste[xxx]=Build_Av[i];
+				xxx++;xy++;
+			}
+		}*/
 		for(i=0;i<MAX_LENGTH;i++)
 		{
-			program[i].order=rand()%Max_Build_Types;//evtl ganzes Programm hier rein...
+			program[i].order=rand()%Max_Build_Types;
+			//evtl ganzes Programm hier rein...
+			//Liste erstellen 
 			program[i].time=20000;
+			program[i].temp=0;
 //			program[i].loc=
 		}
-		timer=Max_Time;
+		timer=setup.Max_Time;
 		IP=0;
 		length=MAX_LENGTH;
 		av_starport=0;
 		av_factory=0;
-		afit=0;
 	}
 };
 
-unsigned char building_types;
+
+
+
+
+
 
 #endif
+
+
