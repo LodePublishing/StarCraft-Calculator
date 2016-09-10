@@ -11,43 +11,67 @@
 
 using namespace std;
 
+//TODO Kompatibilitaet zu DOS/LINUX!!!
 #define clrscr() printf("\033[2J") /* Bildschirm löschen */      
 #define gotoxy(x,y) printf("\033[%d;%dH",(y),(x))
+#define setattr(a,v,b) printf("\033[%d;%d;%dm", (a), (v), (b))
 
 RACE * player[MAX_PLAYER];
 
+struct boLog
+{
+	unsigned char count;
+	unsigned char order;
+} bolog[MAX_LENGTH],forcelog[60];
+
+void setAt(unsigned char cnt)
+{
+       if(cnt<10) setattr(0,37,40);//112212122
+  else if(cnt<20) setattr(0,33,40);
+  else if(cnt<30) setattr(0,37,40);
+  else if(cnt<40) setattr(0,33,40);
+  else if(cnt<50) setattr(0,32,40);
+  else if(cnt<60) setattr(0,32,40);
+  else if(cnt<70) setattr(0,31,40);
+  else if(cnt<80) setattr(0,31,40);
+  else if(cnt<90) setattr(0,34,40);
+  else setattr(0,34,40);	
+};
 
 int main(int argc, char* argv[])
 {	
-	unsigned short run,rfit,afit;
-	unsigned char race,counter,Detailed_Info,calc;
+	unsigned short run,rfit,afit,sfit;
+	unsigned char counter,Detailed_Info,calc,numbers;
 	char I[11],O[9],R[7];
 	unsigned short old_time,old_fit,old,s,t,u,generation;
 	char * buffer;
 	long size;
 	unsigned char a,verbose,h1,h2;
-	signed char calc_i,error;
+	signed char error;
 	unsigned char timetmp;
 	srand(time(NULL));
 	clrscr();	
 	Init();
 	race=5;
 	verbose=0;
-	h1=argv[1][0];
-	h2=argv[2][0];
 	
 	if(argc>1)
 	{
+		h1=argv[1][0];
+		
 	if((h1=='T')||(h1=='t'))
 		race=0;
 	else if((h1=='P')||(h1=='p'))
 		race=1;
 	else if((h1=='Z')||(h1=='z'))
 		race=2;
-	if((h2=='V')||(h2=='v')||(h1=='V')||(h1=='v'))
-		verbose=1;
+	if(argc>2)
+	{
+		h2=argv[2][0];
+		if((h2=='V')||(h2=='v')||(h1=='V')||(h1=='v'))
+			verbose=1;
 	}
-	
+	}
 	if(race==5)
 	{
 		printf("Press 1 for Terra, 2 for Protoss or 3 for Zerg.\n");
@@ -88,7 +112,7 @@ int main(int argc, char* argv[])
 	run=0;
 	afit=0;
 	rfit=0;
-
+	sfit=0;
 	FILE * pFileI;
         pFileI = fopen (I,"rb");
 	// Auf Error checken! Evtl nciht da!
@@ -108,13 +132,18 @@ int main(int argc, char* argv[])
 	
 	s=0;t=0;u=0;
 	timetmp=0;
-
-	// auf 3 oder mehr Zahlen checken!
+	numbers=20;
+//evtl noch eigene 'settings' klasse oder so
 	
+	// auf 3 oder mehr Zahlen checken!
+// evtl ne eigene Preferences Datei!	
 	while(s<size)
 	{
 		if((buffer[s]>=48)&&(buffer[s]<58))
 		{
+			if(numbers==20)
+				numbers=(buffer[s]-48);
+			else
 			if(Max_Time==0)
 			{
 				if((buffer[s+1]>=48)&&(buffer[s+1]<58))
@@ -221,6 +250,7 @@ int main(int argc, char* argv[])
                               }
                               else
 	                              goal[u].time=buffer[s]-48;
+			      goal[u].time*=60;
 			      u++;
 			      timetmp=0;
 			}
@@ -311,7 +341,7 @@ int main(int argc, char* argv[])
 
 	
 	afit=0;
-
+	sfit=0;
 
 	clrscr();
 	gotoxy(0,0);
@@ -336,15 +366,14 @@ int main(int argc, char* argv[])
 		if(goal[s].what>0)
 			printf("- %20s : %i   (%s) \n",stats[race][s].name,goal[s].what,kurz[race][s].b);
 
-	calc=176;
-	calc_i=1;
+	calc=0;
 	printf("\n\nPress Enter to start calculation\n");
 	printf("Please note: this may take a while.\n");
 	a=getchar();
 	clrscr();
 	gotoxy(0,22);	
 	
-	printf("Evolution Chamber v1.02BETA - Brought to you by clawsoftware.de\n");
+	printf("Evolution Chamber v1.02GAMMA - Brought to you by clawsoftware.de\n");
 	printf("                 Press any key to cancel calculation.");
 	gotoxy(0,0);
 	old_time=Max_Time;
@@ -376,43 +405,41 @@ int main(int argc, char* argv[])
 			 }
 				
 		// eigentlich brauch ich ja nur player[0] ...
-
-		printf("Calculating [%c]         Status:",(calc+0));
+		printf("Calculating [");
+		setattr(0,31+(calc%7),40);
+		printf("%c",67+(calc%26));
+		setattr(0,37,40);
+		printf("]         Status:");
 		if(player[0]->timer<Max_Time)
 		{
 			if(old_time>player[0]->timer)
-			printf(" found better solution . . .          \n");
+			printf(" found better solution . . .          ");
 			else	
-			printf(" optimizing build order . . .         \n");
+			printf(" optimizing build order . . .         ");
 		}
 		else			
 		{
 			if((old_fit/100)<(player[0]->pFitness/100))
-			printf(" another goal completed . . .		  \n");
+			printf(" another goal completed . . .         ");
 				else
-			printf(" searching for possible solution . . .\n");
+			printf(" searching for possible solution . . .");
 		}
 		
 		old_time=player[0]->timer;
 		old_fit=player[0]->pFitness;
-		calc+=calc_i;
-		if(calc>178)
-		{
-			calc=177;
-			calc_i=-calc_i;
-		}
-		if(calc<176)
-		{
-			calc=177;
-			calc_i=-calc_i;
-		}
-
+		calc++;
 
 		if(player[0]->pFitness>afit)
 		{
 			afit=player[0]->pFitness;
+			sfit=player[0]->sFitness;
 			rfit=0;
 //			Mut_Rate=MRate;
+		}
+		else if(player[0]->sFitness>sfit)
+		{
+			sfit=player[0]->sFitness;
+			rfit=0;
 		}
 		
 		generation++;
@@ -433,29 +460,55 @@ int main(int argc, char* argv[])
 		printf("   [Build Order of the best individual]");
 	
 		t=0;
-		
-		for(s=0;s<player[0]->length;s++)
+	// ~~~ numbers oben checken	
+		for(s=0;s<60+(1-numbers)*40;s++)
 		{
-			gotoxy((t/10)*10,12+t%10);
+			if(bolog[s].order==player[0]->program[s].order)
+			{
+				if(bolog[s].count<160)
+					bolog[s].count++;
+			}
+			else
+			{	bolog[s].count=0;
+				bolog[s].order=player[0]->program[s].order;
+			}
+			if(numbers==1) gotoxy((t/10)*10,11+t%10);
+			else gotoxy((t/10)*7,11+t%10);
 			t++;
+			setattr(0,37,40);
 			if((Build_Av[player[0]->program[s].order]<building_types)&&(player[0]->program[s].time<player[0]->timer))
-			printf("%2i.%s ",t,kurz[race][Build_Av[player[0]->program[s].order]].b);
-			else printf("         ");
+			{
+				setAt(bolog[s].count);
+				if(numbers==0)
+					printf("%s ",kurz[race][Build_Av[player[0]->program[s].order]].b);
+				else printf("%2i.%s ",t,kurz[race][Build_Av[player[0]->program[s].order]].b);
+			}
+			else { setattr(0,37,40); if(numbers==0) printf(" ----  "); else printf("%2i. ---- ",t);}
 		}
 
-		for(s=0;s<15;s++)
-		{
-			gotoxy(60,s+5);
-			printf("         ");
-		}
-		t=0;
+		setattr(0,37,40);
+
+		t=4;
+		gotoxy(63,3);printf("Force at the end:");
 		for(s=0;s<building_types;s++)
-			if((player[0]->force[s]>0)&&(goal[s].what>0)) 
+			if(goal[s].what>0) 
 			{
-				gotoxy(60,t+5);				
-				printf("%s:%2i  ",kurz[race][s].b,player[0]->force[s]);
+				if(forcelog[s].order==player[0]->force[s])
+                        	{
+		                      if(forcelog[s].count<160)
+					      forcelog[s].count++;
+			        }
+                        	else
+			        {
+				 	forcelog[s].count=0;
+				        forcelog[s].order=player[0]->force[s];			                }
+				setAt(forcelog[s].count);
+				gotoxy(70,t);				
+				printf("%s:%2i",kurz[race][s].b,player[0]->force[s]);
 				t++;
 			}
+
+		setattr(0,37,40);
 		
 		
 
@@ -495,14 +548,20 @@ int main(int argc, char* argv[])
 			Save[run]->length=player[0]->length;
 
 			for(s=0;s<building_types;s++)
+			{
 				Save[run]->force[s]=player[0]->force[s];
+				Save[run]->ftime[s]=player[0]->ftime[s];
+			}
 
 			for(s=0;s<MAX_PLAYER;s++)
 				player[s]->Restart();
 			afit=0;
+			sfit=0;
 			old_time=Max_Time;
 			old_fit=0;
 			run++;
+			for(s=0;s<MAX_LENGTH;s++)
+				bolog[s].count=0;
 		}
 	} // end while...
 
@@ -524,7 +583,10 @@ int main(int argc, char* argv[])
 		Save[run]->length=player[0]->length;
 
 		for(s=0;s<building_types;s++)
+		{
 			Save[run]->force[s]=player[0]->force[s];
+			Save[run]->ftime[s]=player[0]->ftime[s];
+		}
 	}
 	
 	clrscr();
@@ -537,12 +599,20 @@ int main(int argc, char* argv[])
 	if(run>0)
 	{
 		afit=0;
+		sfit=0;
 		for(s=0;s<RUNNINGS;s++)
+		{
 			if((Save[s]->pFitness>afit)&&(Save[s]->timer<Max_Time))
 			{
 				afit=Save[s]->pFitness;
 				t=s;
 			}
+			else if((Save[s]->pFitness==afit)&&(Save[s]->timer<Max_Time)&&(Save[s]->sFitness>sfit))
+			{
+				sfit=Save[s]->sFitness;
+				t=s;
+			}
+		}
 	}
 	clrscr();
 	
@@ -551,6 +621,7 @@ int main(int argc, char* argv[])
 	fprintf(pFile,"StarCraft Evolution Chamber by ClawSoftware.de\n");
 	fprintf(pFile,"--------------------------------------------------\n\n");
 	fprintf(pFile,"Build Order of best Individual:\n");
+	
 	fprintf(pFile,"Time used: %.2i:%.2i\n",Save[t]->timer/60,Save[t]->timer%60);	
 
 	printf("Header saved...\n");
@@ -582,23 +653,47 @@ int main(int argc, char* argv[])
 
 	for(s=0;s<building_types;s++)
 		if(Save[t]->force[s]>0)
-			fprintf(pFile,"%s : %i\n",stats[race][s].name,Save[t]->force[s]);
+			fprintf(pFile,"%s : %i [%i]\n",stats[race][s].name,Save[t]->force[s],Save[t]->ftime[s]);
 	fprintf(pFile,"Harvested Minerals : %i\n",(short)(Save[t]->harvested_mins));
 	fprintf(pFile,"Harvested Gas      : %i\n",(short)(Save[t]->harvested_gas));
 	fprintf(pFile,"Minerals at the end: %i\n",(short)(Save[t]->mins));
 	fprintf(pFile,"Gas at the end     : %i\n",(short)(Save[t]->gas));
-	printf("First Solution succesfully saved...\n");
-/*	out_file<<"Other possible solutions: \n";
+	fprintf(pFile,"------------------------------\n\n");
+	printf("First solution [%.2i:%.2i] succesfully saved...\n",Save[t]->timer/60,Save[t]->timer%60);
+	printf("Checking for other solutions:\n");
+	fprintf(pFile,"Other possible solutions: \n");
+	unsigned char otherfound=0;
+	unsigned char newone=0;
 	if(run>0)
 	//Alle runs ausgeben!
-	for(x=0;x<run;x++)
-		if((Save[x]->timer<Max_Time)&&(y!=x)&&(Save[x]->timer!=Save[y]->timer))			
+	for(u=0;u<run;u++)
+	{
+		newone=1;
+		for(s=0;s<u;s++)
 		{
-			out_file<<"\n";
-			out_file<<"\n----------------------------------------------------------\n\n";
+			newone=newone&&(((short)Save[u]->harvested_mins!=(short)Save[s]->harvested_mins)||
+				        ((short)Save[u]->harvested_gas!=(short)Save[s]->harvested_gas)||
+				        ((short)Save[u]->timer!=(short)Save[s]->timer)||
+				        ((short)Save[u]->mins!=(short)Save[s]->mins)||
+				        ((short)Save[u]->gas!=(short)Save[s]->gas));
+		}
+			
+		if((Save[u]->timer<Max_Time)&&(t!=u)&&(newone==1))			
+		{
+			otherfound=1;
+			printf("- [%.2i:%.2i] succesfully saved...\n",Save[u]->timer/60,Save[u]->timer%60);
+			fprintf(pFile,"\n------------------------------\n\n");
+		}
+	}
+	if(otherfound==0)
+		fprintf(pFile,"None found!\n");
+	
+			/*
+			
+			
+			
 			out_file<<"Time used: "<<Save[x]->timer/60<<":"<<Save[x]->timer%60<<"\n";	
-			printf("Start saving %i. Solution...\n",x);
-			printf("%i\n",Save[x]->length);
+			
 			old=200;
 			counter=1;
 			for(i=0;i<=Save[x]->length;i++)

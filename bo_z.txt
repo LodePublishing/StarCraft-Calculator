@@ -1,0 +1,42 @@
+StarCraft Evolution Chamber by ClawSoftware.de
+--------------------------------------------------
+
+Build Order of best Individual:
+Time used: 6:48
+[0:0] Drone
+[0:18] Drone
+[0:34] Drone
+[0:48] Drone
+[1:0] Drone
+[1:37] Spawning Pool
+[1:47] Extractor
+[2:30] Mineral Drone to Gas
+[3:0] Zergling
+[3:1] Zergling
+[3:2] Overlord
+[3:42] Zergling
+[3:56] Hatchery
+[4:26] Metabolic Boost
+[4:27] Gas Drone to Mineral
+[4:39] Zergling
+[4:51] Zergling
+[5:4] Zergling
+[5:16] Zergling
+[5:29] Zergling
+[5:41] Zergling
+[5:59] Zergling
+[6:6] Zergling
+[6:19] Zergling
+Zergling : 12
+Drone : 6
+Overlord : 2
+Hatchery : 2
+Spawning Pool : 1
+Extractor : 1
+Metabolic Boost : 1
+Harvested Minerals: 1665
+Harvested Gas: 104
+Minerals after completing last task: 115
+Gas after completing last task: 4
+
+Other possible solutions: 

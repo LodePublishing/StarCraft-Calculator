@@ -1,0 +1,96 @@
+Remember: only *change* numbers, do not add or remove them. 
+These settings are fail-safe settings.
+You might want to change it in certain circumstances.
+
+---------------
+Input / Output:
+---------------
+
+Numbers 1
+-- a 'One' means: The build order is printed with the number of the item
+-- this will cost some space on the screen and only the first sixty out of 
+-- hundred items will be printed. A 'Zero' will result in a brief presentation 
+-- and the first hundred orders will be printed.
+
+Colors 1
+-- You might want to turn this to 'Zero' if your screen does not support
+-- colors.
+
+Detailed Output 0
+-- a 'One' means that the build order in the output file 'bo_*.txt' will be
+-- printed with a timestamp [min:sec] in front of each order.
+-- a 'Zero' will result in a compact view of the build order which is probably
+-- much more readable
+
+
+------------
+Map Options:
+------------
+
+Time to Enemy 50
+-- This is the time in seconds a 'normal' unit will need to reach the base of
+-- the enemy. This setting is especially useful when trying a rush.
+-- SCC will adjust the time to each unit as the speed is different.
+-- I will add here another setting for air units later.
+-- A zero will switch this option off.
+
+Vespine Geysirs 1
+-- This setting describes how many Vespine Geysirs are near the main base.
+-- As there are no rules for an expansion in the calculator this really
+-- only means how many of them are near your starting position.
+
+Mineral Gathering modificator 100
+-- Well... I still have a hard time to figure out how much a drone/scv/probe
+-- really gathers. I did some tests, stopped the time etc. I think the
+-- relations between the number of gatherers is more or less correct.
+-- Primarily this describes the distance CC/Nexus/Hatch to the Mineral blocks
+
+Mineral Blocks 8
+-- If there are more workers than blocks then some workers have to wait.
+-- i.e. if you set Mineral blocks to for example sixteen every single worker
+-- will gather the same amount of minerals / minute no matter whether you have
+-- four, eight or sixteen.
+
+Time to wallin 0
+-- Should defensive buildings be placed away from the main building?
+-- This result in higher delays as the drone has to reach the building site
+-- first.
+-- A 'Zero' deactivates this function.
+
+-----------------
+Internal Options:
+-----------------
+
+Max Time 45 (in minutes)
+-- Max Time is to define the search space at the beginning.
+-- That means: The program will run slow at the beginning when using a high
+-- value and visa versa it will run fast at the beginning when using a small
+-- value. 
+-- Besides that a high value will grant that the program will find a basic 
+-- solution (which fulfills the goals stated in goals_*.txt)
+-- A good thumb rule: Set it to thrice the value you would need to build it.
+
+Max Generations 150
+-- Max Generations define the time how long a build order should be optimized.
+-- After *Max Generations* Generations without change in time and gathered
+-- resources, the current run will end and saved.
+
+Mutations 50
+-- How many items in a build order of each test case should have the chance to
+-- mutate? Very small values will result in a slow evolution where only small
+-- changes per step are possible. It might remain in a local optima :/
+-- On the other side very large values will result mainly in destructive
+-- mutations which will slow down evolution too... 
+-- Fifty worked quite well though there is probably a better number depending
+-- on the task
+
+Mutation Rate 50
+-- Mutation rate is the probability of a change in the build order.
+-- In contrary to above, a large value means that there is a low probability
+-- of a mutation and visa versa a small value will result in a high
+-- probability.
+
+
+
+Did you miss something? Write me!
+ghoul@clawsoftware.de

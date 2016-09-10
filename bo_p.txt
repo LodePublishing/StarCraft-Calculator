@@ -1,0 +1,66 @@
+StarCraft Evolution Chamber by ClawSoftware.de
+--------------------------------------------------
+
+Build Order of best Individual:
+Time used: 07:43
+[00:00] Probe
+[00:20] Probe
+[00:40] Probe
+[01:00] Probe
+[01:20] Probe
+[01:21] Assimilator
+[01:40] Pylon
+[02:13] Gateway
+[02:14] Probe
+[02:34] Probe
+[02:35] Mineral Probe To Gas
+[03:16] Zealot
+[03:17] Mineral Probe To Gas
+[03:18] Cybernetics Core
+[03:28] Pylon
+[03:53] Forge
+[04:09] Zealot
+[04:34] Citadel Of Adun
+[04:59] Photon Cannon
+[05:16] Zealot
+[05:47] Templar Archives
+[06:06] Photon Cannon
+[06:31] Photon Cannon
+[06:52] Dark Templar
+[07:00] Probe
+[07:20] Probe
+[07:25] Pylon
+[07:26] Mineral Probe To Gas
+[07:40] Probe
+[07:35] Cybernetics Core
+Dark Templar : 1 [462]
+Probe : 13 [20]
+Zealot : 3 [236]
+Nexus : 1 [0]
+Pylon : 2 [133]
+Assimilator : 1 [124]
+Gateway : 1 [196]
+Photon Cannon : 3 [352]
+Cybernetics Core : 1 [261]
+Citadel Of Adun : 1 [337]
+Templar Archives : 1 [410]
+Forge : 1 [276]
+Harvested Minerals : 2581
+Harvested Gas      : 512
+Minerals at the end: 56
+Gas at the end     : 112
+------------------------------
+
+Other possible solutions: 
+
+------------------------------
+
+
+------------------------------
+
+
+------------------------------
+
+
+------------------------------
+

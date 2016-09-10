@@ -661,13 +661,14 @@ public:
 						if(building[j].RB==0)
 						{
 							force[building[j].type]++;
+							if((force[building[j].type]>=goal[force[building[j].type]].what)&&(ftime[building[j].type]==0))                                                              ftime[building[j].type]=timer;
 							if(stats[2][building[j].type].type<3)
 								availible[building[j].type]++;
 							else
 								availible[building[j].type]=1;
 							ready=1;
 							for(i=0;i<BUILDING_TYPES_ZERG;i++)
-								ready&=((goal[i].what<=force[i])&&((goal[i].time>timer)||(goal[i].time==0)));
+								ready&=((goal[i].what<=force[i])&&((goal[i].time>ftime[i])||(goal[i].time==0)));
 //							if((harvested_mins >= Goal_Harvested_Mins)&&(minsready==0)) minsready=(timer*100)/Max_Time;
 //							if((harvested_gas >= Goal_Harvested_Gas)&&(gasready==0)) gasready=(timer*100)/Max_Time;
 						}

@@ -55,7 +55,7 @@ struct GOAL
 };
 
 unsigned short Ziel[60],Build_Av[60],Build_Bv[60]; 
-unsigned char Vespene_Av,Max_Build_Types,Max_Vespene;
+unsigned char Vespene_Av,Max_Build_Types,Max_Vespene,race;
 unsigned short Max_Time,Max_Generations,Mut_Rate,Mutations;
 unsigned short total_goals,building_types;
 unsigned char num,Attack;
@@ -277,9 +277,9 @@ const Stats stats[3][60]=
 class RACE
 {
 public:
-	unsigned char force[60];
+	unsigned force[60];
+	unsigned short ftime[60]; //when the goal is reached...
 	unsigned char availible[60];
-
 	double mins,gas;
 	unsigned short larvae,IP,min,n;
 	unsigned short peonmins,peongas, peonbuilding, length,BuildingRunning;
@@ -320,9 +320,12 @@ public:
 	void CalculateFitness()
 	{
 		unsigned char i;
+		unsigned short verschwendung;
+		unsigned char bonus[MAX_GOALS]; // ob schon Bonus fuer halbfertige Einheit vergeben wurde
 		pFitness=0;
 		sFitness=0;
-		sFitness=(unsigned short)(harvested_mins+harvested_mins+harvested_gas);
+		sFitness=(unsigned short)(harvested_mins+harvested_gas);
+		//Problem: Verschwendung... viele Science Labors etc
 		 if(ready==0)
 	         {
 	                 timer=Max_Time;
@@ -332,9 +335,24 @@ public:
                                 if(goal[i].what>0)
 	        	             {
 	                              if(goal[i].what>force[i])
-	                                    pFitness+=((force[i]*100)/goal[i].what);
-                                         else pFitness+=100;
-                                    }
+				      {
+				      //nicht alle erledigt & ueber der Zeit
+					      if(goal[i].time>0)
+					      	pFitness+=(100*goal[i].time*force[i])/(goal[i].what*Max_Time);
+					      else pFitness+=(100*force[i])/goal[i].what;
+				      }
+				      else
+				      {
+					if((goal[i].time>0)&&(ftime[i]>goal[i].time))
+						pFitness+=(goal[i].time*100/ftime[i]);
+					else	pFitness+=100;
+					if(goal[i].what<force[i])
+						sFitness-=(force[i]-goal[i].what)*(stats[race][i].mins+stats[race][i].gas);
+				      }
+				     }
+// Obacht vor sehr kleinen goal[i].times vielleicht nochmal in der scc.cpp checken
+				      
+				      
 		//if(Goal_Harvested_Gas>harvested_gas)
                   //      fitness+=(unsigned short)(harvested_gas*100/Goal_Harvested_Gas);
              //   else
@@ -351,9 +369,14 @@ public:
 	//		fitness+=minsready;
 	//	};
 //Problem hier: wenn Programm viele nichtfertige Gebaeude kurz vor Ende hat wirds nicht abgefangen...
-/*		for(i=0;i<MAX_BUILDINGS;i++)
-                        if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type]))
-	                          fitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[2][building[i].type].BT));*/
+		for(i=0;i<MAX_GOALS;i++)
+			bonus[i]=goal[i].what-force[i];
+		for(i=0;i<MAX_BUILDINGS;i++)
+                        if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type])&&(bonus[building[i].type]>0))
+			{
+	                          pFitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[race][building[i].type].BT));
+				  bonus[building[i].type]--;
+			}
 	       }
 	        else
 		 {
@@ -423,6 +446,7 @@ void Init()
 	for(i=0;i<building_types;i++)
         {
                force[i]=0;
+	       ftime[i]=0;
                if(stats[2][i].type<3)
 	               availible[i]=0;
 	       else
