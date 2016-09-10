@@ -1,4 +1,4 @@
-#include "race.h"
+#include "anarace.h"
 #include "settings.h"
 #include "main.h"
 #include <stdlib.h>
@@ -7,7 +7,7 @@
 
 // TODO: reimplement/recheck the speed of the units
 
-void RACE::adjustMineralHarvest(int loc)
+void ANARACE::adjustMineralHarvest(int loc)
 {
 	if(loc==0)
 	{
@@ -17,21 +17,20 @@ void RACE::adjustMineralHarvest(int loc)
 	else
 	if(location[loc].force[MINERALS]>0)//TODO Check auf Hauptgebaeude machen! Fernsammeln!
 	{
-		for(int i=0;i<45;i++)
+		for(int i=45;i--;)
 		if(i*8<45*location[loc].force[MINERALS])
-		{
+				{
 			int k=0;
-			for(int j=0;j<45;j++)
-				if(i*8<=j*location[loc].force[MINERALS]) { k=j;j=45;}
+					for(int j=0;j<45;j++)
+						if(i*8<=j*location[loc].force[MINERALS]) { k=j;j=45;}
 			mineralHarvestPerSecond[loc][i]=basicMineralHarvestPerSecond[k]*location[loc].force[MINERALS]/8;
 		}
 		else mineralHarvestPerSecond[loc][i]=basicMineralHarvestPerSecond[44]*location[loc].force[MINERALS]/8;
 	}
 }
 
-void RACE::adjustGasHarvest(int loc)
+void ANARACE::adjustGasHarvest(int loc)
 {
-//TODO: Gas ermoeglichen... updaten wenn Refinery gebaut wird etc.
 	if(loc==0)
 	{
 		for(int j=5;j--;)
@@ -43,8 +42,7 @@ void RACE::adjustGasHarvest(int loc)
         	for(int i=0;i<5;i++)
                 	gasHarvestPerSecond[loc][i]=basicGasHarvestPerSecond[i];
 /*
-
-
+		
 		for(int i=5;i--;)
 		if(i*8<45*location[loc].force[REFINERY])
 				{
@@ -57,7 +55,7 @@ void RACE::adjustGasHarvest(int loc)
 	}
 }
 
-void RACE::calculate()
+void ANARACE::calculate()
 {
 //ZERG: Larvenproduktion!  CREEP!
 //PROTOSS: Bauen: Hin und rueckfahren! PYLON!
@@ -65,7 +63,7 @@ void RACE::calculate()
 	int time=pSet->ga.maxTime;
 	int ready=0;
 	IP=pSet->ga.maxLength-1;
-//mins, gas hier rein...
+	//mins, gas hier rein...
 	while((time)&&(!ready)&&(IP))
 	{
 //TODO: evtl ueberlegen IP zu springen... also erstmal feststellen, warum nicht gebuildet werden kann und dann in einem Ruck resources und btimes hochsetzen...
@@ -82,8 +80,29 @@ void RACE::calculate()
 			if(!(ok=buildGene(genoToPhaenotype[Code[dominant=1][IP]])))
 				ok=buildGene(genoToPhaenotype[Code[dominant=0][IP]]);
 		}
+                
+		program[IP].success.type=success.type;
+		program[IP].success.loc=success.loc;
+		program[IP].success.what=success.what;
+
 		if((ok)||(!timeout))
 		{
+			if(timeout) 
+			{
+				program[IP].time=pSet->ga.maxTime-time; //ANA~
+		                program[IP].dominant=dominant; //ANA~
+		                program[IP].type=Code[dominant][IP];
+			}
+			else 
+			{
+				program[IP].time=pSet->ga.maxTime+1;
+				program[IP].success.type=TIMEOUT;
+				program[IP].success.what=0;
+				program[IP].success.loc=0;
+			}
+			program[IP].needSupply=maxSupply-supply;
+			program[IP].haveSupply=maxSupply;
+			
 			timeout=pSet->ga.maxTimeOut;
 			IP--;
 		}
@@ -98,9 +117,6 @@ void RACE::calculate()
 				if(!(--(build->RB)))
 				{
 					const UNIT_STATISTICS* stat=&pStats[build->type];
-#ifdef SCCDEBUG
-					printf("%s built [%i].\n",stat->name,build->location);
-#endif		
 					switch(stat->facility_type)
 					{
 						case IS_LOST:
@@ -163,7 +179,6 @@ void RACE::calculate()
 						case NEEDED_ALWAYS:break;
 						default:break;
 					}
-					
 					if(stat->supply<0) {supply-=stat->supply;maxSupply-=stat->supply;};
 					//~~~~
 					location[0].force[build->type]+=build->unitCount;
@@ -179,6 +194,11 @@ void RACE::calculate()
 						// ~~~~ Ja... geht schon... aber kann ja auch mal was anderes sein...
 					}
 					//evtl noch location==0 als 'egal wo' einfuehren
+					//ANA~
+
+					program[build->IP].built=1;
+					program[build->IP].location=build->location;
+	//			IP zeugs checken... length is immer 2 :/	
 					for(int i=MAX_GOALS;i--;)
 						if((goal[i].unit>0)&&((goal[i].location==0)||(build->location==goal[i].location))&&(build->type==goal[i].unit)&&((goal[i].time==0)||(time<=goal[i].time)))
 							ftime[build->type]=time;
@@ -191,13 +211,18 @@ void RACE::calculate()
 				}
 			}
 		}
-	harvestResources();
-	time--;
-	timeout--;
+		harvestResources();
+		time--;
+		timeout--;
 	}
 	 //end while
 	length=pSet->ga.maxLength-IP;
-	if(ready) pFitness=time;
+	if(ready) 
+	{
+		pFitness=time;
+		timer=time;
+	}
+	else timer=pSet->ga.maxTime;
 	calculateFitness(ready);
 	
 	//TODO: Auch voruebergehende Ziele miteinberechnen (Bewegungen!)
@@ -208,7 +233,7 @@ void RACE::calculate()
 // falschen Standort ueber distances abrechnen! (100-distance oder so... je nach dem wieviele am falschen Ort sind!)
 
 
-void RACE::calculateFitness(int ready)
+void ANARACE::calculateFitness(int ready)
 {
 	int bonus[MAX_LOCATIONS][UNIT_TYPE_COUNT]; // temporary data to check whether a bonus is already given (only applies if force > goal)
 	sFitness=(harvestedMins+harvestedGas); //TODO: evtl gas und mins (wie urspruenglich eigentlich) in Verhaeltnis setyen wieviel es jeweils Geysire/Mineralien gibt...
@@ -307,67 +332,124 @@ void RACE::calculateFitness(int ready)
 
 
 
-int RACE::buildGene(int what)
+int ANARACE::buildGene(int what)
 {
 	const UNIT_STATISTICS* stat=&pStats[what];
 	int ok=0;
+
+	success.what=0;//ANA~
+	success.loc=0;
+	success.type=OK;
+
 	if(what<=EXTRACTOR+1)
 	{
-//TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
-//	printf("Building %s [%i].\n",stat->name,window);
-		if(
-			((stat->prerequisite[0]==0)||(location[0].force[stat->prerequisite[0]]>0))&&
-			((stat->prerequisite[1]==0)||(location[0].force[stat->prerequisite[1]]>0))&&
-			((stat->prerequisite[2]==0)||(location[0].force[stat->prerequisite[2]]>0))
-			&&
-			( ((stat->facility[0]>0)&&(location[0].availible[stat->facility[0]]>0))||
-			  ((stat->facility[1]>0)&&(location[0].availible[stat->facility[1]]>0))||
-			  ((stat->facility[2]>0)&&(location[0].availible[stat->facility[2]]>0))||
-			  ((stat->facility[0]==0)&&(stat->facility[1]==0)&&(stat->facility[2]==0))
+		if((stat->prerequisite[0]>0)&&(location[0].force[stat->prerequisite[0]]==0))
+		{
+			success.what=stat->prerequisite[0];
+			success.loc=0;
+			success.type=PREREQUISITE_FAILED;
+		}
+		else		
+		if((stat->prerequisite[1]>0)&&(location[0].force[stat->prerequisite[1]]==0))
+                {
+                        success.what=stat->prerequisite[1];
+                        success.loc=0;
+                        success.type=PREREQUISITE_FAILED;
+                }
+		else 
+		if((stat->prerequisite[2]>0)&&(location[0].force[stat->prerequisite[2]]==0))
+                {
+                        success.what=stat->prerequisite[2];
+                        success.loc=0;
+                        success.type=PREREQUISITE_FAILED;
+                }
+		else
+		if //ANA~
+
+                        ( ((stat->facility[0]==0)||(location[0].availible[stat->facility[0]]==0))&&
+                          ((stat->facility[1]==0)||(location[0].availible[stat->facility[1]]==0))&&
+                          ((stat->facility[2]==0)||(location[0].availible[stat->facility[2]]==0))&&
+                          ((stat->facility[0]>0)||(stat->facility[1]>0)||(stat->facility[2]>0))
 			)
-			&&
-			(mins>=stat->mins+stat->upgrade_cost*location[0].force[what])&&
-			(gas>=stat->gas+stat->upgrade_cost*location[0].force[what])
-			&&
-			
-			((supply>=stat->supply)||(stat->supply<=0))&&
-			((stat->facility2==0)||(location[0].availible[stat->facility2]>0)))
-			{
+ 
+//TODO: availible/force[0] auf 100 setzen... naj ama guggn
+		{
+			if(stat->facility[1]>0)
+				success.what=stat->facility[1];
+			else if(stat->facility[1]>0)
+				success.what=stat->facility[2];
+			else if(stat->facility[2]>0)
+				success.what=stat->facility[0];
+
+			success.loc=0;
+			success.type=FACILITY_FAILED;
+		}
+		else
+		if((stat->facility2>0)&&(location[0].availible[stat->facility2]==0))
+                {
+                        success.what=stat->facility2;
+                        success.loc=0;
+                        success.type=FACILITY_FAILED;
+                }
+//TODO: evtl success 2 Schritte zurueckverfolgen...
+		else
+		if(mins<stat->mins+stat->upgrade_cost*location[0].force[what])
+		{
+			success.what=0;
+			success.loc=0;
+		        success.type=ENOUGH_MINERALS;
+		}
+		else
+		if(gas<stat->gas+stat->upgrade_cost*location[0].force[what])
+		{
+			success.what=0;
+			success.loc=0;
+		        success.type=ENOUGH_GAS;
+		}
+		else
+		if((supply<stat->supply)&&(stat->supply>0))
+		{
+			success.what=0;
+			success.loc=0;
+		        success.type=SUPPLY_SATISFIED;
+		}
+		else 
+		{
+
 				//Zuerst: availible pruefen ob am Ort gebaut werden kann
 				//Wenn nicht => +/- absteigen bis alle locations durch sind
-		
-				int fac=0;
-				int loc=window;
-				if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
-					for(fac=3;fac--;)
-						if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
-						{
-							ok=1;
-							break;
-						}
-				if(!ok)
-					for(loc=1;loc<MAX_LOCATIONS;loc++)
-						if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
-						{
-							for(fac=3;fac--;)
-								if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0)))
-								{
-									ok=1;
-									break;
-								}
-							break;
-						}	
+			int fac=0;
+			int loc=window;
+			if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
+				for(fac=3;fac--;)
+					if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0))) 
+					{
+						ok=1;
+						break;
+					}
+			if(!ok)
+				for(loc=1;loc<MAX_LOCATIONS;loc++)
+					if((stat->facility2==0)||(location[loc].availible[stat->facility2]>0))
+					{
+						for(fac=3;fac--;)
+							if( ((stat->facility[fac]>0)&&(location[loc].availible[stat->facility[fac]]>0)) || ((stat->facility[fac]==0)&&(fac==0)))
+							{
+								ok=1;
+								break;
+							}
+						break;
+					}	
 //				bewegliche Sachen ueberdenken...
 //					evtl zusaetzliche Eigenschaft 'speed' einbauen (muss sowieso noch...)... bei speed>0 ... mmmh... trifft aber auch nur auf scvs zu ... weil bringt ja wenig erst mit der hydra rumzulaufen und dann zum lurker... mmmh... aber waere trotzdem zu ueberlegen...
 //					auch noch ueberlegen, wenn z.B. mit scv ohne kommandozentrale woanders gesammelt wird...
-//		Phagen ueber Phagen...			
+//		Phagen ueber Phagen...
 				if(ok)
 					{
 						int nr=0;
 						while((nr<MAX_BUILDINGS-1)&&(building[nr].RB))
 						{
 							nr++;
-							//nr=MAX_BUILDINGS;
+						//	nr=MAX_BUILDINGS;
 						}
 						building[nr].facility=stat->facility[fac];
 						building[nr].location=loc;
@@ -457,7 +539,7 @@ int RACE::buildGene(int what)
 						}
 	
 //						building[nr].on_the_run=0;
-					//	building[nr].IP=IP;
+						building[nr].IP=IP;
 					} //kk!=1?
 				}
 			}
@@ -519,10 +601,12 @@ int RACE::buildGene(int what)
 						what=SCV;
 						ok=1;
 					}
+					program[IP].dominant=dominant;
 //	 TODO else  ?? alle durchsuchen bis ein scv gefunden wurde? mmmh...
 						
 					if(ok)
 					{
+						program[IP].built=1; //ANA~
 						int nr=0;
 						while((nr<MAX_BUILDINGS-1)&&(building[nr].RB))
 						{
@@ -534,7 +618,7 @@ int RACE::buildGene(int what)
 						building[nr].location=window;
 					       	building[nr].type=what;
 						building[nr].RB=map[start].distance[window]*100/pStats[what].speed;
-//						building[nr].IP=IP;
+						building[nr].IP=IP;
 						// 2x Unit => send 12/All instead of just one unit there
 						if((IP>0)&&((Code[0][IP-1]==Code[dominant][IP])||(Code[1][IP-1]==Code[dominant][IP])))
 							{
@@ -554,7 +638,6 @@ int RACE::buildGene(int what)
 				};break;//move the units!
 			default:break;
 		}
-
 /*      else
       if((gRace==ZERG)&&(what==BREAK_UP_BUILDING)&&(BuildingRunning>0)) // lieber eine variable mit last_gebaeude oder so machen und da die Daten speichern, anstatt Programm oder buildings durchzulaufen...
 			{
@@ -592,11 +675,13 @@ int RACE::buildGene(int what)
 					}*/
 //TODO: Verwandtschaftsgrad fuer crossing over feststellen!	
 	}
+	if(ok)
+		program[IP].built=1; //ANA~
 	return ok;
 }
 
 
-void RACE::harvestResources()
+void ANARACE::harvestResources()
 {
 //	int t=(rand()%10)-5;
 	for(int i=1;i<MAX_LOCATIONS;i++)//~~
@@ -642,121 +727,8 @@ void RACE::harvestResources()
 	}
 }
 
-void RACE::mutateGeneCode()
-{
-	if(length==0) return;
-	if(rand()%100==0)
-	{
-       		if(mutationRate>100)
-			mutationRate-=rand()%100;
-		else mutationRate+=rand()%100;
-	}
-	for(int x=MAX_LENGTH;x--;) //length
-		if(rand()%mutationRate==0)
-		{
-			switch(rand()%6)
-			{
-				//TODO: wenn generateBuildOrder==1 dann bleibts stehen!
-				case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
-					if((!pSet->ga.generateBuildOrder)||((isVariable[phaenoToGenotype[Code[0][x]]]==1)&&(isVariable[phaenoToGenotype[Code[1][x]]]==1)))
-					for(int y=x;y<MAX_LENGTH-1;y++)
-					{
-						Code[0][y]=Code[0][y+1];
-						Code[1][y]=Code[1][y+1];
-					};
-					break;
-				case 1://add one variabel entry
-					for(int y=MAX_LENGTH-1;y>x;y--)
-					{
-						Code[0][y]=Code[0][y-1];
-						Code[1][y]=Code[1][y-1];
-					}
-					{
-					int y=rand()%maxBuildTypes;
-					if(pSet->ga.generateBuildOrder)
-						while(isVariable[y]==0) y=rand()%maxBuildTypes;
-					Code[0][x]=y;
-					y=rand()%maxBuildTypes;
-					if(pSet->ga.generateBuildOrder)
-						while(isVariable[y]==0) y=rand()%maxBuildTypes;
-					Code[1][x]=y;
-					};break;
-				case 2://change one entry
-					{
-						int k=rand()%2;
-						if(isVariable[phaenoToGenotype[Code[k][x]]]==1)
-						{
-							int y=rand()%maxBuildTypes;//Optimieren
-							if(pSet->ga.generateBuildOrder)
-								while(isVariable[y]==0) y=rand()%maxBuildTypes;
-							Code[k][x]=y;
-						};
-					};break;
-				case 3://exchange two entries
-					{
-						int y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-						if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-						if(x!=y)
-						{
-							int k=rand()%2;
-							int ta=Code[k][x];
-							Code[k][x]=Code[k][y];
-							Code[k][y]=ta;
-						}
-					};break;
-				case 4://exchange two entries
-					{
-						int y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-						if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-						if(x!=y)
-						{
-							int ta=Code[0][x];
-							Code[0][x]=Code[0][y];
-							Code[0][y]=ta;
-							ta=Code[1][x];
-							Code[1][x]=Code[1][y];
-							Code[1][y]=ta;
-						}
-					};break;
-				case 5://move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
-					//~~~
-					if(length>2)
-					{
-						int ttt;
-						int ta=rand()%(length-2)+1; //>0    <length-2
-						int tb=rand()%(length-1)+2; //>1   <length-1 
-						while(ta==tb) tb=rand()%(length-1)+2;
-						if(ta>tb) {ttt=tb;tb=ta;ta=ttt;}; //~~
-						int y=rand()%length; //move it here
-						while((y<=tb)&&(y>=ta)) y=rand()%length;
-						int tmp[MAX_LENGTH];
-						if(y>tb)
-						{
-							for(int i=0;i<y-tb;i++) tmp[i]=Code[0][i+tb];
-							for(int i=ta;i<tb;i++) Code[0][i+y-tb]=Code[0][i];
-							for(int i=0;i<y-tb;i++) Code[0][ta+i]=tmp[i];
-							for(int i=0;i<y-tb;i++) tmp[i]=Code[1][i+tb];
-							for(int i=ta;i<tb;i++) Code[1][i+y-tb]=Code[1][i];
-							for(int i=0;i<y-tb;i++) Code[1][ta+i]=tmp[i];
-						}
-						else
-						if(y<ta)
-						{
-							for(int i=0;i<ta-y;i++) tmp[i]=Code[0][i+y];
-							for(int i=ta;i<tb;i++) Code[0][y+i-ta]=Code[0][i];
-							for(int i=0;i<ta-y;i++) Code[0][tb-y]=tmp[i];
-							for(int i=0;i<ta-y;i++) tmp[i]=Code[1][i+y];
-							for(int i=ta;i<tb;i++) Code[1][y+i-ta]=Code[1][i];
-							for(int i=0;i<ta-y;i++) Code[1][tb-y]=tmp[i];
-						}
-					};break;
-			}
-		}
-}
-
-
 // Reset all ongoing data (between two runs)
-void RACE::resetData() // resets all data to standard starting values
+void ANARACE::resetData() // resets all data to standard starting values
 {
 	for(int i=UNIT_TYPE_COUNT;i--;)
 		ftime[i]=0;
@@ -764,10 +736,26 @@ void RACE::resetData() // resets all data to standard starting values
 	{
 	       building[i].RB=0;
 	       building[i].type=255;
-//	       building[i].IP=0;
+	       building[i].IP=0;
 	       building[i].location=0;
 	       building[i].unitCount=0;
 	}
+       for(int i=MAX_LENGTH;i--;)//ANA~
+        {
+                program[i].built=0;
+                program[i].success.type=0;
+		program[i].success.what=0;
+		program[i].success.loc=0;
+                program[i].haveSupply=0;
+                program[i].needSupply=0;
+                program[i].time=pSet->ga.maxTime+1;
+		program[i].type=255;
+                program[i].mins=0;
+                program[i].gas=0;
+                program[i].temp=0;
+                program[i].dominant=0;
+        }
+
 	pFitness=0;
 	sFitness=0;
 	harvestedGas=0;
@@ -780,23 +768,22 @@ void RACE::resetData() // resets all data to standard starting values
 }
 
 
-void RACE::init()
+void ANARACE::init()
 {
 	pStats=pSet->pStats;
 	basicMineralHarvestPerSecond=pSet->misc.pMineralHarvestPerSecond;
 	basicGasHarvestPerSecond=pSet->misc.pGasHarvestPerSecond;
 	adjustGoals(); //goals und buildable kopieren, goalcount etc.
 //#ifdef DEBUGSCC	
-	generateBasicBuildOrder();
 	initialized=1;
 }
 
 
-void RACE::adjustGoals()
+void ANARACE::adjustGoals()
 {
 // TODO: Maybe additional checks of the data sets here...
 //Anfangsforce checken
-	memcpy(goal,pSet->goalList.goal,sizeof(GOAL)*MAX_GOALS); //*4?
+	memcpy(goal,pSet->goalList.goal,sizeof(GOAL)*MAX_GOALS);
 	for(int i=MAX_GOALS;i--;)
 		if(goal[i].count>0)
 			printf("Added %s [%i] to goal list.\n",pStats[goal[i].unit].name,goal[i].location);
@@ -811,206 +798,9 @@ void RACE::adjustGoals()
 			phaenoToGenotype[i]=maxBuildTypes;
 			maxBuildTypes++;
 		}
-	
 }
 
-
-void RACE::generateBasicBuildOrder()
-{
-	//problem wieder mit keep/castle
-	//pre[GOALS]
-//	int build_max,sup;
-//	build_max=0;
-	for(int i=MAX_LENGTH;i--;)
-	{
-		basicBuildOrder[0][i]=0;
-		basicBuildOrder[1][i]=0;
-	}
-	basicLength=0;
-/*	while((supply<maxSupply)&&(basicLength<20))
-	{
-		if(supply<maxSupply)
-		{
-			basicBuildOrder[0][basicLength]=phaenoToGenotype[SCV];
-			supply++;
-		} else
-		{
-			basicBuildOrder[0][basicLength]=phaenoToGenotype[SUPPLY_DEPOT];
-		}
-		basicLength++;
-	}*/
-	
-/*	
-//~~~ allgemeines supply, arbeiter, gas/min, Main, ref, ... einfuehren... is teilweise schon, aber v.a. bei hatch etc. noch machen!
-	
-//TODO: Arbeiter, Raffinerie und Supplysachen deklarieren und hier allgemein durchlaufen lassen
-	switch(gRace)
-	{
-		case TERRA:
-			basicBuildOrder[0][0]=phaenoToGenotype[SCV];
-			basicBuildOrder[0][1]=phaenoToGenotype[SCV];
-			basicBuildOrder[0][2]=phaenoToGenotype[SCV];
-			basicBuildOrder[0][3]=phaenoToGenotype[SCV];
-			basicBuildOrder[0][4]=phaenoToGenotype[SCV];
-			basicBuildOrder[0][5]=phaenoToGenotype[SCV];
-			basicBuildOrder[0][6]=phaenoToGenotype[SUPPLY_DEPOT];
-			if(isBuildable[REFINERY]==1)
-			{
-				basicBuildOrder[0][7]=phaenoToGenotype[REFINERY];
-				basicBuildOrder[0][8]=phaenoToGenotype[GAS_SCV];
-				basicBuildOrder[0][9]=phaenoToGenotype[GAS_SCV];
-				basicBuildOrder[0][10]=phaenoToGenotype[GAS_SCV];
-			};
-			basicLength=10;sup=8;
-			break;
-		case PROTOSS:
-			basicBuildOrder[0][0]=phaenoToGenotype[PROBE];
-			basicBuildOrder[0][1]=phaenoToGenotype[PROBE];
-			basicBuildOrder[0][2]=phaenoToGenotype[PROBE];
-			basicBuildOrder[0][3]=phaenoToGenotype[PROBE];
-			basicBuildOrder[0][4]=phaenoToGenotype[PROBE];
-			basicBuildOrder[0][5]=phaenoToGenotype[PYLON];
-			if(isBuildable[ASSIMILATOR]==1)
-			{
-				basicBuildOrder[0][6]=phaenoToGenotype[ASSIMILATOR];
-				basicBuildOrder[0][7]=phaenoToGenotype[GAS_PROBE];
-				basicBuildOrder[0][8]=phaenoToGenotype[GAS_PROBE];
-				basicBuildOrder[0][9]=phaenoToGenotype[GAS_PROBE];
-			};
-			basicLength=9;sup=8;
-			break;
-		case ZERG:
-			basicBuildOrder[0][0]=phaenoToGenotype[DRONE];
-			basicBuildOrder[0][1]=phaenoToGenotype[DRONE];
-			basicBuildOrder[0][2]=phaenoToGenotype[DRONE];
-			basicBuildOrder[0][3]=phaenoToGenotype[DRONE];
-			basicBuildOrder[0][4]=phaenoToGenotype[DRONE];
-			basicBuildOrder[0][5]=phaenoToGenotype[OVERLORD];
-
-			if(isBuildable[EXTRACTOR]==1)
-			{
-				basicBuildOrder[0][6]=phaenoToGenotype[EXTRACTOR];
-				basicBuildOrder[0][7]=phaenoToGenotype[GAS_DRONE];
-				basicBuildOrder[0][8]=phaenoToGenotype[GAS_DRONE];
-				basicBuildOrder[0][9]=phaenoToGenotype[GAS_DRONE];
-			};
-			basicLength=9;sup=8;
-			break;
-	}
-	//bis hier: 08/15 Start
-
-//	for(int j=0;j<MAX_GOALS;j++)
-//		if(force[j]>0) pre[j]=force[j]; else pre[j]=0;	
-//TODO: Problem bei KEEPs
-	if(settings.generateBuildOrder==1)
-	{
-	for(k=0;k<MAX_LENGTH;k++)
-	{
-		j=0;
-		while((j<build_max)&&(i<MAX_LENGTH-20))
-		{
-			if(((pre[j]<goal[j].count)&&(goal[j].count>0))||((isBuildable[j]>0)&&(force[j]==0)&&(pre[j]<isBuildable[j])))
-			{
-				if((gpStats[j].facility>0)&&(pre[gpStats[j].facility]==0))
-					j=gpStats[j].facility;
-				else if((gpStats[j].prerequisite[0]>0)&&(pre[gpStats[j].prerequisite[0]]==0))
-					j=gpStats[j].prerequisite[0];
-				else if((gpStats[j].prerequisite[1]>0)&&(pre[gpStats[j].prerequisite[1]]==0))
-					j=gpStats[j].prerequisite[1];
-				else if((gpStats[j].prerequisite[2]>0)&&(pre[gpStats[j].prerequisite[2]]==0))
-					j=gpStats[j].prerequisite[2];
-				else if((gpStats[j].type==UPGRADE)&&(gpStats[j].special>0)&&(pre[TIER3]==0))
-					j=TIER3;
-				else if((gpStats[j].special>0)&&(pre[TIER2]==0))
-					j=TIER2;
-				else if((gpStats[j].special>0)&&(pre[TIER3]==0))
-					j=TIER3;
-				else
-				{
-					//building!
-					if(gpStats[j].type==BUILDING)//&&(gRace=ZERG))
-					{
-						i++;
-						basicBuildOrder[i][0]=phaenoToGenotype[DRONE];
-					} else
-					
-					if((gpStats[j].type==UNIT)&&(gpStats[j].supply>sup))
-					{
-						i++;
-						switch(gRace)
-						{
-							case TERRA:basicBuildOrder[i][0]=phaenoToGenotype[SUPPLY_DEPOT];pre[SUPPLY_DEPOT]++;sup+=8;break;
-							case PROTOSS:basicBuildOrder[i][0]=phaenoToGenotype[PYLON];pre[PYLON]++;sup+=8;break;
-							case ZERG:basicBuildOrder[i][0]=phaenoToGenotype[OVERLORD];pre[OVERLORD]++;sup+=8;break;
-							default:break;
-						};
-					};
-					i++;
-					if((gpStats[j].type==UNIT)&&(gpStats[j].supply>0)) sup-=pStats[j].supply;
-					basicBuildOrder[i][0]=phaenoToGenotype[j];
-					pre[j]++;
-					j++;
-				}
-			} else j++;
-		}
-	}
-	}*/
-//	basicLength++;
-	memcpy(basicBuildOrder[1],basicBuildOrder[0],MAX_LENGTH*4);
-}
-
-
-//Reinitialize programs with random orders
-void RACE::resetGeneCode()
-{
-	mutationRate=500+rand()%1000;
-	if((pSet->ga.generateBuildOrder)&&(basicLength>0))
-	{
-		memcpy(Code[0],basicBuildOrder[0],MAX_LENGTH*4);
-		memcpy(Code[1],basicBuildOrder[1],MAX_LENGTH*4);
-	}
-	else
-	for(int i=MAX_LENGTH;i--;)
-	{
-		Code[0][i]=rand()%maxBuildTypes;
-		Code[1][i]=rand()%maxBuildTypes;
-	}
-}
-
-void RACE::crossOver(RACE* parent2, RACE* child1, RACE* child2)
-{
-	int counter,num;
-	counter=MAX_LENGTH;
-	RACE* c;
-
-	for(int i=0;i<MAX_LENGTH;i++)
-	{
-		if(rand()%counter<4)
-		{
-			num=MAX_LENGTH-counter;
-			memcpy(&child1->Code[0][i-num],&Code[0][i-num],num*2);
-			memcpy(&child1->Code[1][i-num],&parent2->Code[1][i-num],num*2);
-			memcpy(&child2->Code[1][i-num],&Code[1][i-num],num*2);
-			memcpy(&child2->Code[0][i-num],&parent2->Code[0][i-num],num*2);
-			counter=MAX_LENGTH; //~~ TODO
-			c=child1;
-			child1=child2;
-			child2=c;
-		}
-		counter--;
-	}
-	num=MAX_LENGTH-counter;
-	memcpy(&child1->Code[0][counter],&Code[0][counter],num*2);
-	memcpy(&child1->Code[1][counter],&parent2->Code[1][counter],num*2);
-	memcpy(&child2->Code[1][counter],&Code[1][counter],num*2);
-	memcpy(&child2->Code[0][counter],&parent2->Code[0][counter],num*2);
-	
-	child1->mutationRate=(2*mutationRate+parent2->mutationRate)/3;
-	child2->mutationRate=(2*parent2->mutationRate+mutationRate)/3;
-}
-
-
-void RACE::initLocations()
+void ANARACE::initLocations()
 {
 	memcpy(location,pSet->location,sizeof(LOCATION)*MAX_LOCATIONS);
         for(int i=MAX_LOCATIONS;i--;)
@@ -1020,15 +810,14 @@ void RACE::initLocations()
         }
 }
 
-RACE::RACE()
+ANARACE::ANARACE()
 {
 	length=pSet->ga.maxLength;
 	map=pSet->map;
-	memcpy(isBuildable,pSet->goalList.isBuildable,UNIT_TYPE_COUNT*4); 
+	memcpy(isBuildable,pSet->goalList.isBuildable,UNIT_TYPE_COUNT*4);
 	memcpy(isVariable,pSet->goalList.isVariable,UNIT_TYPE_COUNT*4);
 	if(!initialized) init();
 	initLocations();
 	resetData();
-	resetGeneCode();
 }
 

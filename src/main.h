@@ -5,7 +5,7 @@
 
 #define MAX_LENGTH 96
 #define RUNNINGS 5
-#define MAX_PLAYER 100
+#define MAX_PLAYER 128
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
 
@@ -399,18 +399,16 @@ const int mining_t[45]={
 1284,1284,1285,1285 //41-44
 };
 
-#define ERROR_MESSAGES 10
+#define ERROR_MESSAGES 8
 
 #define OK 0
-#define ENOUGH_FORCE 1
-#define ENOUGH_AVAILIBLE 2
-#define ENOUGH_MINERALS 3
-#define ENOUGH_GAS 4
-#define SUPPLY_SATISFIED 5
-#define RESEARCHED 6
-#define TIMEOUT 7
-#define TOO_MANY_BUILDINGS 8
-#define UNKNOWN 9
+#define ENOUGH_MINERALS 1
+#define ENOUGH_GAS 2
+#define SUPPLY_SATISFIED 3
+#define PREREQUISITE_FAILED 4
+#define FACILITY_FAILED 5
+#define TIMEOUT 6
+#define UNKNOWN 7
 
 #define NAME_LENGTH 21
 
@@ -432,12 +430,7 @@ struct UNIT_STATISTICS
 	int speed;
 };
 
-
 #define MAX_LOCATIONS 8
-
-
-
-
 
 #define IS_LOST 0
 #define NEEDED_ONCE 1

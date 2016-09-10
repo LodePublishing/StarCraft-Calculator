@@ -1,7 +1,8 @@
 "@SETTINGS"
-"Max Time" = "30"
+"Max Time" = "10"
 "Preprocess Buildorder" = "NO"
 "Max Generations" = "150"
+"Max length" = "96"
 "@END"
 
 "@PLAYER" "1"
@@ -9,9 +10,9 @@
 "Race" = "Terra"
 "Starting Minerals" = "50"
 "Starting Gas" = "0"
-"Needed supply" = "4"
-"Max Supply Terra" = "9"
-"SCV" = "1" "4"
-"Command Center" = "1" "1"
+"Need supply" = "4"
+"Max Supply Terra" = "10"
+#"SCV" = "1" "4"
+#"Command Center" = "1" "1"
 "@END"
 

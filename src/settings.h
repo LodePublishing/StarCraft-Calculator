@@ -27,7 +27,7 @@ struct MISC
 
 struct GA
 {
-	int maxTime;
+	int maxTime,maxTimeOut,maxLength,maxRuns;
 	int generateBuildOrder;
 	int maxGenerations;
 };

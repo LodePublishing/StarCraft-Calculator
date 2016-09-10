@@ -7,47 +7,47 @@
 
 void GOALLIST::addGoal(int unit, int count, int time, int location)
 {
-        allGoal[unit]+=count;
+	allGoal[unit]+=count;
 
-        globalGoal[location][unit]+=count;
+	globalGoal[location][unit]+=count;
 
-        int i=0;
-        for(i=0;i<goalCount;i++)
-                if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
-                {
-                        goal[i].count+=count;
-                        i=goalCount;
-                }
-        if(i==goalCount)
-        {
-                goal[goalCount].unit=unit;
-                goal[goalCount].time=time;
-                goal[goalCount].location=location;
-                goal[goalCount].count=count;
-                goalCount++;
-        }
+	int i=0;
+	for(i=0;i<goalCount;i++)
+		if((goal[i].unit==unit)&&(goal[i].time==time)&&(goal[i].location==location))
+		{
+			goal[i].count+=count;
+			i=goalCount+1;
+		}
+	if(i<goalCount+1)
+	{
+		goal[goalCount].unit=unit;
+		goal[goalCount].time=time;
+		goal[goalCount].location=location;
+		goal[goalCount].count=count;
+		goalCount++;
+	}
 };
 
 GOALLIST::GOALLIST()
 {
-        goalCount=0;
-        for(int i=0;i<MAX_GOALS;i++)
-        {
-                goal[i].count=0;
-                goal[i].time=0;
-                goal[i].unit=0;
-                goal[i].location=0;
-        }
+	goalCount=0;
+	for(int i=0;i<MAX_GOALS;i++)
+	{
+		goal[i].count=0;
+		goal[i].time=0;
+		goal[i].unit=0;
+		goal[i].location=0;
+	}
       for(int i=0;i<UNIT_TYPE_COUNT;i++)
-                    allGoal[i]=0;
+		    allGoal[i]=0;
       for(int i=0;i<MAX_LOCATIONS;i++)
-              for(int j=0;j<UNIT_TYPE_COUNT;j++)
-                      globalGoal[i][j]=0;
+	      for(int j=0;j<UNIT_TYPE_COUNT;j++)
+		      globalGoal[i][j]=0;
       for(int i=UNIT_TYPE_COUNT;i--;)
-	        {
-                  isVariable[i]=0;
-                  isBuildable[i]=0;
-	        }
+		{
+		  isVariable[i]=0;
+		  isBuildable[i]=0;
+		}
 };
 
 
@@ -78,21 +78,21 @@ int SETTINGS::loadGoals() //~~~
 	//"unit name" "count" "time" "location"
 	while(fgets(line,sizeof(line),pFile)!=NULL)
 	{
-                ++ln;
-                line[strlen(line)-1]='\0';
-                if((line[0]=='#')||(line[0]=='\0')) continue;
-                strcpy(item,"");
-                strcpy(param1,"");
-                strcpy(param2,"");
+		++ln;
+		line[strlen(line)-1]='\0';
+		if((line[0]=='#')||(line[0]=='\0')) continue;
+		strcpy(item,"");
+		strcpy(param1,"");
+		strcpy(param2,"");
 
-                if((buffer=strtok(line,"\""))!=NULL) strcpy(item,buffer);strtok(NULL,"\"");
-                if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param1,buffer);strtok(NULL,"\"");
-                if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param2,buffer);strtok(NULL,"\"");
+		if((buffer=strtok(line,"\""))!=NULL) strcpy(item,buffer);strtok(NULL,"\"");
+		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param1,buffer);strtok(NULL,"\"");
+		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param2,buffer);strtok(NULL,"\"");
 		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param3,buffer);strtok(NULL,"\"");
-                if((buffer=strtok(NULL,"\""))!=NULL)
-                {
-                        printf("Line %d: Too many entries (%s).\n",ln,buffer);continue;
-                }
+		if((buffer=strtok(NULL,"\""))!=NULL)
+		{
+			printf("Line %d: Too many entries (%s).\n",ln,buffer);continue;
+		}
 		value1=atoi(param1);value2=atoi(param2);value3=atoi(param3);
 		
 		#ifdef DEBUGSCC
@@ -119,53 +119,11 @@ int SETTINGS::loadGoals() //~~~
 		if(m!=-1)
 			printf("Line %d: Unknown entry: %s\n",ln,item);
 	}
-        if(goalList.goalCount<=0) return -1;
-        for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
-                        for(int i=UNIT_TYPE_COUNT;i--;)
-                        if((goalList.allGoal[i]>0)||(goalList.isBuildable[i]>0))
-                                        {
-                                                goalList.isBuildable[i]=1;
-                                for(int k=0;k<3;k++)
-
-                                                        if((pStats[i].prerequisite[k]>0)&&(goalList.allGoal[pStats[i].prerequisite[k]]==0))
-                                                goalList.addGoal(pStats[i].prerequisite[k],1,0,0);
-                                if((pStats[i].facility2>0)&&(goalList.allGoal[pStats[i].facility2]==0)&&(pStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST))
-                                {
-                                        goalList.isVariable[pStats[i].facility2]=1;
-                                        if(pStats[i].facility_type!=IS_LOST) //do not set those morph-facilities as goals...
-                                                goalList.addGoal(pStats[i].facility2,1,0,0);
-                                        else goalList.isBuildable[pStats[i].facility2]=1;// ... but make them buildable :)
-                                }
-                                                if((pStats[i].facility[0]>0)&&(goalList.allGoal[pStats[i].facility[0]]==0)&&((pStats[i].facility[1]==0)||(goalList.allGoal[pStats[i].facility[1]]==0))&&((pStats[i].facility[2]==0)||(goalList.allGoal[pStats[i].facility[2]]==0)))
-// only facility[0] is important
-                                                {
-                                                        goalList.isVariable[pStats[i].facility[0]]=1;
-                                                        if((pStats[i].facility_type==NEEDED_ONCE)||(pStats[i].facility_type==NEEDED_UNTIL_COMPLETE)||(pStats[i].facility_type==NEEDED_ALWAYS))
-                                                goalList.addGoal(pStats[i].facility[0],1,0,0);
-                                        else goalList.isBuildable[pStats[i].facility[0]]=1; // ... same as above...
-                                                }
-                                        }
-                        long Need_Gas=0;
-                        for(int i=UNIT_TYPE_COUNT;i--;)
-                                Need_Gas+=(goalList.allGoal[i]*pStats[i].gas);
-                        if(Need_Gas>0)
-                                {
-                                                goalList.isBuildable[REFINERY]=1;
-                                        if(goalList.allGoal[REFINERY]==0)
-                                       goalList.addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
-                                                       goalList.isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...                                        isVariable[GAS_SCV]=1;
-                        };
-//      isBuildable[WINDOW_MOVE_ADD_3]=1;isVariable[WINDOW_MOVE_ADD_3]=1;        isBuildable[WINDOW_MOVE_ADD_1]=1;isVariable[WINDOW_MOVE_ADD_1]=1;        isBuildable[WINDOW_MOVE_SUB_1]=1;isVariable[WINDOW_MOVE_SUB_1]=1;//      isBuildable[WINDOW_MOVE_PREV]=1;isVariable[WINDOW_MOVE_PREV]=1;
-        goalList.isBuildable[MOVE_FROM_HERE]=1;goalList.isVariable[MOVE_FROM_HERE]=1;
-        goalList.isBuildable[MOVE_TO_HERE]=1;goalList.isVariable[MOVE_TO_HERE]=1;
-
-        //TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
-
         switch(race)
         {
                 case TERRA:
-                        goalList.isBuildable[SCV]=1;goalList.isVariable[SCV]=1;goalList.addGoal(COMMAND_CENTER,1,0,1);
-                        goalList.isBuildable[COMMAND_CENTER]=1;goalList.isVariable[COMMAND_CENTER]=1;
+                        goalList.isBuildable[SCV]=1;goalList.isVariable[SCV]=1;goalList.addGoal(SCV,4,0,0);
+                        goalList.isBuildable[COMMAND_CENTER]=1;goalList.isVariable[COMMAND_CENTER]=1;goalList.addGoal(COMMAND_CENTER,1,0,1);
                         goalList.isBuildable[SUPPLY_DEPOT]=1;goalList.isVariable[SUPPLY_DEPOT]=1;break;
                 case PROTOSS:
                         goalList.isBuildable[PROBE]=1;goalList.isVariable[PROBE]=1;goalList.addGoal(NEXUS,1,0,1);
@@ -176,9 +134,54 @@ int SETTINGS::loadGoals() //~~~
                         goalList.isBuildable[DRONE]=1;goalList.isVariable[DRONE]=1;
                         goalList.isBuildable[HATCHERY]=1;goalList.isVariable[HATCHERY]=1;
                         goalList.isBuildable[BREAK_UP_BUILDING]=1;goalList.isVariable[BREAK_UP_BUILDING]=1;break;
-//~~                    allGoal[BREAK_UP_BUILDING].count=0;break;
+//~~                allGoal[BREAK_UP_BUILDING].count=0;break;
                 default:break;
         }
+	if(goalList.goalCount<=0) return -1;
+	for(int j=6;j--;) // Nuclear Warhead needs 6 steps (?) ~~~~
+		for(int i=UNIT_TYPE_COUNT;i--;)
+			if((goalList.allGoal[i]>0)||(goalList.isBuildable[i]>0))
+			{
+				goalList.isBuildable[i]=1;
+				for(int k=0;k<3;k++)
+					if((pStats[i].prerequisite[k]>0)&&(goalList.allGoal[pStats[i].prerequisite[k]]==0))
+						goalList.addGoal(pStats[i].prerequisite[k],1,0,0);
+				if((pStats[i].facility2>0)&&(goalList.allGoal[pStats[i].facility2]==0)&&(pStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST_BUT_AVAILIBLE)&&(pStats[i].facility_type!=NEEDED_UNTIL_COMPLETE_IS_LOST))
+				{
+					goalList.isVariable[pStats[i].facility2]=1;
+					if(pStats[i].facility_type!=IS_LOST) //do not set those morph-facilities as goals...
+						goalList.addGoal(pStats[i].facility2,1,0,0);
+					else goalList.isBuildable[pStats[i].facility2]=1;// ... but make them buildable :)
+				}
+				if((pStats[i].facility[0]>0)&&(goalList.allGoal[pStats[i].facility[0]]==0)&&((pStats[i].facility[1]==0)||(goalList.allGoal[pStats[i].facility[1]]==0))&&((pStats[i].facility[2]==0)||(goalList.allGoal[pStats[i].facility[2]]==0)))
+// only facility[0] is important
+				{
+					goalList.isVariable[pStats[i].facility[0]]=1;
+					if((pStats[i].facility_type==NEEDED_ONCE)||(pStats[i].facility_type==NEEDED_UNTIL_COMPLETE)||(pStats[i].facility_type==NEEDED_ALWAYS))
+						goalList.addGoal(pStats[i].facility[0],1,0,0);
+					else goalList.isBuildable[pStats[i].facility[0]]=1; // ... same as above...
+				}
+			}
+	long Need_Gas=0;
+	for(int i=UNIT_TYPE_COUNT;i--;)
+		Need_Gas+=(goalList.allGoal[i]*pStats[i].gas);
+	if(Need_Gas>0)
+	{
+		goalList.isBuildable[REFINERY]=1;
+		if(goalList.allGoal[REFINERY]==0)
+		       goalList.addGoal(REFINERY,1,0,0); //ASSIMILATOR == EXTRACTOR == REFINERY
+		goalList.isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
+		goalList.isVariable[GAS_SCV]=1;
+	};
+      goalList.isBuildable[WINDOW_MOVE_ADD_3]=1;goalList.isVariable[WINDOW_MOVE_ADD_3]=1;
+      goalList.isBuildable[WINDOW_MOVE_ADD_1]=1;goalList.isVariable[WINDOW_MOVE_ADD_1]=1;
+      goalList.isBuildable[WINDOW_MOVE_SUB_1]=1;goalList.isVariable[WINDOW_MOVE_SUB_1]=1;
+      goalList.isBuildable[WINDOW_MOVE_PREV]=1; goalList.isVariable[WINDOW_MOVE_PREV]=1;
+      goalList.isBuildable[MOVE_FROM_HERE]=1;   goalList.isVariable[MOVE_FROM_HERE]=1;
+      goalList.isBuildable[MOVE_TO_HERE]=1;     goalList.isVariable[MOVE_TO_HERE]=1;
+
+	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
+
 	return(0);
 }
 
@@ -229,8 +232,8 @@ int SETTINGS::init()
 		strcpy(param1,"");
 		strcpy(param2,"");
 		if((buffer=strtok(line,"\""))!=NULL) strcpy(item,buffer);strtok(NULL,"\"");
-                if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param1,buffer);strtok(NULL,"\"");
-                if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param2,buffer);
+		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param1,buffer);strtok(NULL,"\"");
+		if((buffer=strtok(NULL,"\""))!=NULL) strcpy(param2,buffer);
 		if((buffer=strtok(NULL,"\""))!=NULL)
 		{
 			printf("Line %d: Too many entries (%s).\n",ln,buffer);continue;
@@ -289,7 +292,7 @@ int SETTINGS::init()
 				}
 				else if(!strcmp(item,"Starting Minerals"))
 				{
-					if(value1>=0) misc.mins=value1;
+					if(value1>=0) misc.mins=value1*100;
 				}
 				else if(!strcmp(item,"Starting Gas"))
 				{
@@ -299,7 +302,7 @@ int SETTINGS::init()
 				{
 					if(misc.timer>=0) misc.timer=value1;
 				}//~~
-				else if(!strcmp(item,"Needed supply"))
+				else if(!strcmp(item,"Have supply"))
 				{
 					if(value1<=200) misc.supply=value1;
 				}
@@ -365,6 +368,28 @@ int SETTINGS::init()
 						printf("Line %d: %d for max time is too low.\n",ln,value1);
 					else ga.maxTime=value1*60;
 				}
+				else if(!strcmp(item,"Max Timeout"))
+				{
+					if(value1<30)
+						printf("Line %d: %d for max timeout is too low.\n",ln,value1);
+					else ga.maxTimeOut=value1;
+				}
+				else if(!strcmp(item,"Max Length"))
+				{
+					if(value1<10)
+						printf("Line %d: %d for max length is too low.\n",ln,value1);
+					else if(value1>96)
+						printf("Line %d: %d for max length is too high.\n",ln,value1);
+					else ga.maxLength=value1;
+				}
+
+				else if(!strcmp(item,"Max Runs"))
+				{
+					if(value1>10)
+						printf("Line %d: %d for max runs is too high.\n",ln,value1);
+					else ga.maxRuns=value1;
+				}
+				
 				else if(!strcmp(item,"Preprocess Buildorder"))
 				{
 					if((!strcmp(param1,"YES"))||(!strcmp(param1,"Y")))
@@ -401,6 +426,7 @@ int SETTINGS::init()
 			}
 		}// END if(mode>0)
 	}// END while
+	misc.supply=misc.maxSupply-misc.supply;
 	if(misc.maxSupply<misc.supply)
 		printf("Warning: max supply is lower than supply.\n");
 	return(1);
@@ -499,21 +525,21 @@ switch(race)
 			location[0].force[NEXUS]=1;
 			location[0].availible[NEXUS]=1;
 			   for(int i=R_PSIONIC_STORM;i<=R_ARGUS_TALISMAN;i++)
-                           {
+			   {
 				for(int j=MAX_LOCATIONS;j--;)
-                                {
-                                        location[j].availible[i]=3;
-                                        location[j].force[i]=3;
-                                }
-                           }
-                           for(int i=R_ARMOR;i<=R_PLASMA_SHIELDS;i++)
-                           {
+				{
+					location[j].availible[i]=3;
+					location[j].force[i]=3;
+				}
+			   }
+			   for(int i=R_ARMOR;i<=R_PLASMA_SHIELDS;i++)
+			   {
 				for(int j=MAX_LOCATIONS;j--;)
-                                {
-                                        location[j].availible[i]=3;
-                                        location[j].force[i]=3;
-                                }
-                           }
+				{
+					location[j].availible[i]=3;
+					location[j].force[i]=3;
+				}
+			   }
 			   break;
 		case ZERG:
 			   location[1].force[HATCHERY]=1;
@@ -522,30 +548,30 @@ switch(race)
 			   location[0].availible[HATCHERY]=1;
 				
 			   location[1].force[OVERLORD]=1;
-                           location[1].availible[OVERLORD]=1;
-                           location[0].availible[OVERLORD]=1;
-                           location[0].force[OVERLORD]=1;
+			   location[1].availible[OVERLORD]=1;
+			   location[0].availible[OVERLORD]=1;
+			   location[0].force[OVERLORD]=1;
 
-                           location[1].force[LARVA]=1;
-                           location[1].availible[LARVA]=1;
-                           location[0].availible[LARVA]=1;
-                           location[0].force[LARVA]=1;
+			   location[1].force[LARVA]=1;
+			   location[1].availible[LARVA]=1;
+			   location[0].availible[LARVA]=1;
+			   location[0].force[LARVA]=1;
 		   for(int i=R_VENTRAL_SACKS;i<=R_LURKER_ASPECT;i++)
-                           {
+			   {
 				for(int j=MAX_LOCATIONS;j--;)
-                                {
-                                        location[j].availible[i]=3;
-                                        location[j].force[i]=3;
-                                }
-                           }
-                           for(int i=R_CARAPACE;i<=R_FLYER_ATTACKS;i++)
-                           {
+				{
+					location[j].availible[i]=3;
+					location[j].force[i]=3;
+				}
+			   }
+			   for(int i=R_CARAPACE;i<=R_FLYER_ATTACKS;i++)
+			   {
 				for(int j=MAX_LOCATIONS;j--;)
-                                {
-                                        location[j].availible[i]=3;
-                                        location[j].force[i]=3;
-                                }
-                           }
+				{
+					location[j].availible[i]=3;
+					location[j].force[i]=3;
+				}
+			   }
 			break;
 		default:
 //TODO: Some sort of error
@@ -564,11 +590,20 @@ SETTINGS::SETTINGS()
 	scr=CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, CONSOLE_TEXTMODE_BUFFER, 0);
 #endif	 //-> io
 	race=TERRA;
-	misc.mins=50;
+	
+	misc.mins=5000;
 	misc.gas=0;
 	misc.timer=0;
 	misc.supply=4;
 	misc.maxSupply=10;
+
+	ga.maxTime=30;
+	ga.maxTimeOut=133;
+	ga.maxLength=96;
+	ga.generateBuildOrder=0;
+	ga.maxGenerations=150;
+	ga.maxRuns=2;
+	
 	printf("Initializing Map... ");
 	initMap();
 	setColor(33); //?
