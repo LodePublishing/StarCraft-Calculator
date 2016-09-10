@@ -1,9 +1,9 @@
 #include "main.h"
 
-struct Namen
+/*struct Namen
 {
 	char b[6];
-};
+};*/
  
 const char error_m[ERROR_MESSAGES][21]=
 {
@@ -16,13 +16,13 @@ const char error_m[ERROR_MESSAGES][21]=
 	"unknown problem"
 };
 
-
+/*
 char error_sm[ERROR_MESSAGES]=
 {
-	        'O','M','G','S','P','F','U'
+	        'O','F','b','m','g','s','r','t','B','U'
 };
 //TODO: restliche units einfuegen
-const Namen kurz[RACES][UNIT_TYPE_COUNT]=
+const Namen kurz[RACES][MAX_GOALS]=
 {
 	{
 	{"NULL!"},{"SCV  "},{"Marin"},{"Ghost"},{"Vultu"},{"Golia"},{"STank"},{"FiBat"},{"Medic"},{"Wrait"},
@@ -31,8 +31,8 @@ const Namen kurz[RACES][UNIT_TYPE_COUNT]=
 	{"PhyLa"},{"MasSh"},{"CCCoS"},{"CCNuS"},{"StpCT"},{"ScFCO"},{"ScFPL"},{"FacMS"},{"StimP"},{"LockD"},
 	{"EMPSw"},{"SMine"},{"SiegM"},{"Irrad"},{"YamaG"},{"Cloak"},{"PersC"},{"Resto"},{"OptcF"},{"U238S"},
 	{"IonTh"},{"TitaR"},{"OculI"},{"MoebR"},{"ApolR"},{"ColoR"},{"CaduR"},{"CharB"},{"InfAr"},{"InfWe"},
-	{"VehAr"},{"VehWe"},{"ShpAr"},{"ShpWe"},{"Refin"},{"VeSCV"},{"Move1"},{"Move3"},{"Mov-1"},{"NULL!"},
-	{"NULL!"},{"NULL!"},{"VespG"},{"Miner"},{"StimP"},{"LockD"},{"EMPSw"},{"SMine"},{"SiegM"},{"Irrad"},
+	{"VehAr"},{"VehWe"},{"ShpAr"},{"ShpWe"},{"Refin"},{"VeSCV"},{"WMv+3"},{"WMv+1"},{"WMv-1"},{"WMvPr"},
+	{"MvFHr"},{"MvTHr"},{"VespG"},{"Miner"},{"StimP"},{"LockD"},{"EMPSw"},{"SMine"},{"SiegM"},{"Irrad"},
 	{"YamaG"},{"Cloak"},{"PersC"},{"Resto"},{"OptcF"},{"U238S"},{"IonTh"},{"TitaR"},{"OculI"},{"MoebR"},
 	{"ApolR"},{"ColoR"},{"CaduR"},{"CharB"},{"InfAr"},{"InfWe"},{"VehAr"},{"VehWe"},{"ShpAr"},{"ShpWe"}
 	},
@@ -44,8 +44,8 @@ const Namen kurz[RACES][UNIT_TYPE_COUNT]=
 	{"Fleet"},{"ArbTr"},{"RobBy"},{"Shiel"},{"PsiSt"},{"Hallu"},{"Recal"},{"Stasi"},{"Disru"},{"MindC"},
 	{"Maels"},{"Singu"},{"LegEn"},{"ScrbD"},{"ReavC"},{"GraDr"},{"Senso"},{"GraBo"},{"KhaAm"},{"ApiaS"},
 	{"GraTh"},{"CarCa"},{"KhaCo"},{"ArgJe"},{"ArgTa"},{"Armor"},{"Plati"},{"Groun"},{"AirWe"},{"PShie"},
-	{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"Assim"},{"VePrb"},{"Move1"},{"Move3"},{"Mov-1"},{"NULL!"},
-	{"NULL!"},{"NULL!"},{"VespG"},{"Miner"},{"PsiSt"},{"Hallu"},{"Recal"},{"Stasi"},{"Disru"},{"MindC"},
+	{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"Assim"},{"VePrb"},{"WMv+3"},{"WMv+1"},{"WMv-1"},{"WMvPr"},
+	{"MvFHr"},{"MvTHr"},{"VespG"},{"Miner"},{"PsiSt"},{"Hallu"},{"Recal"},{"Stasi"},{"Disru"},{"MindC"},
 	{"Maels"},{"Singu"},{"LegEn"},{"ScrbD"},{"ReavC"},{"GraDr"},{"Senso"},{"GraBo"},{"KhaAm"},{"ApiaS"},
 	{"GraTh"},{"CarCa"},{"KhaCo"},{"ArgJe"},{"ArgTa"},{"Armor"},{"Plati"},{"Groun"},{"AirWe"},{"PShie"},
 	},
@@ -57,10 +57,10 @@ const Namen kurz[RACES][UNIT_TYPE_COUNT]=
 	{"Anten"},{"Pneum"},{"Boost"},{"Adren"},{"Muscu"},{"Groov"},{"Gamet"},{"MNode"},{"Chiti"},{"Anabo"},
 	{"Burro"},{"Spawn"},{"Plagu"},{"Consu"},{"Ensna"},{"LAspc"},{"Carap"},{"FCarp"},{"Melee"},{"Missl"},
 	{"FAtta"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},
-	{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"Extra"},{"VeSCV"},{"Move1"},{"Move3"},{"Mov-1"},{"NULL!"},
-	{"NULL!"},{"NULL!"},{"VespG"},{"Miner"},{"Cancl"},{"VSacs"},{"Anten"},{"Pneum"},{"Boost"},{"Adren"},
+	{"NULL!"},{"NULL!"},{"NULL!"},{"NULL!"},{"Extra"},{"VeSCV"},{"WMv+3"},{"WMv+1"},{"WMv-1"},{"WMvPr"},
+	{"MvFHr"},{"MvTHr"},{"VespG"},{"Miner"},{"Cancl"},{"VSacs"},{"Anten"},{"Pneum"},{"Boost"},{"Adren"},
 	{"Muscu"},{"Groov"},{"Gamet"},{"MNode"},{"Chiti"},{"Anabo"},{"Burro"},{"Spawn"},{"Plagu"},{"Consu"},
 	{"Ensna"},{"LAspc"},{"Carap"},{"FCarp"},{"Melee"},{"Missl"},{"FAtta"},{"NULL!"},{"NULL!"},{"NULL!"}
 	}
-};	
+};	*/
 

@@ -66,6 +66,7 @@ class SETTINGS
 	int init();
 	void initLocations();
 	int race;//~~
+
 	void initMap(); 
 	const UNIT_STATISTICS* pStats;
 	SETTINGS();

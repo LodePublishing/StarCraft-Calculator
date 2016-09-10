@@ -1,14 +1,17 @@
 #include "soup.h"
+#include "settings.h"
+#include "race.h"
+#include "text.h"
+#include <string.h>
 #include <stdlib.h>
-#include <cstring>
-#include <time.h>
+#include <stdio.h>
+#include "anarace.h"
 
 SOUP::SOUP(SETTINGS *set)
 {
-	srand(time(NULL));
 	for(int i=MAX_PLAYER;i--;) 
 		player[i]=&p[i];
-//TODO!!! static pSet hier initialisieren! race und anarace noch nicht initialisieren sondern ueber new hier aufrufen!
+			//new RACE(set);
 //	for(int i=RUNNINGS;i--;) statistics[i]=new STATISTICS;
 	settings=set;
 };
@@ -21,28 +24,33 @@ SOUP::~SOUP()
 
 int compare(const void* a,const void* b)
 {
-	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<(*(RACE*)b).sFitness)) || ( ((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness==(*(RACE*)b).sFitness)&& ((*(RACE*)a).tFitness>=(*(RACE*)b).tFitness)) )
-		return (1);
-	else if(( (*(RACE*)a).pFitness>(*(RACE*)b).pFitness)|| ((*(RACE*)a).sFitness>(*(RACE*)b).sFitness))
-		return (-1);
-	else return(0);
+        if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<=(*(RACE*)b).sFitness)))
+                return (1);
+        else if(( (*(RACE*)a).pFitness>(*(RACE*)b).pFitness)|| ((*(RACE*)a).sFitness>(*(RACE*)b).sFitness))
+                return (-1);
+        else return(0);
 };
 
-//TODO: Ueber Optionen einstellen, welche Fitness ueberhaupt bzw. wie stark gewertet wird (oder ob z.B. die Fitnesswerte zusammengeschmissen werden sollen etc.)
-
-int SOUP::newGeneration()
+void SOUP::run()
 {
-	if(anaplayer.run>=settings->ga.maxRuns) return(0);
-		for(int i=MAX_PLAYER;i--;)
-		{
-			player[i]->resetData();
+	int n=0;
+	int generation=0;
+	int pfit=0;
+	int sfit=0;
+	int rfit=0;
+	while(n<settings->ga.maxRuns)
+	{
+                for(int i=MAX_PLAYER;i--;)
+                {
+                        player[i]->resetData();
 			player[i]->initLocations();
-			if(i>0) player[i]->mutateGeneCode();
+                        player[i]->mutateGeneCode();
 		}
+
 
 		for(int i=MAX_PLAYER;i--;)
 			player[i]->calculate();
-		/*for(int i=7;i--;)
+		for(int i=7;i--;)
 			qsort(player[i*16],MAX_PLAYER/16,sizeof(RACE),compare);
 		for(int i=7;i--;)
 		{
@@ -53,59 +61,65 @@ int SOUP::newGeneration()
 			while(c1==c2)
 				c2=rand()%(MAX_PLAYER/16);
 			player[p1*16]->crossOver(player[p2*16],player[c1*16+7],player[c2*16+7]);
-		}*/
+		}
 		qsort(player[0],MAX_PLAYER,sizeof(RACE),compare);
 
-		  for(int i=20;i--;)
-		{
-			int t=rand()%(MAX_PLAYER/2)+MAX_PLAYER/2;
-			memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH*4); 
-			memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH*4);
-		}  
+                for(int i=10;i--;)
+                {
+                        int t=rand()%(MAX_PLAYER-1)+1;
+                        memcpy(player[t]->Code[0],player[0]->Code[0],MAX_LENGTH*4); 
+                        memcpy(player[t]->Code[1],player[0]->Code[1],MAX_LENGTH*4);
+                        player[t]->pFitness=player[0]->pFitness;
+                        player[t]->sFitness=player[0]->sFitness;
+                }
 
-		if((player[0]->pFitness>anaplayer.maxpFitness)||((player[0]->pFitness>=anaplayer.maxpFitness)&&(player[0]->sFitness>anaplayer.maxsFitness))|| ((player[0]->pFitness>=anaplayer.maxpFitness)&&(player[0]->sFitness>=anaplayer.maxsFitness)&&(player[0]->tFitness>anaplayer.maxtFitness)))
+		if((player[0]->pFitness>pfit)||((player[0]->pFitness>=pfit)&&(player[0]->sFitness>sfit)))
 		{
-			if(player[0]->tFitness>anaplayer.maxtFitness)
-				anaplayer.maxtFitness=player[0]->tFitness;
-			if(player[0]->sFitness>anaplayer.maxsFitness)
+			if(player[0]->sFitness>sfit)
+				sfit=player[0]->sFitness;
+			if(player[0]->pFitness>pfit)
 			{
-				anaplayer.maxsFitness=player[0]->sFitness;
-				anaplayer.maxtFitness=player[0]->tFitness;
+				pfit=player[0]->pFitness;
+				sfit=player[0]->sFitness;
 			}
-			if(player[0]->pFitness>anaplayer.maxpFitness)
-			{
-				anaplayer.maxpFitness=player[0]->pFitness;
-				anaplayer.maxsFitness=player[0]->sFitness;
-				anaplayer.maxtFitness=player[0]->tFitness;
-			}
-			anaplayer.unchangedGenerations=0;
+			rfit=0;
+			printf("\n");
 			memcpy(anaplayer.Code[0],player[0]->Code[0],MAX_LENGTH*4);
-			memcpy(anaplayer.Code[1],player[0]->Code[1],MAX_LENGTH*4);
+                        memcpy(anaplayer.Code[1],player[0]->Code[1],MAX_LENGTH*4);
 			anaplayer.resetData();
 			anaplayer.initLocations();
 			anaplayer.calculate();
+			for(int i=1;i<anaplayer.length;i++)
+			{
+				//printf("STATS: %i %i %i\n",settings->ga.maxLength-i,anaplayer.Code[1][settings->ga.maxLength-i],anaplayer.Code[0][settings->ga.maxLength-i]);
+//				if(anaplayer.program[settings->ga.maxLength-i].time<settings->ga.maxTime)
+				{
+					if(anaplayer.program[settings->ga.maxLength-i].dominant)
+						printf("%i: [%s/%s]",settings->ga.maxLength-i,anaplayer.pStats[anaplayer.genoToPhaenotype[anaplayer.Code[1][settings->ga.maxLength-i]]].name,anaplayer.pStats[anaplayer.genoToPhaenotype[anaplayer.Code[0][settings->ga.maxLength-i]]].name);
+					else printf("%i: [%s/%s]",settings->ga.maxLength-i,anaplayer.pStats[anaplayer.genoToPhaenotype[anaplayer.Code[0][settings->ga.maxLength-i]]].name,anaplayer.pStats[anaplayer.genoToPhaenotype[anaplayer.Code[1][settings->ga.maxLength-i]]].name);
+					printf(" (%i/%i) [%i] {%i}\n",anaplayer.location[1].force[SCV],anaplayer.location[0].force[SCV],anaplayer.program[settings->ga.maxLength-i].built,anaplayer.program[settings->ga.maxLength-i].type);
+				}
+			}
+			if(anaplayer.timer==settings->ga.maxTime)
+			printf("Generation %3i: new pFit: %5i, sFit: %5i\n",generation,pfit,sfit);
+			else printf("Generation %3i: %2i:%2i, sFit %5i\n",generation,(settings->ga.maxTime-anaplayer.timer)/60,(settings->ga.maxTime-anaplayer.timer)%60,sfit);
 		}
 
-		
-		io.screen(&anaplayer);
-		
+//		locations 0/1 checken... funzt sumup bei calcfitness nicht!
 
-		anaplayer.unchangedGenerations++;
-		anaplayer.generation++;
-		if(anaplayer.unchangedGenerations>settings->ga.maxGenerations)
+		rfit++;
+		generation++;
+		if(rfit>settings->ga.maxGenerations)
 		{
+			rfit=0;pfit=0;sfit=0;generation=0;
 			for(int i=MAX_PLAYER;i--;)
 			{
 				player[i]->resetGeneCode();
 				player[i]->resetData();
 				player[i]->initLocations();
 			}
-			anaplayer.run++;
-			anaplayer.generation=0;
-			anaplayer.maxpFitness=0;
-			anaplayer.maxsFitness=0;
-			anaplayer.maxtFitness=0;
-			anaplayer.unchangedGenerations=0;
+			n++;
+			printf("NEW RUN: %i...\n",n);
 		}
-	return(1);
+	}
 };

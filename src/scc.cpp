@@ -1,22 +1,3 @@
-// StarCraft Calculator - Calculates and optimizes build orders
-// Copyright (C) 2003 Clemens Lode
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-// See www.clawsoftware.de for updates/news/faq/tutorials etc.
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -32,8 +13,6 @@
 #define COLOR_3 37
 
 // Here are some global variables (accessible by any class due to 'extern' declaration in 'main.h'
-int gRace,gColors;
-MAP gMap[MAX_LOCATIONS];
 
 int RACE::isBuildable[UNIT_TYPE_COUNT];
 int RACE::isVariable[UNIT_TYPE_COUNT];
@@ -46,10 +25,6 @@ int  RACE::globalGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
 GOAL RACE::goal[MAX_GOALS];
 int RACE::basicBuildOrder[2][MAX_LENGTH];
 int RACE::basicLength;
-
-
-
-const Stats* gpStats;
 
 int compare(const void* a,const void* b)
 {
@@ -68,121 +43,12 @@ int determine(int g1,int y1,int g2,int y2,int g3,int y3)
 
 int main(int argc, char* argv[])
 {	
-        RACE * Save[RUNNINGS];
-        RACE Savet[RUNNINGS];
-        RACE playert[MAX_PLAYER];
-        RACE* pPlayer[MAX_PLAYER];
-
-	int tgGoal[MAX_LOCATIONS][UNIT_TYPE_COUNT];
-	struct boLog
-	{
-	        int count;
-		int order;
-	} bolog[MAX_LENGTH],globalForcelog[MAX_GOALS];
-	
-
-	// TODO: make some significant variables...	
-	int run,rfit,afit,sfit;
-	int counter;
-	int time_graphics_counter, resources_graphics_counter;
-	
-	char I[11],O[9],R[7];
-	char tmp[255];
-	int old_time,old_pFitness,old_sFitness,old,old_t,old_sup,generation,calc,t,time_difference,resources_difference;
-
-	int race_size;
-
 	unsigned char a;
-// TODO: maybe put them to settings	
-	time_graphics_counter=16;time_difference=0;
-	resources_graphics_counter=16;resources_difference=0;
-	generation=0;
-    	run=0;
-    	afit=0;
-    	rfit=0;
-    	sfit=0;
-	old=200;
-	counter=1;
-	old_pFitness=0;
-	old_sFitness=0;
-
-        for(int i=0;i<RUNNINGS;i++) Save[i]=&Savet[i];
-        for(int i=0;i<MAX_PLAYER;i++) pPlayer[i]=&playert[i];
-
-
-
-	gMap[0].mineralCount=0;gMap[0].geysirCount=0; // The wayne location... 
-	gMap[1].mineralCount=8;gMap[1].geysirCount=1; //Main
-	gMap[2].mineralCount=0;gMap[2].geysirCount=0; //Front
-	gMap[3].mineralCount=8;gMap[3].geysirCount=1; //Exe
-	gMap[4].mineralCount=0;gMap[4].geysirCount=0; //Center
-	gMap[5].mineralCount=8;gMap[5].geysirCount=1; //EnemyExe
-	gMap[6].mineralCount=0;gMap[6].geysirCount=0; //EnemyFront
-	gMap[7].mineralCount=8;gMap[7].geysirCount=1; //EnemyMain
-
-	gMap[1].distance[0]=0;gMap[1].distance[1]=15;gMap[1].distance[2]=25;gMap[1].distance[3]=50;gMap[1].distance[4]=75;gMap[1].distance[5]=85;gMap[1].distance[6]=100;
-
-	gMap[2].distance[0]=15;gMap[2].distance[1]=0;gMap[2].distance[2]=10;gMap[2].distance[3]=35;gMap[2].distance[4]=60;gMap[2].distance[5]=70;gMap[2].distance[6]=85;
-
-	gMap[3].distance[0]=25;gMap[3].distance[1]=10;gMap[3].distance[2]=0;gMap[3].distance[3]=40;gMap[3].distance[4]=65;gMap[3].distance[5]=75;gMap[3].distance[6]=90;
-
-	gMap[4].distance[0]=50;gMap[4].distance[1]=35;gMap[4].distance[2]=40;gMap[4].distance[3]=0;gMap[4].distance[4]=40;gMap[4].distance[5]=35;gMap[4].distance[6]=50;
-
-        gMap[5].distance[0]=90;gMap[5].distance[1]=75;gMap[5].distance[2]=65;gMap[5].distance[3]=40;gMap[5].distance[4]=0;gMap[5].distance[5]=10;gMap[5].distance[6]=25;
-	
-	gMap[6].distance[0]=85;gMap[6].distance[1]=70;gMap[6].distance[2]=60;gMap[6].distance[3]=35;gMap[6].distance[4]=10;gMap[6].distance[5]=0;gMap[6].distance[6]=15;
-
-	gMap[7].distance[0]=100;gMap[7].distance[1]=85;gMap[7].distance[2]=75;gMap[7].distance[3]=50;gMap[7].distance[4]=25;gMap[7].distance[5]=15;gMap[7].distance[6]=0;
-//Lost Temple ohne Mins exen
-	
 	srand(time(NULL));
-	clrscr();
 	
-	if(settings.Init()==1)
-	{
-		printf("Error during settings. Repair / Reinstall the settings.txt file!\n");
-	        return(1);
-	}
-
-	gRace=5;
-        printf("Press '1' for Terran, '2' for Protoss or '3' for Zerg.\n");
-        while(gRace==5)
-                {
-                        gRace=TERRA;
-                        a=getchar();
-                        if(((a-49)>=0)&&((a-49)<3)) gRace=a-49;
-                }
-        printf("RACE: %i",gRace);
-
-	
-	printf("Setting Race and initializing player models... ");
-	
-	switch(gRace)
-	{
-		case 0:sprintf(I,"goal_t.txt");sprintf(O,"bo_t.txt");sprintf(R,"Terran");break;
-		case 1:sprintf(I,"goal_p.txt");sprintf(O,"bo_p.txt");sprintf(R,"Protoss");break;
-		case 2:sprintf(I,"goal_z.txt");sprintf(O,"bo_z.txt");sprintf(R,"Zerg");break;
-		default:printf("not enough arguments");return 0;break;
-	}
-	
-	printf("[%s]",R);
-	setColor(32);
-	printf(" ok\n");
-	setColor(37);
-
-	gpStats=&(stats[gRace][0]);
-
-	race_size=sizeof(RACE);
-	
+	//race in settings
 	// Sets additional gGoals, say the user enters "Guardien" Set_Goals will also set Hive, Greater Spire, Lair, Queens Nest, Extractor and Spawning Pool as a gGoal 
 	
-	pPlayer[0]->Set_Goals(I);
-	pPlayer[0]->AdjustMining();	
-	pPlayer[0]->generateBasicBuildorder();
-
-	for(int s=MAX_PLAYER;s--;)
-		pPlayer[s]->Restart();
-        old_time=settings.Max_Time;
 
 	for(int s=MAX_LENGTH;s--;) bolog[s].count=0;
 
@@ -245,7 +111,7 @@ int main(int argc, char* argv[])
 		old_pFitness=pPlayer[0]->pFitness;
 	        old_sFitness=pPlayer[0]->sFitness;	
 		for(int s=MAX_PLAYER;s--;)
-			(*pPlayer[s]).Init();
+			(*pPlayer[s]).resetData();
 		for(int s=1;s<MAX_PLAYER;s++)
 			(*pPlayer[s]).Mutate();
 		for(int s=MAX_PLAYER;s--;)
@@ -596,7 +462,7 @@ if((calc%80==8)||(calc%80==9)) setColor(COLOR_3); else if((calc%80==6)||(calc%80
 			memcpy(Save[run]->ftime,pPlayer[0]->ftime,MAX_GOALS*4);
 
 		        for(int s=MAX_PLAYER;s--;)
-			       	pPlayer[s]->Restart();
+			       	pPlayer[s]->resetGeneCode();
 			
 			afit=0;
 			sfit=0;

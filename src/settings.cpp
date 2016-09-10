@@ -7,8 +7,8 @@
 
 void GOALLIST::addGoal(int unit, int count, int time, int location)
 {
-	if(unit==0) return;
 	allGoal[unit]+=count;
+
 	globalGoal[location][unit]+=count;
 
 	int i=0;
@@ -106,13 +106,13 @@ int SETTINGS::loadGoals() //~~~
 
 //Aufbau der goal datei: "Einheitname" LEER "Anzahl" LEER "Zeit" LEER "Ort"
 		
-		for(m=REFINERY;m--;) 
+		for(m=UNIT_TYPE_COUNT;m--;) 
 			if((strstr(stats[race][m].name,item)!=NULL)&&(value2<=ga.maxTime)) //TODO: strcmp durch 'erstes auftauchen' vertauschen
 			{
 				//TODO: values checken!
 			 	//TODO: evtl statt Ortsnummer einfach den Ortsnamen nehmen
 				goalList.addGoal(m,value1,60*value2,value3); //TODO: evtl statt Ortsnummer einfach den Ortsnamen nehmen
-				printf("Adding %s (%ix) [%i] (@%i)\n",stats[race][m].name,value1,value2,value3);
+				printf("Adding %s (%ix) [%i] (@%i)\n",item,value1,value2,value3);
 				m=-1;
 				break;
 			}
@@ -123,11 +123,11 @@ int SETTINGS::loadGoals() //~~~
         {
                 case TERRA:
                         goalList.isBuildable[SCV]=1;goalList.isVariable[SCV]=1;goalList.addGoal(SCV,4,0,0);
-                        goalList.isBuildable[COMMAND_CENTER]=1;goalList.isVariable[COMMAND_CENTER]=1;goalList.addGoal(COMMAND_CENTER,1,0,0);
+                        goalList.isBuildable[COMMAND_CENTER]=1;goalList.isVariable[COMMAND_CENTER]=1;goalList.addGoal(COMMAND_CENTER,1,0,1);
                         goalList.isBuildable[SUPPLY_DEPOT]=1;goalList.isVariable[SUPPLY_DEPOT]=1;break;
                 case PROTOSS:
-                        goalList.isBuildable[PROBE]=1;goalList.isVariable[PROBE]=1;goalList.addGoal(PROBE,4,0,0);
-                        goalList.isBuildable[NEXUS]=1;goalList.isVariable[NEXUS]=1;goalList.addGoal(NEXUS,1,0,1);
+                        goalList.isBuildable[PROBE]=1;goalList.isVariable[PROBE]=1;goalList.addGoal(NEXUS,1,0,1);
+                        goalList.isBuildable[NEXUS]=1;goalList.isVariable[NEXUS]=1;
                         goalList.isBuildable[PYLON]=1;goalList.isVariable[PYLON]=1;break;
                 case ZERG:
                         goalList.isBuildable[OVERLORD]=1;goalList.isVariable[OVERLORD]=1;goalList.addGoal(HATCHERY,1,0,1); //~~~
@@ -173,12 +173,9 @@ int SETTINGS::loadGoals() //~~~
 		goalList.isBuildable[GAS_SCV]=1; //ONE_MINERAL_SCV... = ONE_MINERAL_PROBE... = ONE_MINERAL_DRONE...
 		goalList.isVariable[GAS_SCV]=1;
 	};
-//      goalList.isBuildable[WINDOW_MOVE_ADD_3]=1;goalList.isVariable[WINDOW_MOVE_ADD_3]=1;
-//      goalList.isBuildable[WINDOW_MOVE_ADD_1]=1;goalList.isVariable[WINDOW_MOVE_ADD_1]=1;
-//      goalList.isBuildable[WINDOW_MOVE_SUB_1]=1;goalList.isVariable[WINDOW_MOVE_SUB_1]=1;
-	goalList.isBuildable[MOVE_ONE_1_FORWARD]=1;goalList.isVariable[MOVE_ONE_1_FORWARD]=1;
-	goalList.isBuildable[MOVE_ONE_3_FORWARD]=1;goalList.isVariable[MOVE_ONE_3_FORWARD]=1;
-	goalList.isBuildable[MOVE_ONE_1_BACKWARD]=1;goalList.isVariable[MOVE_ONE_1_BACKWARD]=1;
+//      isBuildable[WINDOW_MOVE_ADD_3]=1;isVariable[WINDOW_MOVE_ADD_3]=1;	isBuildable[WINDOW_MOVE_ADD_1]=1;isVariable[WINDOW_MOVE_ADD_1]=1;	isBuildable[WINDOW_MOVE_SUB_1]=1;isVariable[WINDOW_MOVE_SUB_1]=1;//      isBuildable[WINDOW_MOVE_PREV]=1;isVariable[WINDOW_MOVE_PREV]=1;
+//	goalList.isBuildable[MOVE_FROM_HERE]=1;goalList.isVariable[MOVE_FROM_HERE]=1;
+  //      goalList.isBuildable[MOVE_TO_HERE]=1;goalList.isVariable[MOVE_TO_HERE]=1;
 
 	//TODO: ueberlegen ob nicht einfach Move+ und Move- reichen...
 
@@ -292,7 +289,7 @@ int SETTINGS::init()
 				}
 				else if(!strcmp(item,"Starting Minerals"))
 				{
-					if(value1>=0) misc.mins=value1*100;
+					if(value1>=0) misc.mins=value1;
 				}
 				else if(!strcmp(item,"Starting Gas"))
 				{
@@ -302,7 +299,7 @@ int SETTINGS::init()
 				{
 					if(misc.timer>=0) misc.timer=value1;
 				}//~~
-				else if(!strcmp(item,"Have supply"))
+				else if(!strcmp(item,"Needed supply"))
 				{
 					if(value1<=200) misc.supply=value1;
 				}
@@ -387,8 +384,6 @@ int SETTINGS::init()
 				{
 					if(value1>10)
 						printf("Line %d: %d for max runs is too high.\n",ln,value1);
-					else if(value1==0)
-						printf("Line %d: %d for max runs is too low.\n",ln,value1);
 					else ga.maxRuns=value1;
 				}
 				
@@ -401,7 +396,7 @@ int SETTINGS::init()
 					else
 						printf("Line %d: Unknown value: %s.\n",ln,param1);
 				}
-				else if(!strcmp(item,"Max unchanged Generations"))
+				else if(!strcmp(item,"Max Generations"))
 				{
 					if((value1<25)||(value1>500))
 						printf("Line ?d: Max Generations (%d) too low or too high (%d).\n",ln,value1);
@@ -428,7 +423,6 @@ int SETTINGS::init()
 			}
 		}// END if(mode>0)
 	}// END while
-	misc.supply=misc.maxSupply-misc.supply;
 	if(misc.maxSupply<misc.supply)
 		printf("Warning: max supply is lower than supply.\n");
 	return(1);
@@ -464,16 +458,15 @@ void SETTINGS::initMap()
 
 	map[8].distance[0]=0;map[8].distance[1]=35;map[8].distance[2]=25;map[8].distance[3]=30;map[8].distance[4]=0;map[8].distance[5]=30;map[8].distance[6]=25;map[8].distance[7]=35;map[8].distance[8]=0;
 //Lost Temple ohne Mins exen
-	
 }
 
 void SETTINGS::initHarvest()
 {
 	switch(race)
 	{
-		case TERRA:misc.pMineralHarvestPerSecond=&(mining_t[0]);misc.pGasHarvestPerSecond=&(gasing_t[0]);break;
-		case PROTOSS:misc.pMineralHarvestPerSecond=&(mining_p[0]);misc.pGasHarvestPerSecond=&(gasing_p[0]);break;
-		case ZERG:misc.pMineralHarvestPerSecond=&(mining_z[0]);misc.pGasHarvestPerSecond=&(gasing_z[0]);break;
+		case TERRA:misc.pMineralHarvestPerSecond=&(mining_t[0]);misc.pGasHarvestPerSecond=&(mining_t[0]);break;
+		case PROTOSS:misc.pMineralHarvestPerSecond=&(mining_p[0]);misc.pGasHarvestPerSecond=&(mining_p[0]);break;
+		case ZERG:misc.pMineralHarvestPerSecond=&(mining_z[0]);misc.pGasHarvestPerSecond=&(mining_z[0]);break;
 		default:break;
 	}
 }
@@ -594,7 +587,7 @@ SETTINGS::SETTINGS()
 #endif	 //-> io
 	race=TERRA;
 	
-	misc.mins=5000;
+	misc.mins=50;
 	misc.gas=0;
 	misc.timer=0;
 	misc.supply=4;
@@ -604,8 +597,8 @@ SETTINGS::SETTINGS()
 	ga.maxTimeOut=133;
 	ga.maxLength=96;
 	ga.generateBuildOrder=0;
-	ga.maxGenerations=250;
-	ga.maxRuns=5;
+	ga.maxGenerations=150;
+	ga.maxRuns=2;
 	
 	printf("Initializing Map... ");
 	initMap();
@@ -629,7 +622,6 @@ SETTINGS::SETTINGS()
 	printf("OK!\nLoading goals... ");
 	loadGoals();
 	printf("OK!\n");
-	char a=getchar();
 }
 
 SETTINGS::~SETTINGS()
