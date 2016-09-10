@@ -2,31 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "io.h"
 
-Settings setup;
+Settings settings;
 
-#ifdef WIN32
-HANDLE scr;
-	
-const unsigned char colorsWin32[7]= //Translate Linux ANSI Colors to SetConsoleTextAttribute Colors
-{
-	FOREGROUND_RED,FOREGROUND_GREEN,FOREGROUND_RED|FOREGROUND_GREEN,FOREGROUND_BLUE,FOREGROUND_RED|FOREGROUND_BLUE,FOREGROUND_GREEN|FOREGROUND_BLUE,FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN
-};
-
-void print(const char * x) {DWORD num; WriteConsole(scr,x,strlen(x),&num,0); }
-
-#endif
-
-void Settings::setColor(unsigned char c)
-{
-	if(colors==0) return;
-	#ifdef WIN32
-
-	SetConsoleTextAttribute(scr,colorsWin32[c-31]);
-	#elif __linux__
-	printf("\033[0;%d;40m",c);
-	#endif
-};
 
 void Settings::Fatal(char * strn)
 { 
@@ -36,7 +15,7 @@ void Settings::Fatal(char * strn)
 	printf("%s\nExiting...",strn);
 }
 
-unsigned char Settings::InitSettings()
+unsigned char Settings::Init()
 {
 	const unsigned short power[4]={1,10,100,1000};
 	unsigned short size,s;
@@ -45,7 +24,7 @@ unsigned char Settings::InitSettings()
 	unsigned short data[DATA_SET_SIZE];
 	char * buffer;
 
-
+d=0;
  	for(s=0;s<DATA_SET_SIZE;s++)
 		data[s]=0;
  
@@ -57,8 +36,10 @@ unsigned char Settings::InitSettings()
 	if(pFileS==NULL)
 	{
 		Fatal("Settings file settings.txt not found!");
-		return(1);
+		//return(1);
 	}
+	else
+	{
 	printf("File found. Reading...\n");
 
 	fseek (pFileS, 0, SEEK_END);
@@ -102,7 +83,7 @@ unsigned char Settings::InitSettings()
 	printf("Buffer freed and saved, checking data:\n");
 	
 
-
+	}
 
 	if(d<DATA_SET_SIZE)
 	{
@@ -126,6 +107,7 @@ unsigned char Settings::InitSettings()
 		Mutations=50;
 		Mutation_Rate=50;
 		Verbose=1;
+		generateBuildOrder=1;
 	}
 	else
 	{
@@ -144,6 +126,7 @@ unsigned char Settings::InitSettings()
 		Mutations=data[12];
 		Mutation_Rate=data[13];
 		Verbose=data[14];
+		generateBuildOrder=data[15];
 	}
 
 	
@@ -327,7 +310,7 @@ unsigned char Settings::InitGoal(char I[11])
 	{
 		goal[s].what=0;
 		goal[s].time=0;
-		Ziel[s]=0;
+		buildable[s]=0;
 		data[2*s]=0;
 		data[2*s+1]=0;
 	}
@@ -415,28 +398,26 @@ unsigned char Settings::InitGoal(char I[11])
 
 void Settings::AdjustMining()
 {
-	unsigned short i,j,k;
-	float f,g;
-	const double * miningp[45];
+	int i,j,k;
+	const int * miningp[45];
 	switch(race)
 	{
 		case 0:for(i=0;i<45;i++) miningp[i]=&mining_t[i];for(i=0;i<5;i++) gasing[i]=gasing_t[i];break;
 		case 1:for(i=0;i<45;i++) miningp[i]=&mining_p[i];for(i=0;i<5;i++) gasing[i]=gasing_p[i];break;
 		case 2:for(i=0;i<45;i++) miningp[i]=&mining_z[i];for(i=0;i<5;i++) gasing[i]=gasing_z[i];break;
 	}
-	g=Mineral_Blocks*Mineral_Mod/800.0;
+
 	for(i=0;i<45;i++)
-		if(i*8/Mineral_Blocks<45)
+		if(i*8<45*Mineral_Blocks)
 		{
-			f=i*(8.0/Mineral_Blocks);
 			k=0;
 			for(j=0;j<45;j++)
 			{
-				if((f+1>j)&&(f<=j)) { k=j;j=45;}
+				if(i*8<=j*Mineral_Blocks) { k=j;j=45;} 
 			}
-			mining[i]=*miningp[k]*g;
+			mining[i]=*miningp[k]*Mineral_Blocks*Mineral_Mod/800;
 		}
-	        else mining[i]=*miningp[44]*g;
+	    else mining[i]=*miningp[44]*Mineral_Blocks*Mineral_Mod/800;
 }
 
 Settings::Settings()

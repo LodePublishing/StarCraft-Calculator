@@ -1,0 +1,68 @@
+Remember: The numbers mean how many the program should build of this unit
+>at least<. And: You don't have to enter all the tech buildings, they will
+added automaticly. (i.e. the program will build a templar archive if you
+set Dark Templars to for example two and left everything else at zero)
+
+Units
+        Dark Templar 0  0
+         Dark Archon 0  0
+               Probe 0  0
+              Zealot 3  5    
+             Dragoon 0  0
+        High Templar 0  0
+              Archon 0  0
+              Reaver 1  0
+             Corsair 0  0
+             Shuttle 1  0
+               Scout 0  0
+             Arbiter 0  0
+             Carrier 0  0
+            Observer 0  0
+
+Buildings
+               Nexus 0  0
+   Robotics Facility 0  0
+               Pylon 0  0
+         Assimilator 0  0
+         Observatory 0  0
+             Gateway 0  0
+       Photon Cannon 0  0
+    Cybernetics Core 0  0
+     Citadel Of Adun 0  0
+    Templar Archives 0  0 
+               Forge 0  0 
+            Stargate 0  0
+        Fleet Beacon 0  0
+    Arbiter Tribunal 0  0
+Robotics Support Bay 0  0 
+      Shield Battery 0  0
+
+Researches
+       Psionic Storm 0  0     (High Templar special ability)
+       Hallucination 0  0     (High Templar special ability)
+              Recall 0  0     (Arbiter special ability)
+        Stasis Field 0  0     (Arbiter special ability)
+      Disruption Web 0  0     (Corsair special ability)
+        Mind Control 0  0     (Dark archon special ability)
+           Maelstrom 0  0     (Dark archon special ability)
+  Singularity Charge 0  0     (Dragoon range)
+    Leg Enhancements 0  0     (Zealot speed)
+       Scarab Damage 0  0     (Additional Damage for Reaverscarabs)
+     Reaver Capacity 0  0     (Additional Scarabs for Reaver)
+      Gravitic Drive 1  0     (Shuttle speed)
+        Sensor Array 0  0     (Observer sight range)
+   Gravitic Boosters 0  0     (Observer speed)
+    Khaydarin Amulet 0  0     (Dark Templar energy)
+       Apial Sensors 0  0     (Scout sight range)
+  Gravitic Thrusters 0  0     (Scout speed)
+    Carrier Capacity 0  0     (Additional interceptors for Carriers)
+      Khaydarin Core 0  0     (Arbiter energy)
+         Argus Jewel 0  0     (Corsair energy)
+      Argus Talisman 0  0     (High Templar energy)
+
+Upgrades
+               Armor 0  0     (Ground Units armor)
+             Plating 0  0     (Air Units armor)
+      Ground Weapons 0  0
+         Air Weapons 0  0
+      Plasma Shields 0  0

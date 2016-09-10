@@ -1,101 +1,41 @@
 #include "terra.h"
 #include "settings.h"
 
-#define BUILDING_TYPES_TERRA 60
-
-#define MARINE 0
-#define GHOST 1
-#define VULTURE 2
-#define GOLIATH 3
-#define SIEGE_TANK 4
-#define SCV 5
-#define FIREBAT 6
-#define MEDIC  7
-
-#define WRAITH 8
-#define SCIENCE_VESSEL 9
-#define DROPSHIP 10
-#define BATTLE_CRUISER 11
-#define VALKYRIE 12
-
-#define COMMAND_CENTER 13
-#define SUPPLY_DEPOT 14
-#define REFINERY 15
-#define BARRACKS 16
-#define ACADEMY 17
-#define FACTORY 18
-#define STARPORT 19
-#define SCIENCE_FACILITY 20
-#define ENGINEERING_BAY 21
-#define ARMORY 22
-#define MISSILE_TURRET 23
-#define BUNKER 24
-
-#define COMSAT_STATION 25
-#define NUCLEAR_SILO 26
-#define CONTROL_TOWER 27
-#define COVERT_OPS 28
-#define PHYSICS_LAB 29
-#define MACHINE_SHOP 30
-
-#define STIM_PACKS 31
-#define LOCKDOWN 32
-#define EMP_SHOCKWAVE 33
-#define SPIDER_MINES 34
-#define TANK_SIEGE_MODE 35
-#define IRRADIATE 36
-#define YAMATO_GUN 37
-#define CLOAKING_FIELD 38
-#define PERSONNEL_CLOAKING 39
-#define RESTORATION 40
-#define OPTICAL_FLARE 41
-
-#define U238_SHELLS 42
-#define ION_THRUSTERS 43
-#define TITAN_REACTOR 44
-#define OCULAR_IMPLANTS 45
-#define MOEBIUS_REACTOR 46
-#define APOLLO_REACTOR 47
-#define COLOSSUS_REACTOR 48
-#define CADUCEUS_REACTOR 49
-#define CHARON_BOOSTER 50
-
-#define INFANTRY_ARMOR 51
-#define INFANTRY_WEAPONS 52
-#define VEHICLE_PLATING 53
-#define VEHICLE_WEAPONS 54
-#define SHIP_PLATING 55
-#define SHIP_WEAPONS 56
-
-#define NUCLEAR_WARHEAD 57
-
-#define ONE_MINERAL_SCV_TO_GAS 58
-#define ONE_GAS_SCV_TO_MINERAL 59
 
 	void Player_Terra::Set_Goals()
 	{
-		unsigned char i,j;
+		unsigned char i,j,k;
 		long Need_Gas;
-		building_types=BUILDING_TYPES_TERRA;
+		for(i=0;i<MAX_GOALS;i++)
+			Variabel[i]=0;
 		for(j=0;j<6;j++) // Nuclear Warhead needs 6 steps :)
-		for(i=0;i<BUILDING_TYPES_TERRA;i++)
+		for(i=0;i<MAX_GOALS;i++)
 			if(goal[i].what>0)
 			{
-				Ziel[i]=1;
-				switch(i)
+				buildable[i]=1;
+				for(k=0;k<3;k++)
+					if((stats[TERRA][i].prerequisite[k]>0)&&(goal[stats[TERRA][i].prerequisite[k]].what==0))
+						goal[stats[TERRA][i].prerequisite[k]].what=1;
+				if((stats[TERRA][i].facility>0)&&(goal[stats[TERRA][i].facility].what==0))
 				{
-					case BUNKER:
-					case MARINE:
-					case ACADEMY:
-					case FACTORY:
-						if(goal[BARRACKS].what==0) goal[BARRACKS].what=1;break;
+					Variabel[stats[TERRA][i].facility]=1;
+					goal[stats[TERRA][i].facility].what=1;
+				}
 					
-					case ARMORY:
-					case MACHINE_SHOP:
-					case STARPORT:
-					case VULTURE:
-						if(goal[FACTORY].what==0) goal[FACTORY].what=1;break;
-					case GOLIATH:
+/*				switch(i)
+				{
+//					case BUNKER:
+//					case MARINE:
+//					case ACADEMY:
+//					case FACTORY:
+//						if(goal[BARRACKS].what==0) goal[BARRACKS].what=1;break;
+					
+//					case ARMORY:
+//					case MACHINE_SHOP:
+//					case STARPORT:
+//					case VULTURE:
+//						if(goal[FACTORY].what==0) goal[FACTORY].what=1;break;
+/					case GOLIATH:
 						if(goal[ARMORY].what==0) goal[ARMORY].what=1;break;
 					case ION_THRUSTERS:
 					case TANK_SIEGE_MODE:
@@ -154,35 +94,33 @@
 					case NUCLEAR_WARHEAD:
 						if(goal[NUCLEAR_SILO].what<goal[NUCLEAR_WARHEAD].what) goal[NUCLEAR_SILO].what=goal[NUCLEAR_WARHEAD].what;
 						break;					
-				}
+				}*/
 			}
 
-		Ziel[SCV]=1;
-		Ziel[COMMAND_CENTER]=1;
-		Ziel[SUPPLY_DEPOT]=1;
+		buildable[SCV]=1;
+		buildable[COMMAND_CENTER]=1;
+		buildable[SUPPLY_DEPOT]=1;
+
+		Variabel[SCV]=1;
+		Variabel[COMMAND_CENTER]=1;
+		Variabel[SUPPLY_DEPOT]=1;
 
 		Need_Gas=0;
 
-		for(i=0;i<BUILDING_TYPES_TERRA;i++)
+		for(i=0;i<MAX_GOALS;i++)
 			Need_Gas+=(goal[i].what*stats[0][i].gas);
 
 		if(Need_Gas>0)
 		{
-			Ziel[REFINERY]=1;
+			need_Gas=1;
+			buildable[REFINERY]=1;
 			if(goal[REFINERY].what==0) goal[REFINERY].what=1;
-			Ziel[ONE_MINERAL_SCV_TO_GAS]=1;
-			Ziel[ONE_GAS_SCV_TO_MINERAL]=1;
-		}
+			buildable[ONE_MINERAL_SCV_TO_GAS]=1;
+			buildable[ONE_GAS_SCV_TO_MINERAL]=1;
+			Variabel[ONE_MINERAL_SCV_TO_GAS]=1;
+			Variabel[ONE_GAS_SCV_TO_MINERAL]=1;
+		} else need_Gas=0;
 
-		Max_Build_Types=0;
-		for(i=0;i<BUILDING_TYPES_TERRA;i++)
-		if(Ziel[i]==1)
-		{
-			Build_Av[Max_Build_Types]=i;
-			Max_Build_Types++;
-		}
-		goal[ONE_MINERAL_SCV_TO_GAS].what=0; // Just to be sure :)
-		goal[ONE_GAS_SCV_TO_MINERAL].what=0;		
 	}
 	
 // Test whether the item can be build (minerals, gas, supply, buildings, ...)
@@ -494,11 +432,11 @@
 		harvested_gas=0;
 		harvested_mins=0;
 		
-		Vespene_Av=setup.Vespene_Geysirs;		
+		Vespene_Av=settings.Vespene_Geysirs;		
 		Vespene_Extractors=0;
 		tt=0;
 
-		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
+		while((timer<settings.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{
 			tSupply=Supply;// for the log file
 			tMax_Supply=Max_Supply;
@@ -514,29 +452,29 @@
 					building[j].RB--;
 					if(building[j].RB==0)
 					{
-						if((setup.Time_to_Enemy>0)&&(building[j].type<COMMAND_CENTER)&&(building[j].on_the_run==0)&&(building[j].type!=SCV)&&(building[j].type!=DROPSHIP))
+						if((settings.Time_to_Enemy>0)&&(building[j].type<COMMAND_CENTER)&&(building[j].on_the_run==0)&&(building[j].type!=SCV)&&(building[j].type!=DROPSHIP))
 						{
 							building[j].on_the_run=1;
 							if(building[j].type==VULTURE)
 							{
 								if(force[ION_THRUSTERS]>0)
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 								else
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 							}
 							else if((building[j].type==MARINE)||(building[j].type==FIREBAT))
 							{
 								if((force[STIM_PACKS]>0)&&(force[MARINE]<4*force[MEDIC]))
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 								else
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 							}
 							else if(building[j].type==WRAITH)
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 							else if((building[j].type<SIEGE_TANK)||(building[j].type==MEDIC)||(building[j].type==SCV)||(building[j].type==GOLIATH)||(building[j].type==GHOST)||(building[j].type==VALKYRIE)||(building[j].type==SCIENCE_VESSEL))
-								building[j].RB+=setup.Time_to_Enemy;
+								building[j].RB+=settings.Time_to_Enemy;
 							else if(building[j].type==BATTLE_CRUISER)
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 						}
 						switch(building[j].type)
 						{
@@ -615,7 +553,18 @@
 			
 			tt++;
 			ok=0;
-			Build(Build_Av[program[IP].order]);
+			if(Code[IP][0]<Code[IP][1])
+			{
+				program[IP].dominant=0;
+				Build(Build_Av[Code[IP][0]]);
+				if(ok==0) {program[IP].dominant=1;Build(Build_Av[Code[IP][1]]);}
+			}
+			else
+			{
+				program[IP].dominant=1;
+				Build(Build_Av[Code[IP][1]]);
+				if(ok==0) {program[IP].dominant=0;Build(Build_Av[Code[IP][0]]);}
+			}
 			if(suc>0) program[IP].success=suc;
 			if((ok==1)||(tt>267))
 			{
@@ -631,7 +580,7 @@
 				IP++;
 			}
 		//Scoutpeon
-		if((setup.Scout_Time>0)&&(timer==setup.Scout_Time)&&((peonmins>0)||(peongas>0)))
+		if((settings.Scout_Time>0)&&(timer==settings.Scout_Time)&&((peonmins>0)||(peongas>0)))
 		{
 			if(peonmins>0)
 				peonmins--;

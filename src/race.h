@@ -6,10 +6,10 @@
 class RACE
 {
 public:
-	unsigned char force[60];
-	unsigned short ftime[60]; //when the goal is reached / when the last item is produced
-	unsigned char availible[60];
-	double mins,gas;
+	int force[60];
+	int ftime[60]; //when the goal is reached / when the last item is produced
+	int availible[60];
+	int mins,gas;
 	
 	//TODO: gather new data for mining and gasing
 	
@@ -19,10 +19,12 @@ public:
 	unsigned char suc,IP;
 
 	unsigned char ready;
+
+	unsigned char Code[MAX_LENGTH][2];
+
 	struct Program
 	{
-		unsigned char order,location,need_Supply,have_Supply,success,built;
-		unsigned short time,mins,gas,temp;		
+		int need_Supply,have_Supply,success,built,dominant,have_Minerals,have_Gas,time,mins,gas,temp;		
 	} program[MAX_LENGTH];
 	struct Building
 	{
@@ -36,8 +38,8 @@ public:
 
 	unsigned char nr,ok;
 
-	double harvested_gas,harvested_mins;
-	unsigned short pFitness,sFitness,timer,gasready,minsready;
+	int harvested_gas,harvested_mins;
+	int pFitness,sFitness,timer,gasready,minsready;
 
 	// => zerg.h, terra.h, protoss.h
 	virtual void Set_Goals() {};
@@ -51,6 +53,7 @@ public:
 	void Mutate();
 	void Restart();
 	void Produce(unsigned char who);
+	void generateBasicBuildorder();
 	
 	void Harvest_Resources();
 	void Init();

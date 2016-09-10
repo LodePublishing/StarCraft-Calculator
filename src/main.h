@@ -7,7 +7,209 @@
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
 #define MAX_GOALS 60
-#define DATA_SET_SIZE 15
+
+
+#define TERRA 0
+#define PROTOSS 1
+#define ZERG 2
+
+#define MARINE 0
+#define GHOST 1
+#define VULTURE 2
+#define GOLIATH 3
+#define SIEGE_TANK 4
+#define SCV 5
+#define FIREBAT 6
+#define MEDIC  7
+
+#define WRAITH 8
+#define SCIENCE_VESSEL 9
+#define DROPSHIP 10
+#define BATTLE_CRUISER 11
+#define VALKYRIE 12
+
+#define COMMAND_CENTER 13
+#define SUPPLY_DEPOT 14
+#define REFINERY 15
+#define BARRACKS 16
+#define ACADEMY 17
+#define FACTORY 18
+#define STARPORT 19
+#define SCIENCE_FACILITY 20
+#define ENGINEERING_BAY 21
+#define ARMORY 22
+#define MISSILE_TURRET 23
+#define BUNKER 24
+
+#define COMSAT_STATION 25
+#define NUCLEAR_SILO 26
+#define CONTROL_TOWER 27
+#define COVERT_OPS 28
+#define PHYSICS_LAB 29
+#define MACHINE_SHOP 30
+
+#define STIM_PACKS 31
+#define LOCKDOWN 32
+#define EMP_SHOCKWAVE 33
+#define SPIDER_MINES 34
+#define TANK_SIEGE_MODE 35
+#define IRRADIATE 36
+#define YAMATO_GUN 37
+#define CLOAKING_FIELD 38
+#define PERSONNEL_CLOAKING 39
+#define RESTORATION 40
+#define OPTICAL_FLARE 41
+
+#define U238_SHELLS 42
+#define ION_THRUSTERS 43
+#define TITAN_REACTOR 44
+#define OCULAR_IMPLANTS 45
+#define MOEBIUS_REACTOR 46
+#define APOLLO_REACTOR 47
+#define COLOSSUS_REACTOR 48
+#define CADUCEUS_REACTOR 49
+#define CHARON_BOOSTER 50
+
+#define INFANTRY_ARMOR 51
+#define INFANTRY_WEAPONS 52
+#define VEHICLE_PLATING 53
+#define VEHICLE_WEAPONS 54
+#define SHIP_PLATING 55
+#define SHIP_WEAPONS 56
+
+#define NUCLEAR_WARHEAD 57
+
+#define ONE_MINERAL_SCV_TO_GAS 58
+#define ONE_GAS_SCV_TO_MINERAL 59
+
+
+#define DARK_TEMPLAR 0
+#define DARK_ARCHON 1
+#define PROBE 2
+#define ZEALOT 3
+#define DRAGOON 4
+#define HIGH_TEMPLAR 5
+#define ARCHON 6
+#define REAVER 7
+#define CORSAIR 8
+#define SHUTTLE 9
+#define SCOUT 10
+#define ARBITER 11
+#define CARRIER 12
+#define OBSERVER 13
+#define NEXUS 14
+#define ROBOTICS_FACILITY 15
+#define PYLON 16
+#define ASSIMILATOR 17
+#define OBSERVATORY 18
+#define GATEWAY 19
+#define PHOTON_CANNON 20
+#define CYBERNETICS_CORE 21
+#define CITADEL_OF_ADUN 22
+#define TEMPLAR_ARCHIVES 23
+#define FORGE 24
+#define STARGATE 25
+#define FLEET_BEACON 26
+#define ARBITER_TRIBUNAL 27
+#define ROBOTICS_SUPPORT_BAY 28
+#define SHIELD_BATTERY 29
+
+#define PSIONIC_STORM 30
+#define HALLUCINATION 31
+#define RECALL 32
+#define STASIS_FIELD 33
+#define DISRUPTION_WEB 34
+#define MIND_CONTROL 35
+#define MAELSTROM 36
+
+#define SINGULARITY_CHARGE 37
+#define LEG_ENHANCEMENTS 38
+#define SCARAB_DAMAGE 39
+#define REAVER_CAPACITY 40
+#define GRAVITIC_DRIVE 41
+#define SENSOR_ARRAY 42
+#define GRAVITIC_BOOSTERS 43
+#define KHAYDARIN_AMULET 44
+#define APIAL_SENSORS 45
+#define GRAVITIC_THRUSTERS 46
+#define CARRIER_CAPACITY 47
+#define KHAYDARIN_CORE 48
+#define ARGUS_JEWEL 49
+#define ARGUS_TALISMAN 50
+
+#define ARMOR 51
+#define PLATING 52
+#define GROUND_WEAPONS 53
+#define AIR_WEAPONS 54
+#define PLASMA_SHIELDS 55
+
+#define ONE_MINERAL_PROBE_TO_GAS 58
+#define ONE_GAS_PROBE_TO_MINERAL 59
+
+
+
+#define ZERGLING 0
+#define HYDRALISK 1
+#define ULTRALISK 2
+#define DRONE 3
+#define DEFILER 4
+#define LURKER 5
+#define OVERLORD 6
+#define MUTALISK 7
+#define GUARDIEN 8
+#define QUEEN 9
+#define SCOURGE 10
+#define DEVOURER 11
+
+#define HATCHERY 12
+#define LAIR 13
+#define HIVE 14
+#define NYDUS_CANAL 15
+#define HYDRALISK_DEN 16
+#define DEFILER_MOUND 17
+#define GREATER_SPIRE 18
+#define QUEENS_NEST 19
+#define EVOLUTION_CHAMBER 20
+#define ULTRALISK_CAVERN 21
+#define SPIRE 22
+#define SPAWNING_POOL 23
+#define CREEP_COLONY 24
+#define SPORE_COLONY 25
+#define SUNKEN_COLONY 26
+#define EXTRACTOR 27
+
+#define VENTRAL_SACKS 28
+#define ANTENNAE 29
+#define PNEUMATIZED_CARAPACE 30
+#define METABOLIC_BOOST 31
+#define ADRENAL_GLANDS 32
+#define MUSCULAR_AUGMENTS 33
+#define GROOVED_SPINES 34
+#define GAMETE_MEIOSIS 35
+#define METASYNAPTIC_NODE 36
+#define CHITINOUS_PLATING 37
+#define ANABOLIC_SYNTHESIS 38
+
+#define BURROWING 39
+#define SPAWN_BROODLING 40
+#define PLAGUE 41
+#define CONSUME 42
+#define ENSNARE 43
+#define LURKER_ASPECT 44
+
+#define CARAPACE 45
+#define FLYER_CARAPACE 46
+#define MELEE_ATTACKS 47
+#define MISSILE_ATTACKS 48
+#define FLYER_ATTACKS 49
+
+#define ONE_MINERAL_DRONE_TO_GAS 58
+#define ONE_GAS_DRONE_TO_MINERAL 59
+
+#define BREAK_UP_BUILDING 50
+
+
+
 
 struct GOAL
 {
@@ -16,281 +218,286 @@ struct GOAL
 
 //some global variables
 
-extern unsigned char Ziel[60],Build_Av[60],Build_Bv[60]; 
-extern unsigned char Vespene_Av,Max_Build_Types,race,building_types;
+extern unsigned char buildable[MAX_GOALS],Build_Av[MAX_GOALS],Build_Bv[MAX_GOALS]; 
+extern unsigned char Vespene_Av,Max_Build_Types,race,Variabel[MAX_GOALS];
 extern unsigned short total_goals;
-extern unsigned char num,Vespene_Extractors;
+extern unsigned char num,Vespene_Extractors,colors,need_Gas;
 extern GOAL goal[MAX_GOALS];
-extern double mining[45],gasing[5];
+extern int mining[45],gasing[5];
+extern unsigned char Basic[MAX_LENGTH][2],Basic_Length;
 
-const double gasing_z[5]=
+const int gasing_z[5]=
 {
 0,
-1.12,
-2.03,
-3.2,
-3.52
+112,
+203,
+320,
+352
 };
 
-const double mining_z[45]=
+const int mining_z[45]=
 {
 0,
-0.83,1.65,2.44,3.14,3.85,4.5,5.2,5.83,
-6.45,7.01,7.65,8.19,8.53,8.79,9.11,9.38,
-9.95,10.41,10.7,10.92,11.21,11.43,12,12.53, // [Claw,4/4/03] changed 11.49 -> 12
-12.66,12.76,12.83,12.88,12.92,12.94,12.96,12.97,
-12.98,12.98,12.99,12.99,12.99,12.99,13,13,
-13,13,13,13
+83,165,244,314,385,450,520,583,
+645,701,765,819,853,879,911,938,
+995,1041,1070,1092,1121,1143,1200,1253, // [Claw,4/4/03] changed 1149 -> 12
+1266,1276,1283,1288,1292,1294,1296,1297,
+1298,1298,1299,1299,1299,1299,1300,1300,
+1300,1300,1300,1300
 };
 
-const double gasing_p[5]=
+const int gasing_p[5]=
 {
 0,
-1.17,
-2.19,
-3.36,
-3.52	
+117,
+219,
+336,
+352	
 };
 
-const double mining_p[45]=
+const int mining_p[45]=
 {
 0,
-0.8,1.59,2.44,3.14,3.84,4.47,5.2,5.84,
-6.51,7.06,7.67,8.17,8.47,8.72,9.02,9.27,
-10,10.5,10.85,11.11,11.44,11.73,12.23,12.63,
-12.72,12.82,12.87,12.91,12.93,12.95,12.97,12.98,
-12.99,12.99,12.99,12.99,12.99,13,13,13,
-13,13,13,13
+80,159,244,314,384,447,520,584,
+651,706,767,817,847,872,902,927,
+1000,1050,1085,1111,1144,1173,1223,1263,
+1272,1282,1287,1291,1293,1295,1297,1298,
+1299,1299,1299,1299,1299,1300,1300,1300,
+1300,1300,1300,1300
 };
 
-const double gasing_t[5]=
+const int gasing_t[5]=
 {
 0,
-1.23,
-2.35,
-3.52,
-3.52
+123,
+235,
+352,
+352
 };
 
-const double mining_t[45]={
+const int mining_t[45]={
 0,
-0.72,1.43,2.19,2.95,3.69,4.42,5.06,5.7, //1-8
-6.26,6.82,7.25,7.67,8.07,8.47,8.78,9.09, //9-16
-9.43,9.77,10.12,10.46,10.73,11.01,11.42,11.83, //17-24
-12.03,12.23,12.33,12.43,12.51,12.59,12.66,12.74, //25-32
-12.77,12.79,12.81,12.82,12.83,12.83,12.84,12.84, //33-40
-12.84,12.84,12.85,12.85 //41-44
+72,143,219,295,369,442,506,570, //1-8
+626,682,725,767,807,847,878,909, //9-16
+943,977,1012,1046,1073,1101,1142,1183, //17-24
+1203,1223,1233,1243,1251,1259,1266,1274, //25-32
+1277,1279,1281,1282,1283,1283,1284,1284, //33-40
+1284,1284,1285,1285 //41-44
 };
 
+//TODO: Wenn eine Drone fertig is, dann muss sie erstmal hinfahren und sammeln kann also nicht sofort 15 Sekunden lang mitmachen => Bauzeit um 15 sec erhoehen
 
+#define NAME_LENGTH 21
+#define NOTHING 0
+#define UNIT 1
+#define BUILDING 2
+#define RESEARCH 3
+#define UPGRADE 4
 
 struct Stats
 {
-	char name[21];
+	char name[NAME_LENGTH];
 	unsigned short BT;
-	unsigned short mins,gas;
+	int mins,gas;
 	unsigned char supply;
 	unsigned short type; // 0: nothing, 1: unit, 2: building (primarily for zerg!), 3: Research, 4: Upgrade
-	unsigned char tmp; //fuer Upgrades erstmal nur... 50, 75, 100
+	int tmp; //fuer Upgrades erstmal nur.. 50, 75, 100
+
+	unsigned char special;
+	unsigned char prerequisite[3];
+	unsigned char facility;
 };
 
-const Stats stats[3][60]=
+const Stats stats[3][MAX_GOALS]=
 {
 	{
-	{"              Marine", 24, 50,  0,1,1},
-	{"               Ghost", 50, 25, 75,1,1},
-	{"             Vulture", 30, 75,  0,2,1},
-	{"             Goliath", 40,100, 50,2,1},
-	{"          Siege Tank", 50,150,100,2,1},
-	{"                 SCV", 20, 50,  0,1,1}, // 0.0 Time to Enemy da es im Lager bleibt!
-	{"             Firebat", 24, 50, 25,1,1},
-	{"               Medic", 30, 50, 25,1,1},
-	{"              Wraith", 60,150,100,2,1},
-	{"      Science Vessel", 80,100,225,2,1},
-	{"            Dropship", 50,100,100,2,1},
-	{"      Battle Cruiser",133,400,300,6,1},
-	{"            Valkyrie", 50,250,125,3,1},
-	{"      Command Center",120,400,  0,2,0},
-	{"        Supply Depot", 40,100,  0,0,2},
-	{"            Refinery", 40,100,  0,0,2},
-	{"            Barracks", 80,150,  0,0,2},
-	{"             Academy", 80,150,  0,0,2},
-	{"             Factory", 80,200,100,0,2},
-	{"            Starport", 70,150,100,0,2},
-	{"    Science Facility", 60,100,150,0,2},
-	{"     Engineering Bay", 60,125,  0,0,2},
-	{"              Armory", 80,100, 50,0,2},
-	{"      Missile Turret", 30, 75,  0,0,2},
-	{"              Bunker", 30,100,  0,0,2},
-	{"      Comsat Station", 40, 50, 50,0,0},
-	{"        Nuclear Silo", 40,100,100,0,0},
-	{"       Control Tower", 80, 50, 50,0,0},
-	{"          Covert Ops", 40, 50, 50,0,0},
-	{"         Physics Lab", 40, 50, 50,0,0},
-	{"        Machine Shop", 40, 50, 50,0,0},
-	{"          Stim Packs", 80,100,100,0,3},
-	{"            Lockdown",100,200,200,0,3},
-	{"       EMP Shockwave",120,200,200,0,3},
-	{"        Spider Mines", 80,100,100,0,3},
-	{"          Siege Mode", 80,150,150,0,3},
-	{"           Irradiate", 80,200,200,0,3},
-	{"          Yamato Gun",120,100,100,0,3},
-	{"      Cloaking Field",100,150,150,0,3},
-	{"  Personnel Cloaking", 80,100,100,0,3},
-	{"         Restoration", 80,100,100,0,3},
-	{"       Optical Flare",120,100,100,0,3},
-	{"        U-238 Shells",100,150,150,0,3},
-	{"       Ion Thrusters",100,100,100,0,3},
-	{"       Titan Reactor",166,150,150,0,3},
-	{"     Ocular Implants",166,100,100,0,3},
-	{"     Moebius Reactor",166,200,200,0,3},
-	{"      Apollo Reactor",166,200,200,0,3},
-	{"    Colossus Reactor",166,150,150,0,3},
-	{"    Caduceus Reactor",166,150,150,0,3},
-	{"      Charon Booster",133,100,100,0,3},
-
-	{"      Infantry Armor",266,100,100,0,4,75},
-	{"    Infantry Weapons",266,100,100,0,4,75},
-	{"     Vehicle Plating",266,100,100,0,4,75},
-	{"     Vehicle Weapons",266,100,100,0,4,75},
-	{"        Ship Plating",266,150,150,0,4,75},
-	{"        Ship Weapons",266,100,100,0,4,50},
-	{"     Nuclear Warhead",100,200,200,8,0},
-
-	{"  Mineral SCV to Gas",  0,  0,  0,0,0},
-	{"  Gas SCV to Mineral",  0,  0,  0,0,0}
+	{"              Marine", 24, 5000,    0,1,1,    0,0, {0 ,0, 0}, BARRACKS},
+	{"               Ghost", 50, 2500, 7500,1,1,    0,0, {ACADEMY ,COVERT_OPS, 0}, BARRACKS},
+	{"             Vulture", 30, 7500,    0,2,1,    0,0, {FACTORY ,0, 0}, FACTORY},
+	{"             Goliath", 40,10000, 5000,2,1,    0,0, {ARMORY, 0, 0}, FACTORY},
+	{"          Siege Tank", 50,15000,10000,2,1,    0,0, {MACHINE_SHOP ,0, 0}, FACTORY},
+	{"                 SCV", 20, 5000,    0,1,1,    0,0, {0 ,0, 0}, COMMAND_CENTER}, // 0.0 Time to Enemy da es im Lager bleibt!
+	{"             Firebat", 24, 5000, 2500,1,1,    0,0, {ACADEMY ,0, 0}, BARRACKS},
+	{"               Medic", 30, 5000, 2500,1,1,    0,0, {ACADEMY ,0, 0}, BARRACKS},
+	{"              Wraith", 60,15000,10000,2,1,    0,0, {STARPORT ,0, 0}, STARPORT},
+	{"      Science Vessel", 80,10000,22500,2,1,    0,0, {CONTROL_TOWER ,SCIENCE_FACILITY, 0}, STARPORT},
+	{"            Dropship", 50,10000,10000,2,1,    0,0, {CONTROL_TOWER ,0, 0}, STARPORT},
+	{"      Battle Cruiser",133,40000,30000,6,1,    0,0, {CONTROL_TOWER ,PHYSICS_LAB, 0}, STARPORT},
+	{"            Valkyrie", 50,25000,12500,3,1,    0,0, {CONTROL_TOWER ,ARMORY, 0}, STARPORT},
+	{"      Command Center",120,40000,    0,2,0,    0,0, {0 ,0, 0}, 0},
+	{"        Supply Depot", 40,10000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"            Refinery", 40,10000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"            Barracks", 80,15000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"             Academy", 80,15000,    0,0,2,    0,0, {BARRACKS ,0, 0}, 0},
+	{"             Factory", 80,20000,10000,0,2,    0,0, {BARRACKS ,0, 0}, 0},
+	{"            Starport", 70,15000,10000,0,2,    0,0, {FACTORY ,0, 0}, 0},
+	{"    Science Facility", 60,10000,15000,0,2,    0,0, {STARPORT ,0, 0}, 0},
+	{"     Engineering Bay", 60,12500,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"              Armory", 80,10000, 5000,0,2,    0,0, {FACTORY ,0, 0}, 0},
+	{"      Missile Turret", 30, 7500,    0,0,2,    0,0, {ENGINEERING_BAY ,0, 0}, 0},
+	{"              Bunker", 30,10000,    0,0,2,    0,0, {BARRACKS ,0, 0}, 0},
+	{"      Comsat Station", 40, 5000, 5000,0,0,    0,0, {ACADEMY ,0, 0}, COMMAND_CENTER},
+	{"        Nuclear Silo", 40,10000,10000,0,0,    0,0, {COVERT_OPS ,0, 0}, COMMAND_CENTER},
+	{"       Control Tower", 80, 5000, 5000,0,0,    0,0, {0 ,0, 0}, STARPORT},
+	{"          Covert Ops", 40, 5000, 5000,0,0,    0,0, {0 ,0, 0}, SCIENCE_FACILITY},
+	{"         Physics Lab", 40, 5000, 5000,0,0,    0,0, {0 ,0, 0}, SCIENCE_FACILITY},
+	{"        Machine Shop", 40, 5000, 5000,0,0,    0,0, {0 ,0, 0}, FACTORY},
+	{"          Stim Packs", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, ACADEMY},
+	{"            Lockdown",100,20000,20000,0,3,    0,0, {0 ,0, 0}, COVERT_OPS},
+	{"       EMP Shockwave",120,20000,20000,0,3,    0,0, {0 ,0, 0}, SCIENCE_FACILITY},
+	{"        Spider Mines", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, MACHINE_SHOP},
+	{"          Siege Mode", 80,15000,15000,0,3,    0,0, {0 ,0, 0}, MACHINE_SHOP},
+	{"           Irradiate", 80,20000,20000,0,3,    0,0, {0 ,0, 0}, SCIENCE_FACILITY},
+	{"          Yamato Gun",120,10000,10000,0,3,    0,0, {0 ,0, 0}, PHYSICS_LAB},
+	{"      Cloaking Field",100,15000,15000,0,3,    0,0, {0 ,0, 0}, CONTROL_TOWER},
+	{"  Personnel Cloaking", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, COVERT_OPS},
+	{"         Restoration", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, ACADEMY},
+	{"       Optical Flare",120,10000,10000,0,3,    0,0, {0 ,0, 0}, ACADEMY},
+	{"        U-238 Shells",100,15000,15000,0,3,    0,0, {0 ,0, 0}, ACADEMY},
+	{"       Ion Thrusters",100,10000,10000,0,3,    0,0, {0 ,0, 0}, MACHINE_SHOP},
+	{"       Titan Reactor",166,15000,15000,0,3,    0,0, {0 ,0, 0}, SCIENCE_FACILITY},
+	{"     Ocular Implants",166,10000,10000,0,3,    0,0, {0 ,0, 0}, COVERT_OPS},
+	{"     Moebius Reactor",166,20000,20000,0,3,    0,0, {0 ,0, 0}, COVERT_OPS},
+	{"      Apollo Reactor",166,20000,20000,0,3,    0,0, {0 ,0, 0}, CONTROL_TOWER},
+	{"    Colossus Reactor",166,15000,15000,0,3,    0,0, {0 ,0, 0}, PHYSICS_LAB},
+	{"    Caduceus Reactor",166,15000,15000,0,3,    0,0, {0 ,0, 0}, ACADEMY},
+	{"      Charon Booster",133,10000,10000,0,3,    0,0, {0 ,0, 0}, MACHINE_SHOP},
+	{"      Infantry Armor",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, ENGINEERING_BAY},
+	{"    Infantry Weapons",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, ENGINEERING_BAY},
+	{"     Vehicle Plating",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, ARMORY},
+	{"     Vehicle Weapons",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, ARMORY},
+	{"        Ship Plating",266,15000,15000,0,4, 7500,0, {0 ,0, 0}, ARMORY},
+	{"        Ship Weapons",266,10000,10000,0,4, 5000,0, {0 ,0, 0}, ARMORY},
+	{"     Nuclear Warhead",100,20000,20000,8,0,    0,0, {0 ,0, 0}, NUCLEAR_SILO},
+	{"  Mineral SCV to Gas",  0,	0,	  0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"  Gas SCV to Mineral",  0,	0,	  0,0,0,    0,0, {0 ,0, 0}, 0}
 },
 	
 	{
-	{"        Dark Templar", 50,125,100,2,1},
-	{"         Dark Archon", 20,  0,  0,0,1},
-	{"               Probe", 20, 50,  0,1,1},
-	{"              Zealot", 40,100,  0,2,1},
-	{"             Dragoon", 50,125, 50,2,1},
-	{"        High Templar", 50, 50,150,2,1},
-	{"              Archon", 20,  0,  0,0,1},
-	{"              Reaver", 70,200,100,4,1},
-	{"             Corsair", 40,150,100,2,1},
-	{"             Shuttle", 60,200,  0,2,1},
-	{"               Scout", 80,275,125,3,1},
-	{"             Arbiter",160,100,350,4,1},
-	{"             Carrier",140,350,250,6,1},
-	{"            Observer", 40, 25, 75,1,1},
-	{"               Nexus",120,400,  0,0,2},
-	{"   Robotics Facility", 80,200,200,0,2},
-	{"               Pylon", 30,100,  0,0,2},
-	{"         Assimilator", 40,100,  0,0,2},
-	{"         Observatory", 30, 50,100,0,2},
-	{"             Gateway", 60,150,  0,0,2},
-	{"       Photon Cannon", 50,150,  0,0,2},
-	{"    Cybernetics Core", 60,200,  0,0,2},
-	{"     Citadel Of Adun", 60,150,100,0,2},
-	{"    Templar Archives", 60,150,200,0,2},
-	{"               Forge", 40,150,  0,0,2},
-	{"            Stargate", 70,150,150,0,2},
-	{"        Fleet Beacon", 60,300,200,0,2},
-	{"    Arbiter Tribunal", 60,200,150,0,2},
-	{"Robotics Support Bay", 30,150,100,0,2},
-	{"      Shield Battery", 30,100,  0,0,2},
-	{"       Psionic Storm",120,200,200,0,3},
-	{"       Hallucination", 80,150,150,0,3},
-	{"              Recall",120,150,150,0,3},
-	{"        Stasis Field",100,150,150,0,3},
-	{"      Disruption Web", 80,200,200,0,3},
-	{"        Mind Control",120,200,200,0,3},
-	{"           Maelstrom",100,100,100,0,3},
-	{"  Singularity Charge",166,150,150,0,3},
-	{"    Leg Enhancements",133,150,150,0,3},
-	{"       Scarab Damage",166,200,200,0,3},
-	{"     Reaver Capacity",166,200,200,0,3},
-	{"      Gravitic Drive",166,200,200,0,3},
-	{"        Sensor Array",133,150,150,0,3},
-	{"   Gravitic Boosters",133,150,150,0,3},
-	{"    Khaydarin Amulet",166,150,150,0,3},
-	{"       Apial Sensors",166,100,100,0,3},
-	{"  Gravitic Thrusters",166,200,200,0,3},
-	{"    Carrier Capacity",100,100,100,0,3},
-	{"      Khaydarin Core",166,150,150,0,3},
-	{"         Argus Jewel",166,100,100,0,3},
-	{"      Argus Talisman",166,150,150,0,3},
-	{"               Armor",266,100,100,0,4,75},
-	{"             Plating",266,150,150,0,4,75},
-	{"      Ground Weapons",266,100,100,0,4,50},
-	{"         Air Weapons",266,100,100,0,4,75},
-	{"      Plasma Shields",266,200,200,0,4,100},
-	{"Mineral Probe To Gas",  0,  0,  0,0,0},
-	{"Gas Probe To Mineral",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0}
+	{"        Dark Templar", 50,12500,10000,2,1,    0,0, {TEMPLAR_ARCHIVES ,0, 0}, GATEWAY},
+	{"         Dark Archon", 20,    0,    0,0,1,    0,0, {0 ,0, 0}, 0},//~~
+	{"               Probe", 20, 5000,    0,1,1,    0,0, {0 ,0, 0}, NEXUS},
+	{"              Zealot", 40,10000,    0,2,1,    0,0, {0 ,0, 0}, GATEWAY},
+	{"             Dragoon", 50,12500, 5000,2,1,    0,0, {CYBERNETICS_CORE ,0, 0}, GATEWAY},
+	{"        High Templar", 50, 5000,15000,2,1,    0,0, {TEMPLAR_ARCHIVES ,0, 0}, GATEWAY},
+	{"              Archon", 20,    0,    0,0,1,    0,0, {0 ,0, 0}, 0},//~~
+	{"              Reaver", 70,20000,10000,4,1,    0,0, {ROBOTICS_SUPPORT_BAY ,0, 0}, ROBOTICS_FACILITY}, 
+	{"             Corsair", 40,15000,10000,2,1,    0,0, {0 ,0, 0}, STARGATE},
+	{"             Shuttle", 60,20000,    0,2,1,    0,0, {0 ,0, 0}, ROBOTICS_FACILITY},
+	{"               Scout", 80,27500,12500,3,1,    0,0, {0 ,0, 0}, STARGATE},
+	{"             Arbiter",160,10000,35000,4,1,    0,0, {ARBITER_TRIBUNAL ,0, 0}, STARGATE},
+	{"             Carrier",140,35000,25000,6,1,    0,0, {FLEET_BEACON ,0, 0}, STARGATE},
+	{"            Observer", 40, 2500, 7500,1,1,    0,0, {OBSERVATORY ,0, 0}, ROBOTICS_FACILITY},
+	{"               Nexus",120,40000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"   Robotics Facility", 80,20000,20000,0,2,    0,0, {CYBERNETICS_CORE ,0, 0}, 0},
+	{"               Pylon", 30,10000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"         Assimilator", 40,10000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"         Observatory", 30, 5000,10000,0,2,    0,0, {ROBOTICS_FACILITY ,0, 0}, 0},
+	{"             Gateway", 60,15000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"       Photon Cannon", 50,15000,    0,0,2,    0,0, {FORGE ,0, 0}, 0},
+	{"    Cybernetics Core", 60,20000,    0,0,2,    0,0, {GATEWAY ,0, 0}, 0},
+	{"     Citadel Of Adun", 60,15000,10000,0,2,    0,0, {CYBERNETICS_CORE ,0, 0}, 0},
+	{"    Templar Archives", 60,15000,20000,0,2,    0,0, {CITADEL_OF_ADUN ,0, 0}, 0},
+	{"               Forge", 40,15000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"            Stargate", 70,15000,15000,0,2,    0,0, {CYBERNETICS_CORE ,0, 0}, 0},
+	{"        Fleet Beacon", 60,30000,20000,0,2,    0,0, {STARGATE ,0, 0}, 0},
+	{"    Arbiter Tribunal", 60,20000,15000,0,2,    0,0, {TEMPLAR_ARCHIVES ,STARGATE, 0}, 0},
+	{"Robotics Support Bay", 30,15000,10000,0,2,    0,0, {ROBOTICS_FACILITY ,0, 0}, 0},
+	{"      Shield Battery", 30,10000,    0,0,2,    0,0, {GATEWAY ,0, 0}, 0},
+	{"       Psionic Storm",120,20000,20000,0,3,    0,0, {0 ,0, 0}, TEMPLAR_ARCHIVES},
+	{"       Hallucination", 80,15000,15000,0,3,    0,0, {0 ,0, 0}, TEMPLAR_ARCHIVES},
+	{"              Recall",120,15000,15000,0,3,    0,0, {0 ,0, 0}, ARBITER_TRIBUNAL},
+	{"        Stasis Field",100,15000,15000,0,3,    0,0, {0 ,0, 0}, ARBITER_TRIBUNAL},
+	{"      Disruption Web", 80,20000,20000,0,3,    0,0, {0 ,0, 0}, FLEET_BEACON},
+	{"        Mind Control",120,20000,20000,0,3,    0,0, {0 ,0, 0}, TEMPLAR_ARCHIVES},
+	{"           Maelstrom",100,10000,10000,0,3,    0,0, {0 ,0, 0}, TEMPLAR_ARCHIVES},
+	{"  Singularity Charge",166,15000,15000,0,3,    0,0, {0 ,0, 0}, CYBERNETICS_CORE},
+	{"    Leg Enhancements",133,15000,15000,0,3,    0,0, {0 ,0, 0}, CITADEL_OF_ADUN},
+	{"       Scarab Damage",166,20000,20000,0,3,    0,0, {0 ,0, 0}, ROBOTICS_SUPPORT_BAY},
+	{"     Reaver Capacity",166,20000,20000,0,3,    0,0, {0 ,0, 0}, ROBOTICS_SUPPORT_BAY},
+	{"      Gravitic Drive",166,20000,20000,0,3,    0,0, {0 ,0, 0}, ROBOTICS_SUPPORT_BAY},
+	{"        Sensor Array",133,15000,15000,0,3,    0,0, {0 ,0, 0}, OBSERVATORY},
+	{"   Gravitic Boosters",133,15000,15000,0,3,    0,0, {0 ,0, 0}, OBSERVATORY},
+	{"    Khaydarin Amulet",166,15000,15000,0,3,    0,0, {0 ,0, 0}, TEMPLAR_ARCHIVES},
+	{"       Apial Sensors",166,10000,10000,0,3,    0,0, {0 ,0, 0}, FLEET_BEACON},
+	{"  Gravitic Thrusters",166,20000,20000,0,3,    0,0, {0 ,0, 0}, FLEET_BEACON},
+	{"    Carrier Capacity",100,10000,10000,0,3,    0,0, {0 ,0, 0}, FLEET_BEACON},
+	{"      Khaydarin Core",166,15000,15000,0,3,    0,0, {0 ,0, 0}, ARBITER_TRIBUNAL},
+	{"         Argus Jewel",166,10000,10000,0,3,    0,0, {0 ,0, 0}, FLEET_BEACON},
+	{"      Argus Talisman",166,15000,15000,0,3,    0,0, {0 ,0, 0}, TEMPLAR_ARCHIVES},
+	{"               Armor",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, FORGE},
+	{"             Plating",266,15000,15000,0,4, 7500,0, {0 ,0, 0}, CYBERNETICS_CORE},
+	{"      Ground Weapons",266,10000,10000,0,4, 5000,0, {0 ,0, 0}, FORGE},
+	{"         Air Weapons",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, CYBERNETICS_CORE},
+	{"      Plasma Shields",266,20000,20000,0,4,10000,0, {0 ,0, 0}, FORGE},
+	{"Mineral Probe To Gas",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"Gas Probe To Mineral",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0}
 	},
 	
 	{
-	{"            Zergling", 28, 50,  0,1,1},
-	{"           Hydralisk", 28, 75, 25,1,1},
-	{"           Ultralisk", 60,200,200,6,1},
-	{"               Drone", 23, 50,  0,1,1},
-	{"             Defiler", 50, 50,150,2,1},
-	{"              Lurker", 40, 50,100,2,0},
-	{"            Overlord", 40,100,  0,0,1},
-	{"            Mutalisk", 40,100,100,2,1},
-	{"            Guardien", 40, 50,100,0,0},
-	{"               Queen", 50,100,100,2,1},
-	{"             Scourge", 30, 25, 75,1,1},
-	{"            Devourer", 40,100, 50,0,0},
-
-	{"            Hatchery",120,300,  0,0,2},
-	{"                Lair",100,150,100,0,0},
-	{"                Hive",120,200,150,0,0},
-	{"         Nydus Canal", 40,150,  0,0,2},
-	{"       Hydralisk den", 40,100, 50,0,2},
-	{"       Defiler mound", 60,100,100,0,2},
-	{"       Greater Spire",120,100,150,0,0},
-	{"        Queen's Nest", 60,150,100,0,2},
-	{"   Evolution Chamber", 40, 75,  0,0,2},
-	{"    Ultralisk Cavern", 80,150,200,0,2},
-	{"               Spire",120,200,150,0,2},
-	{"       Spawning Pool", 80,200,  0,0,2},
-	{"        Creep Colony", 20, 75,  0,0,2},
-	{"        Spore Colony", 20, 50,  0,0,0},
-	{"       Sunken Colony", 20, 50,  0,0,0},
-	{"           Extractor", 40, 50,  0,0,2},//27
- 
-	{"        Ventral Sacs",160,200,200,0,3},
-	{"            Antennae",133,150,150,0,3},
-	{"Pneumatized Carapace",133,150,150,0,3},
-	{"     Metabolic Boost",100,100,100,0,3},
-	{"      Adrenal Glands",100,200,200,0,3},
-	{"   Muscular Augments",100,150,150,0,3},
-	{"      Grooved Spines",100,150,150,0,3},
-	{"      Gamete Meiosis",166,150,150,0,3},
-	{"   Metasynaptic node",166,150,150,0,3},
-	{"   Chitinous Plating",133,150,150,0,3},
-	{"  Anabolic Synthesis",133,200,200,0,3},
-
-	{"           Burrowing", 80,100,100,0,3},
-	{"     Spawn Broodling", 80,100,100,0,3},
-	{"              Plague",100,200,200,0,3},
-	{"             Consume",100,100,100,0,3},
-	{"             Ensnare", 80,100,100,0,3},
-	{"       Lurker Aspect",120,200,200,0,3},
-
-	{"            Carapace",266,150,150,0,4,75},
-	{"      Flyer Carapace",266,150,150,0,4,75},
-	{"       Melee Attacks",266,100,100,0,4,50},
-	{"     Missile Attacks",266,100,100,0,4,50},
-	{"       Flyer Attacks",266,100,100,0,4,75},
-	{"Mineral Drone to Gas",  0,  0,  0,0,0},
-	{"Gas Drone to Mineral",  0,  0,  0,0,0},
-	{"   Break up Building",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0},
-
-	{"                NULL",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0},
-	{"                NULL",  0,  0,  0,0,0}
-	}
+	{"            Zergling", 28, 5000,    0,1,1,    0,0, {SPAWNING_POOL ,0, 0}, 0},
+	{"           Hydralisk", 28, 7500, 2500,1,1,    0,0, {HYDRALISK_DEN ,0, 0}, 0},
+	{"           Ultralisk", 60,20000,20000,6,1,    0,0, {ULTRALISK_CAVERN ,0, 0}, 0},
+	{"               Drone", 23, 5000,    0,1,1,    0,0, {0 ,0, 0}, 0},
+	{"             Defiler", 50, 5000,15000,2,1,    0,0, {DEFILER_MOUND ,0, 0}, 0},
+	{"              Lurker", 40, 5000,10000,2,0,    0,0, {HYDRALISK_DEN ,0, 0}, 0},
+	{"            Overlord", 40,10000,    0,0,1,    0,0, {0 ,0, 0}, 0},
+	{"            Mutalisk", 40,10000,10000,2,1,    0,0, {SPIRE ,0, 0}, 0},
+	{"            Guardien", 40, 5000,10000,0,0,    0,0, {GREATER_SPIRE ,0, 0}, 0},
+	{"               Queen", 50,10000,10000,2,1,    0,0, {QUEENS_NEST ,0, 0}, 0},
+	{"             Scourge", 30, 2500, 7500,1,1,    0,0, {SPIRE ,0, 0}, 0},
+	{"            Devourer", 40,10000, 5000,0,0,    0,0, {GREATER_SPIRE ,0, 0}, 0}, //~~
+	{"            Hatchery",120,30000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"                Lair",100,15000,10000,0,0,    0,0, {SPAWNING_POOL ,0, 0}, HATCHERY}, //~~
+	{"                Hive",120,20000,15000,0,0,    0,0, {QUEENS_NEST ,0, 0}, LAIR},
+	{"         Nydus Canal", 40,15000,    0,0,2,    0,0, {HIVE ,0, 0}, 0},
+	{"       Hydralisk den", 40,10000, 5000,0,2,    0,0, {SPAWNING_POOL ,0, 0}, 0},
+	{"       Defiler mound", 60,10000,10000,0,2,    0,0, {HIVE ,0, 0}, 0},
+	{"       Greater Spire",120,10000,15000,0,0,    0,0, {HIVE ,0, 0}, SPIRE}, //~~
+	{"        Queen's Nest", 60,15000,10000,0,2,    0,0, {LAIR ,0, 0}, 0},
+	{"   Evolution Chamber", 40, 7500,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"    Ultralisk Cavern", 80,15000,20000,0,2,    0,0, {HIVE ,0, 0}, 0},
+	{"               Spire",120,20000,15000,0,2,    0,0, {LAIR ,0, 0}, 0},
+	{"       Spawning Pool", 80,20000,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"        Creep Colony", 20, 7500,    0,0,2,    0,0, {0 ,0, 0}, 0},
+	{"        Spore Colony", 20, 5000,    0,0,0,    0,0, {0 ,0, 0}, CREEP_COLONY},
+	{"       Sunken Colony", 20, 5000,    0,0,0,    0,0, {0 ,0, 0}, CREEP_COLONY},
+	{"           Extractor", 40, 5000,    0,0,2,    0,0, {0 ,0, 0}, 0},//27
+	{"        Ventral Sacs",160,20000,20000,0,3,    0,0, {0 ,0, 0}, 0}, //~~
+	{"            Antennae",133,15000,15000,0,3,    0,0, {0 ,0, 0}, 0},
+	{"Pneumatized Carapace",133,15000,15000,0,3,    0,0, {0 ,0, 0}, 0},
+	{"     Metabolic Boost",100,10000,10000,0,3,    0,0, {0 ,0, 0}, SPAWNING_POOL},
+	{"      Adrenal Glands",100,20000,20000,0,3,    0,0, {0 ,0, 0}, SPAWNING_POOL},
+	{"   Muscular Augments",100,15000,15000,0,3,    0,0, {0 ,0, 0}, HYDRALISK_DEN},
+	{"      Grooved Spines",100,15000,15000,0,3,    0,0, {0 ,0, 0}, HYDRALISK_DEN},
+	{"      Gamete Meiosis",166,15000,15000,0,3,    0,0, {0 ,0, 0}, QUEENS_NEST},
+	{"   Metasynaptic node",166,15000,15000,0,3,    0,0, {0 ,0, 0}, 0},
+	{"   Chitinous Plating",133,15000,15000,0,3,    0,0, {0 ,0, 0}, ULTRALISK_CAVERN},
+	{"  Anabolic Synthesis",133,20000,20000,0,3,    0,0, {0 ,0, 0}, ULTRALISK_CAVERN},
+	{"           Burrowing", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, 0}, //~~
+	{"     Spawn Broodling", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, QUEENS_NEST},
+	{"              Plague",100,20000,20000,0,3,    0,0, {0 ,0, 0}, DEFILER_MOUND},
+	{"             Consume",100,10000,10000,0,3,    0,0, {0 ,0, 0}, DEFILER_MOUND},
+	{"             Ensnare", 80,10000,10000,0,3,    0,0, {0 ,0, 0}, QUEENS_NEST},
+	{"       Lurker Aspect",120,20000,20000,0,3,    0,0, {0 ,0, 0}, HYDRALISK_DEN}, //~~
+	{"            Carapace",266,15000,15000,0,4, 7500,0, {0 ,0, 0}, EVOLUTION_CHAMBER},
+	{"      Flyer Carapace",266,15000,15000,0,4, 7500,0, {0 ,0, 0}, SPIRE},//~~
+	{"       Melee Attacks",266,10000,10000,0,4, 5000,0, {0 ,0, 0}, EVOLUTION_CHAMBER},
+	{"     Missile Attacks",266,10000,10000,0,4, 5000,0, {0 ,0, 0}, EVOLUTION_CHAMBER},
+	{"       Flyer Attacks",266,10000,10000,0,4, 7500,0, {0 ,0, 0}, SPIRE},//~~
+	{"Mineral Drone to Gas",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"Gas Drone to Mineral",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"   Break up Building",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0},
+	{"                NULL",  0,    0,    0,0,0,    0,0, {0 ,0, 0}, 0}
+	} 
 };
 
 

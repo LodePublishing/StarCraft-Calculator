@@ -1,92 +1,35 @@
 #include "protoss.h"
 #include "settings.h"
 
-#define BUILDING_TYPES_PROTOSS 58
-
-#define DARK_TEMPLAR 0
-#define DARK_ARCHON 1
-#define PROBE 2
-#define ZEALOT 3
-#define DRAGOON 4
-#define HIGH_TEMPLAR 5
-#define ARCHON 6
-#define REAVER 7
-#define CORSAIR 8
-#define SHUTTLE 9
-#define SCOUT 10
-#define ARBITER 11
-#define CARRIER 12
-#define OBSERVER 13
-#define NEXUS 14
-#define ROBOTICS_FACILITY 15
-#define PYLON 16
-#define ASSIMILATOR 17
-#define OBSERVATORY 18
-#define GATEWAY 19
-#define PHOTON_CANNON 20
-#define CYBERNETICS_CORE 21
-#define CITADEL_OF_ADUN 22
-#define TEMPLAR_ARCHIVES 23
-#define FORGE 24
-#define STARGATE 25
-#define FLEET_BEACON 26
-#define ARBITER_TRIBUNAL 27
-#define ROBOTICS_SUPPORT_BAY 28
-#define SHIELD_BATTERY 29
-
-#define PSIONIC_STORM 30
-#define HALLUCINATION 31
-#define RECALL 32
-#define STASIS_FIELD 33
-#define DISRUPTION_WEB 34
-#define MIND_CONTROL 35
-#define MAELSTROM 36
-
-#define SINGULARITY_CHARGE 37
-#define LEG_ENHANCEMENTS 38
-#define SCARAB_DAMAGE 39
-#define REAVER_CAPACITY 40
-#define GRAVITIC_DRIVE 41
-#define SENSOR_ARRAY 42
-#define GRAVITIC_BOOSTERS 43
-#define KHAYDARIN_AMULET 44
-#define APIAL_SENSORS 45
-#define GRAVITIC_THRUSTERS 46
-#define CARRIER_CAPACITY 47
-#define KHAYDARIN_CORE 48
-#define ARGUS_JEWEL 49
-#define ARGUS_TALISMAN 50
-
-#define ARMOR 51
-#define PLATING 52
-#define GROUND_WEAPONS 53
-#define AIR_WEAPONS 54
-#define PLASMA_SHIELDS 55
-
-#define ONE_MINERAL_PROBE_TO_GAS 56
-#define ONE_GAS_PROBE_TO_MINERAL 57
 
 
 
 	void Player_Protoss::Set_Goals()
 	{
-		unsigned char i,j;
+		unsigned char i,j,k;
 		long Need_Gas;
-		
-		building_types=BUILDING_TYPES_PROTOSS;
+		for(i=0;i<MAX_GOALS;i++) Variabel[i]=0;		
 		for(j=0;j<6;j++) // Depth 6, just to be sure :)
-		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
+		for(i=0;i<MAX_GOALS;i++)
 			if(goal[i].what>0)
 			{
-				Ziel[i]=1;
+				buildable[i]=1;
+				for(k=0;k<3;k++)
+					if((stats[PROTOSS][i].prerequisite[k]>0)&&(goal[stats[PROTOSS][i].prerequisite[k]].what==0))
+						goal[stats[PROTOSS][i].prerequisite[k]].what=1;
+				if((stats[PROTOSS][i].facility>0)&&(goal[stats[PROTOSS][i].facility].what==0))
+				{
+					Variabel[stats[PROTOSS][i].facility]=1;
+					goal[stats[PROTOSS][i].facility].what=1;
+				}
 				switch(i)
 				{
 					case PHOTON_CANNON:
 					case ARMOR:
 					case GROUND_WEAPONS:
 					case PLASMA_SHIELDS:if(goal[FORGE].what==0) goal[FORGE].what=1; if((i==PLASMA_SHIELDS)||(goal[i].what<=1)||(i==PHOTON_CANNON)) break;
-					case DARK_ARCHON:if(i==DARK_ARCHON) Ziel[DARK_TEMPLAR]=1;
-					case ARCHON:if(i==ARCHON) Ziel[HIGH_TEMPLAR]=1;
+					case DARK_ARCHON:if(i==DARK_ARCHON) buildable[DARK_TEMPLAR]=1;
+					case ARCHON:if(i==ARCHON) buildable[HIGH_TEMPLAR]=1;
 					case ARBITER_TRIBUNAL:if((i==ARBITER_TRIBUNAL)&&(goal[STARGATE].what==0)) goal[STARGATE].what=1;
 					case DARK_TEMPLAR:
 					case HIGH_TEMPLAR:
@@ -147,32 +90,29 @@
 			}
 					
 
-		Ziel[PROBE]=1;
-		Ziel[NEXUS]=1;
-		Ziel[PYLON]=1;
+		buildable[PROBE]=1;
+		buildable[NEXUS]=1;
+		buildable[PYLON]=1;
+
+		Variabel[PROBE]=1;
+		Variabel[PYLON]=1;
+		Variabel[NEXUS]=1;
 
 		Need_Gas=0;
 
-		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
+		for(i=0;i<MAX_GOALS;i++)
 			Need_Gas+=(goal[i].what*stats[1][i].gas);
 
 		if(Need_Gas>0)
 		{
-			Ziel[ASSIMILATOR]=1;
+			need_Gas=1;
+			buildable[ASSIMILATOR]=1;
 			goal[ASSIMILATOR].what=1;
-			Ziel[ONE_MINERAL_PROBE_TO_GAS]=1;
-			Ziel[ONE_GAS_PROBE_TO_MINERAL]=1;
-		}
-
-		Max_Build_Types=0;
-		for(i=0;i<BUILDING_TYPES_PROTOSS;i++)
-		if(Ziel[i]==1)
-		{
-			Build_Av[Max_Build_Types]=i;
-			Max_Build_Types++;
-		}
-		for(i=56;i<60;i++)
-			goal[i].what=0; // Just to be sure that these unfulfillable goals are not set
+			buildable[ONE_MINERAL_PROBE_TO_GAS]=1;
+			buildable[ONE_GAS_PROBE_TO_MINERAL]=1;
+			Variabel[ONE_MINERAL_PROBE_TO_GAS]=1;
+			Variabel[ONE_GAS_PROBE_TO_MINERAL]=1;
+		} else need_Gas=0;
 	}
 
 	void Player_Protoss::Build(unsigned char what)
@@ -437,11 +377,11 @@
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
-		Vespene_Av=setup.Vespene_Geysirs;		
+		Vespene_Av=settings.Vespene_Geysirs;		
 		Vespene_Extractors=0;
 		tt=0;
 
-		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
+		while((timer<settings.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{
 			tSupply=Supply;			
 			tMax_Supply=Max_Supply;
@@ -458,54 +398,54 @@
 					if(building[j].RB==0)
 					{
 						
-						if((setup.Time_to_Enemy>0)&&(building[j].type<NEXUS)&&(building[j].on_the_run==0)&&(building[j].type!=PROBE)&&(building[j].type!=SHUTTLE)&&(building[j].type!=DARK_ARCHON)&&(building[j].type!=ARCHON))
+						if((settings.Time_to_Enemy>0)&&(building[j].type<NEXUS)&&(building[j].on_the_run==0)&&(building[j].type!=PROBE)&&(building[j].type!=SHUTTLE)&&(building[j].type!=DARK_ARCHON)&&(building[j].type!=ARCHON))
 						{
 							building[j].on_the_run=1;
 							switch(building[j].type)
 							{
 							case ZEALOT:
 								if(force[LEG_ENHANCEMENTS]>0)
-									building[j].RB+=(unsigned short)((setup.Time_to_Enemy)*0.75);
+									building[j].RB+=(unsigned short)((settings.Time_to_Enemy)*0.75);
 								else
-									building[j].RB+=(setup.Time_to_Enemy);
+									building[j].RB+=(settings.Time_to_Enemy);
 								break;
 							
 							case SCOUT:
 								if(force[GRAVITIC_THRUSTERS]>0)
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 								else
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 								break;
 							case CORSAIR:
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 								break;
 							case ARCHON:
 							case DARK_ARCHON:
 							case DARK_TEMPLAR:
-								building[j].RB+=(setup.Time_to_Enemy);
+								building[j].RB+=(settings.Time_to_Enemy);
 								break;
 							case CARRIER:
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 								break;
 							case HIGH_TEMPLAR:
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 									break;
 							case OBSERVER:
 								if(force[GRAVITIC_BOOSTERS]>0)
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 								else
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 								break;
 							case REAVER:
 								if(force[SHUTTLE]>0)
 								{
 									if(force[GRAVITIC_DRIVE]>0)
-										building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.5);
+										building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.5);
 									else
-										building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+										building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 								}
 								else
-								building[j].RB+=setup.Time_to_Enemy*3;
+								building[j].RB+=settings.Time_to_Enemy*3;
 								break;
 						}
 					}
@@ -572,7 +512,19 @@
 			
 		        tt++;
 			ok=0;
-			Build(Build_Av[program[IP].order]);
+			
+			if(Code[IP][0]<Code[IP][1])
+			{
+				program[IP].dominant=0;
+				Build(Build_Av[Code[IP][0]]);
+				if(ok==0) {program[IP].dominant=1;Build(Build_Av[Code[IP][1]]);}
+			}
+			else
+			{
+				program[IP].dominant=1;
+				Build(Build_Av[Code[IP][1]]);
+				if(ok==0) {program[IP].dominant=0;Build(Build_Av[Code[IP][0]]);}
+			}
 			if(suc>0) program[IP].success=suc;
 			if((ok==1)||(tt>267))
 			{
@@ -588,7 +540,7 @@
 				IP++;
 			}
 
-		if((setup.Scout_Time>0)&&(timer==setup.Scout_Time)&&((peonmins>0)||(peongas>0)))
+		if((settings.Scout_Time>0)&&(timer==settings.Scout_Time)&&((peonmins>0)||(peongas>0)))
 	        {
 	                     if(peonmins>0)
 	                       peonmins--;
@@ -622,7 +574,7 @@ Player_Protoss::~Player_Protoss()
 void Player_Protoss::readjust_goals()
 {
 	unsigned short i;
-	for(i=0;i<building_types;i++)
+	for(i=0;i<MAX_GOALS;i++)
 		if(goal[i].what>0)
 		{
 			if(i==DARK_ARCHON)

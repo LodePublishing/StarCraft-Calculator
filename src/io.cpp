@@ -1,0 +1,29 @@
+#include "io.h"
+#include "main.h"
+#include "stdio.h"
+
+inline void setColor(unsigned char c)
+{
+	if(colors==0) return;
+	#ifdef WIN32
+
+	SetConsoleTextAttribute(scr,colorsWin32[c-31]);
+	#elif __linux__
+	printf("\033[0;%d;40m",c);
+	#endif
+};
+
+inline void setAt(unsigned char cnt)
+{
+	if(cnt<4) setColor(37);//White
+	else if(cnt<8) setColor(33);//Green
+	else if(cnt<16) setColor(32);//Orange
+	else if(cnt<32) setColor(36);//Purple
+	else if(cnt<64) setColor(31);//Red
+	else setColor(34);//Blue
+};
+
+#ifdef WIN32
+HANDLE scr;
+void print(const char * x) {DWORD num; WriteConsole(scr,x,strlen(x),&num,0); }
+#endif

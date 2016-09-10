@@ -1,78 +1,25 @@
 #include "zerg.h"
 #include "settings.h"
 
-#define BUILDING_TYPES_ZERG 53
-
-#define ZERGLING 0
-#define HYDRALISK 1
-#define ULTRALISK 2
-#define DRONE 3
-#define DEFILER 4
-#define LURKER 5
-#define OVERLORD 6
-#define MUTALISK 7
-#define GUARDIEN 8
-#define QUEEN 9
-#define SCOURGE 10
-#define DEVOURER 11
-
-#define HATCHERY 12
-#define LAIR 13
-#define HIVE 14
-#define NYDUS_CANAL 15
-#define HYDRALISK_DEN 16
-#define DEFILER_MOUND 17
-#define GREATER_SPIRE 18
-#define QUEENS_NEST 19
-#define EVOLUTION_CHAMBER 20
-#define ULTRALISK_CAVERN 21
-#define SPIRE 22
-#define SPAWNING_POOL 23
-#define CREEP_COLONY 24
-#define SPORE_COLONY 25
-#define SUNKEN_COLONY 26
-#define EXTRACTOR 27
-
-#define VENTRAL_SACKS 28
-#define ANTENNAE 29
-#define PNEUMATIZED_CARAPACE 30
-#define METABOLIC_BOOST 31
-#define ADRENAL_GLANDS 32
-#define MUSCULAR_AUGMENTS 33
-#define GROOVED_SPINES 34
-#define GAMETE_MEIOSIS 35
-#define METASYNAPTIC_NODE 36
-#define CHITINOUS_PLATING 37
-#define ANABOLIC_SYNTHESIS 38
-
-#define BURROWING 39
-#define SPAWN_BROODLING 40
-#define PLAGUE 41
-#define CONSUME 42
-#define ENSNARE 43
-#define LURKER_ASPECT 44
-
-#define CARAPACE 45
-#define FLYER_CARAPACE 46
-#define MELEE_ATTACKS 47
-#define MISSILE_ATTACKS 48
-#define FLYER_ATTACKS 49
-
-#define ONE_MINERAL_DRONE_TO_GAS 50
-#define ONE_GAS_DRONE_TO_MINERAL 51
-
-#define BREAK_UP_BUILDING 52
-
 	void Player_Zerg::Set_Goals()
 	{
-		unsigned char i,j;
+		unsigned char i,j,k;
 		long Need_Gas;
-		building_types=BUILDING_TYPES_ZERG;
+		for(i=0;i<MAX_GOALS;i++)
+			Variabel[i]=0;
 		for(j=0;j<6;j++) // Deepth 6, just to be sure :)
-		for(i=0;i<BUILDING_TYPES_ZERG;i++)
+		for(i=0;i<MAX_GOALS;i++)
 			if(goal[i].what>0)
 			{
-				Ziel[i]=1;
+				buildable[i]=1;
+				for(k=0;k<3;k++)
+					if((stats[ZERG][i].prerequisite[k]>0)&&(goal[stats[ZERG][i].prerequisite[k]].what==0))
+						goal[stats[ZERG][i].prerequisite[k]].what=1;
+				if((stats[ZERG][i].facility>0)&&(goal[stats[ZERG][i].facility].what==0)&&(i!=HIVE)&&(i!=LAIR)&&(stats[ZERG][i].facility!=CREEP_COLONY))
+				{
+					Variabel[stats[ZERG][i].facility]=1;
+					goal[stats[ZERG][i].facility].what=1;
+				}
 				switch(i)
 				{
 					case HYDRALISK_DEN:
@@ -94,7 +41,7 @@
 					case DEFILER:
 						if(goal[DEFILER_MOUND].what==0) goal[DEFILER_MOUND].what=1;break;
 					case LURKER:
-						Ziel[HYDRALISK]=1;
+						buildable[HYDRALISK]=1;
 						if(goal[LURKER_ASPECT].what==0) goal[LURKER_ASPECT].what=1;break;
 					
 					case FLYER_CARAPACE:
@@ -102,8 +49,8 @@
 						if((goal[i].what==3)&&(goal[HIVE].what==0)) goal[HIVE].what=1;
 					case SCOURGE:
 					case MUTALISK:
-						Ziel[SPIRE]=1;
-						Ziel[LAIR]=1;
+						buildable[SPIRE]=1;
+						buildable[LAIR]=1;
 						if((goal[GREATER_SPIRE].what==0)&&(goal[DEVOURER].what==0)&&(goal[GUARDIEN].what==0))
 						{
 							goal[SPIRE].what=1;
@@ -112,7 +59,7 @@
 					case GUARDIEN:
 						{
 							if(goal[GREATER_SPIRE].what==0) goal[GREATER_SPIRE].what=1;
-							Ziel[MUTALISK]=1;
+							buildable[MUTALISK]=1;
 						};
 							break;
 					case GAMETE_MEIOSIS:
@@ -121,11 +68,11 @@
 					case QUEEN:
 						if(goal[QUEENS_NEST].what==0) goal[QUEENS_NEST].what=1;break;
 					case LURKER_ASPECT:
-						Ziel[LAIR]=1;
+						buildable[LAIR]=1;
 						if(goal[HYDRALISK_DEN].what==0) goal[HYDRALISK_DEN].what=1;break;
 					
 					case HIVE:
-						Ziel[LAIR]=1;
+						buildable[LAIR]=1;
 						if(goal[QUEENS_NEST].what==0) goal[QUEENS_NEST].what=1;break;						
 					case GREATER_SPIRE:
 						if(goal[SPIRE].what==0) goal[SPIRE].what=1;
@@ -139,61 +86,59 @@
 					case ANTENNAE:
 					case PNEUMATIZED_CARAPACE:		
 					case QUEENS_NEST:
-						Ziel[LAIR]=1;
+						buildable[LAIR]=1;
 						break;
 					case SPORE_COLONY:
-						if(goal[EVOLUTION_CHAMBER].what==0) goal[EVOLUTION_CHAMBER].what=1;Ziel[CREEP_COLONY]=1;break;
+						if(goal[EVOLUTION_CHAMBER].what==0) goal[EVOLUTION_CHAMBER].what=1;buildable[CREEP_COLONY]=1;break;
 					case SUNKEN_COLONY:
-						if(goal[SPAWNING_POOL].what==0) goal[SPAWNING_POOL].what=1;Ziel[CREEP_COLONY]=1;break;
+						if(goal[SPAWNING_POOL].what==0) goal[SPAWNING_POOL].what=1;buildable[CREEP_COLONY]=1;break;
 							
 					case CARAPACE:
 					case MELEE_ATTACKS:
 					case MISSILE_ATTACKS:
 						goal[EVOLUTION_CHAMBER].what=1;
 						if((goal[i].what==3)&&(goal[HIVE].what==0)) goal[HIVE].what=1;
-						else if(goal[i].what==2) Ziel[LAIR]=1;break;
+						else if(goal[i].what==2) buildable[LAIR]=1;break;
 				}
 			}
-		if(Ziel[LAIR]>0)
+		if(buildable[LAIR]>0)
 		{
 			goal[SPAWNING_POOL].what=1;
-			Ziel[SPAWNING_POOL]=1;
-			if((Ziel[HIVE]==0)&&(goal[LAIR].what==0))
+			buildable[SPAWNING_POOL]=1;
+			if((buildable[HIVE]==0)&&(goal[LAIR].what==0))
 				goal[LAIR].what=1;
 		}
 
 //TODO: Check whether Lair/Hive always works		
-		if((Ziel[SPIRE]>0)&&(Ziel[GREATER_SPIRE]==0))
+		if((buildable[SPIRE]>0)&&(buildable[GREATER_SPIRE]==0))
 			goal[SPIRE].what=1;
 
-		Ziel[OVERLORD]=1;
-		Ziel[DRONE]=1;
-		Ziel[HATCHERY]=1;
-		Ziel[BREAK_UP_BUILDING]=1;
+		buildable[OVERLORD]=1;
+		buildable[DRONE]=1;
+		buildable[HATCHERY]=1;
+		buildable[BREAK_UP_BUILDING]=1;goal[BREAK_UP_BUILDING].what=0;
+
+		Variabel[OVERLORD]=1;
+		Variabel[DRONE]=1;
+		Variabel[HATCHERY]=1;
+		Variabel[BREAK_UP_BUILDING]=1;
 
 		Need_Gas=0;
 
-		for(i=0;i<BUILDING_TYPES_ZERG;i++)
+		for(i=0;i<MAX_GOALS;i++)
 			Need_Gas+=(goal[i].what*stats[2][i].gas);
 		if(Need_Gas>0)
 		{
+			need_Gas=1;
 			if(goal[EXTRACTOR].what==0) goal[EXTRACTOR].what=1;
-			Ziel[EXTRACTOR]=1;
-			Ziel[ONE_MINERAL_DRONE_TO_GAS]=1;
-			Ziel[ONE_GAS_DRONE_TO_MINERAL]=1;				 	}
-
-		Max_Build_Types=0;
-		
-		Ziel[EXTRACTOR]=1;
-		
-		for(i=0;i<BUILDING_TYPES_ZERG;i++)
-		if(Ziel[i]==1)
-		{
-			Build_Av[Max_Build_Types]=i;
-			Max_Build_Types++;
-		}
-		for(i=50;i<60;i++)
-			goal[i].what=0; //just to be sure :)
+			buildable[EXTRACTOR]=1;
+			buildable[ONE_MINERAL_DRONE_TO_GAS]=1;
+			buildable[ONE_GAS_DRONE_TO_MINERAL]=1;				 	
+			Variabel[EXTRACTOR]=1;
+			Variabel[ONE_MINERAL_DRONE_TO_GAS]=1;
+			Variabel[ONE_GAS_DRONE_TO_MINERAL]=1;
+			buildable[EXTRACTOR]=1;
+		} else need_Gas=0;
 	}
 
 
@@ -247,8 +192,8 @@
 					{
 						ok=1;
 						peonmins++;
-						mins+=stats[2][building[n].type].mins*0.75;
-						gas+=stats[2][building[n].type].gas*0.75;
+						mins+=stats[2][building[n].type].mins*3/4;
+						gas+=stats[2][building[n].type].gas*3/4;
 						Supply--;
 						force[DRONE]++;
 						if(building[n].type==EXTRACTOR)
@@ -536,11 +481,11 @@
 		timer=0;
 		harvested_gas=0;
 		harvested_mins=0;
-		Vespene_Av=setup.Vespene_Geysirs;
+		Vespene_Av=settings.Vespene_Geysirs;
 		Vespene_Extractors=0;		
 		tt=0;
 
-		while((timer<setup.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
+		while((timer<settings.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{			
 			tSupply=Supply;tMax_Supply=Max_Supply;
 			BuildingRunning=0;
@@ -555,7 +500,7 @@
 					building[j].RB--;
 					if(building[j].RB==0)
 					{
-						if((setup.Time_to_Enemy>0)&&(building[j].type<HATCHERY)&&(building[j].on_the_run==0)&&(building[j].type!=OVERLORD)&&(building[j].type!=DRONE)&&(building[j].type!=LURKER))
+						if((settings.Time_to_Enemy>0)&&(building[j].type<HATCHERY)&&(building[j].on_the_run==0)&&(building[j].type!=OVERLORD)&&(building[j].type!=DRONE)&&(building[j].type!=LURKER))
 			//TODO: Why no Lurker?				
 						{
 							building[j].on_the_run=1;
@@ -564,30 +509,30 @@
 								if(force[METABOLIC_BOOST]>0)
 
 // TODO : Acceleration during the run, say you got 6 zerglings and research metabolic boost just when they are underway
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.5);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.5);
 								else
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 							}
 							else if(building[j].type==HYDRALISK)
 							{
 								if(force[MUSCULAR_AUGMENTS]>0)
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 								else
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 							}
 							else if(building[j].type==ULTRALISK)
 							{
 								if(force[ANABOLIC_SYNTHESIS]>0)
-									building[j].RB+=setup.Time_to_Enemy;
+									building[j].RB+=settings.Time_to_Enemy;
 								else
-									building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 							}
 							else if((building[j].type==MUTALISK)||(building[j].type==SCOURGE)||(building[j].type==QUEEN))
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*0.75);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
 							else if(building[j].type==DEVOURER)
-								building[j].RB+=setup.Time_to_Enemy;
+								building[j].RB+=settings.Time_to_Enemy;
 							else if((building[j].type==GUARDIEN)||(building[j].type==DEFILER))
-								building[j].RB+=(unsigned short)(setup.Time_to_Enemy*1.25);
+								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 						}
 					// End of the 'run to enemy' part
 						
@@ -671,7 +616,18 @@
 
 			tt++;
 			ok=0;
-			Build(Build_Av[program[IP].order]); 
+			if(Code[IP][0]<Code[IP][1])
+			{
+				program[IP].dominant=0;
+				Build(Build_Av[Code[IP][0]]);
+				if(ok==0) {program[IP].dominant=1;Build(Build_Av[Code[IP][1]]);}
+			}
+			else
+			{
+				program[IP].dominant=1;
+				Build(Build_Av[Code[IP][1]]);
+				if(ok==0) {program[IP].dominant=0;Build(Build_Av[Code[IP][0]]);}
+			}
 		// suc and ok is modified by 'Build'
 			if(suc>0) program[IP].success=suc;
 			if((ok==1)||(tt>267))
@@ -722,7 +678,7 @@ Player_Zerg::~Player_Zerg()
 void Player_Zerg::readjust_goals()
 {
 	unsigned short i,j;
-	for(i=0;i<building_types;i++)
+	for(i=0;i<MAX_GOALS;i++)
         	if(goal[i].what>0)
 		{
 			if(stats[2][i].type==2)
@@ -752,13 +708,14 @@ void Player_Zerg::readjust_goals()
 	//why i AND j ? Well... there could be multiple BREAK_UP_BUILDING commands...
 	while(i>0)
 	{
-		if(Build_Av[program[i].order]==BREAK_UP_BUILDING)
+		if(Build_Av[Code[i][program[i].dominant]]==BREAK_UP_BUILDING)
 		{
 			j=i;
 			while(j>0)
 			{
-				if(stats[2][Build_Av[program[j].order]].type==2)
-					goal[Build_Av[program[j].order]].what--;				j--;
+				if(stats[2][Build_Av[Code[j][program[j].dominant]]].type==2)
+					goal[Build_Av[Code[j][program[j].dominant]]].what--;				
+				j--;
 			}
 		}
 		i--;
