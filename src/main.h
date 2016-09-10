@@ -13,6 +13,13 @@
 #define MAX_GOALS 100
 
 
+struct LAST
+{
+	int what;
+	int location;
+	int count;
+};
+
 struct LOCATION
 {
 	int force[UNIT_TYPE_COUNT];
@@ -99,12 +106,15 @@ struct GOAL
 #define SHIP_WEAPONS 			63
 #define REFINERY 			64 // <- must be set constant to 64
 #define GAS_SCV				65
-#define WINDOW_MOVE_ADD_3		66
-#define WINDOW_MOVE_ADD_1		67
-#define WINDOW_MOVE_SUB_1		68
-#define WINDOW_MOVE_PREV		69
-#define MOVE_FROM_HERE			70
-#define MOVE_TO_HERE			71
+
+#define MOVE_ONE_3_FORWARD		66
+#define MOVE_ONE_1_FORWARD		67
+#define MOVE_ONE_1_BACKWARD		68
+
+#define ROTATE		69 //~~
+#define FOLLOW		70 //~~
+#define RESET		71 //~~
+
 #define VESPENE_GEYSIR 			72 
 #define MINERALS			73
 #define R_STIM_PACKS 			74
@@ -765,8 +775,8 @@ const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 
 
 
-
-
 #endif
+
+
 
 

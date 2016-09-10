@@ -1,9 +1,9 @@
 CXX=g++
-OBJ= src/scc22.o src/race.o src/settings.o src/soup.o src/io.o src/anarace.o
-CXXFLAGS= -ggdb -Wall
+OBJ= src/io.o src/scc24.o src/race.o src/anarace.o src/soup.o src/settings.o
+CXXFLAGS= -ggdb
 #-O4 -march=pentium4 -mcpu=pentium4 -ffast-math -pipe -funroll-loops -fforce-mem -malign-double -fforce-addr -fomit-frame-pointer
 LIBS=
-TARGET=scc22
+TARGET=scc24
 
 all:  $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJ) $(LIBS)

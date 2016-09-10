@@ -1,8 +1,9 @@
 "@SETTINGS"
-"Max Time" = "10"
+"Max Time" = "15"
 "Preprocess Buildorder" = "NO"
-"Max Generations" = "150"
+"Max unchanged Generations" = "500"
 "Max length" = "96"
+"Max Runs" = "5"
 "@END"
 
 "@PLAYER" "1"

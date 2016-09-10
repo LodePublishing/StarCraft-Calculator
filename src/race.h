@@ -18,14 +18,19 @@ private:
 	static const MAP* map;
         static const int* basicMineralHarvestPerSecond;
         static const int* basicGasHarvestPerSecond;
+	
+	static LAST last[MAX_LENGTH];
+	static int lastcounter;
 	       
         int mineralHarvestPerSecond[MAX_LOCATIONS][45];
         int gasHarvestPerSecond[MAX_LOCATIONS][5];
-        int window,prev,start,IP;
+//        int window,prev,start,
+	int IP;
         int mins,gas;
         int supply,maxSupply;
         int mutationRate;
-        int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...)
+        int ftime[MAX_GOALS]; //when the goal is reached / when the last item is produced (ALL locations...
+	static int locationList[MAX_LOCATIONS][MAX_LOCATIONS];
 struct Building
 {
         int RB; // Remaining Buildtime
@@ -34,6 +39,7 @@ struct Building
         int facility; // in what facility it was produced
         int location;
         int goal; //For movement!
+	int onTheRun;
         // TODO: Aus Optimierungsgruenden: Eine logforce Variable die _Alle_ Einheiten mitzaehlt
 } building[MAX_BUILDINGS]; //building declaration in main.h
         LOCATION location[MAX_LOCATIONS]; //Location[0] == globalForce/globalAvailible!!
@@ -50,10 +56,12 @@ struct Building
         static int genoToPhaenotype[UNIT_TYPE_COUNT];
         int length;
 	int harvestedGas,harvestedMins;
+	int lastwhat;
 public:
 //Output:
-	int pFitness,sFitness;
+	int pFitness,sFitness,tFitness;
         int Code[2][MAX_LENGTH];
+	//int phaenoCode[2][MAX_LENGTH];
 //Controls:
 	static const SETTINGS* pSet;
 	void mutateGeneCode();

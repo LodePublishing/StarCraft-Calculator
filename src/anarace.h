@@ -8,7 +8,6 @@ class ANARACE
 {
 private:
 	int buildGene(int what);
-        void calculateFitness(int ready);
         void adjustMineralHarvest(int loc);
         void adjustGasHarvest(int loc);
         static void init();
@@ -27,24 +26,23 @@ public:
         struct Program
         {
                 int needSupply,haveSupply,built,dominant,haveMinerals,haveGas,time,mins,gas,temp,location,type;
-		Success success;
+		Success success[2];
         } program[MAX_LENGTH];
 
         static int maxBuildTypes;
-        static int basicLength;
         static int initialized;
         static int phaenoToGenotype[UNIT_TYPE_COUNT];
 	static int genoToPhaenotype[UNIT_TYPE_COUNT];
         static int isBuildable[UNIT_TYPE_COUNT];
-        static int isVariable[UNIT_TYPE_COUNT];
-        static int basicBuildOrder[2][MAX_LENGTH];
         static const UNIT_STATISTICS* pStats;
         static const MAP* map;
         static const int* basicMineralHarvestPerSecond;
         static const int* basicGasHarvestPerSecond;
+	static int lastcounter;
+	static LAST last[MAX_LENGTH];
         int mineralHarvestPerSecond[MAX_LOCATIONS][45];
         int gasHarvestPerSecond[MAX_LOCATIONS][5];
-        int window,prev,start,IP;
+        int IP;
         int mins,gas;
         int supply,maxSupply;
         int mutationRate;
@@ -59,14 +57,23 @@ struct Building
         int facility; // in what facility it was produced
         int location;
         int goal; //For movement!
+	int onTheRun;
         // TODO: Aus Optimierungsgruenden: Eine logforce Variable die _Alle_ Einheiten mitzaehlt
 } building[MAX_BUILDINGS]; //Building declaration in main.h
         LOCATION location[MAX_LOCATIONS]; //Location[0] == globalForce/globalAvailible!!
         static GOAL goal[MAX_GOALS];
 
 	int harvestedGas,harvestedMins;
-	int pFitness,sFitness,length;
+	int length;
         int Code[2][MAX_LENGTH];
+
+        int run;
+        int generation;
+        int maxpFitness;
+        int maxsFitness;
+	int maxtFitness;
+        int unchangedGenerations;
+	
 //Controls:
 	static const SETTINGS* pSet;
 	void calculate(); 
