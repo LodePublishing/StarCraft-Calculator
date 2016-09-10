@@ -12,7 +12,7 @@ void RACE::CalculateFitness()
 	pFitness=0;
 	sFitness=0;
 		
-	sFitness=(unsigned short)(harvested_mins*settings.Mineral_Blocks*settings.Mineral_Mod/800+harvested_gas/settings.Vespene_Geysirs);
+	sFitness=(harvested_mins*settings.Mineral_Blocks*settings.Mineral_Mod/800+harvested_gas/settings.Vespene_Geysirs);
 	if(ready==0)
         {
 	         timer=settings.Max_Time;
@@ -88,9 +88,89 @@ void RACE::CheckReady(unsigned char j)
 		ready&=((goal[i].what<=force[i])&&((goal[i].time>=ftime[i])||(goal[i].time==0)));
 }
 
+void RACE::Build(int what)
+{
+        const Stats * stat;
+        stat=&stats[race][what];
+        ok=0;
+	if(what<EXTRACTOR-1)
+	{
+//TODO: Array und testen wo der comp am meisten haengenbleibt und abbricht... moeglichst dann nach oben bringen!
+
+	if(((stat->prerequisite[0]==0)||(force[stat->prerequisite[0]]>0))&&((stat->prerequisite[1]==0)||(force[stat->prerequisite[1]]>0))&&((stat->prerequisite[2]==0)||(force[stat->prerequisite[2]]>0))&&((stat->facility==0)||(availible[stat->facility]>0))&&(mins>=(stat->mins+(stat->type==UPGRADE)*force[what]*stat->tmp))&&(gas>=(stat->gas+(stat->type==UPGRADE)*force[what]*stat->tmp))&&( (Supply>=stat->supply) || (stat->supply==0))&&((stat->type!=RESEARCH)||((force[what]==0)&&(availible[what]==1))) &&((stat->type!=UPGRADE)||((force[what]<=2)&&(availible[what]==1)))&&(peonmins+peongas*(race!=PROTOSS)>=1*(stat->type==BUILDING))&&(nr<255)&&((what!=EXTRACTOR)||(Vespene_Av>0)))
+	
+                {
+                        Produce(what);
+                        if(stat->facility>0) availible[stat->facility]--;
+                }
+	}
+else
+
+        if(what==ONE_MINERAL_DRONE_TO_GAS)
+        {
+                if((force[EXTRACTOR]>0)&&(peonmins>0))
+	        {
+                                ok=1;
+                                peonmins--;
+                                peongas++;
+                                program[IP].built=1;
+	        }
+        }
+        else
+        if(what==ONE_GAS_DRONE_TO_MINERAL)
+        {
+                if(peongas>0)
+         {
+                        ok=1;
+                        peonmins++;
+                        peongas--;
+                        program[IP].built=1;
+        }
+        }
+        else
+        if(what==EXTRACTOR)
+        {
+                if(Vespene_Av>0)
+                {
+                        Vespene_Av--;
+                        Vespene_Extractors++;
+                        Produce(what);
+                }
+        }
+      else
+      if((race==ZERG)&&(what==BREAK_UP_BUILDING)&&(BuildingRunning>0))
+                        {
+                                min=5000;
+                                n=0;
+                                for(i=0;i<MAX_BUILDINGS;i++)
+                                        if(building[i].RB>0)
+                                        {
+                                                if((stats[2][building[i].type].type==2) && (stats[2][building[i].type].BT-building[i].RB<min))
+                // type == 2 because this makes only sense with buildings
+                // Sure... but what about Lurker, Guardien, Sunken, ...  ?
+                // mmmh... on the other hand this really makes no sense :}
+                                                {
+                                                        min=stats[2][building[i].type].BT-building[i].RB;
+                                                        n=i;
+                                                }
+                                        }
+
+                                        if(min<5000)
+                                        {
+                                                ok=1;
+
+//        if((suc==OK)&&(ok==0))
+  //              suc=TECHNOLOGY_AVAILIBLE;
+/*        if(suc==OK)
+        {
+                protein[what]++;
+                totalProteins[what]++;
+        }*/
+}
 
 
 void RACE::Harvest_Resources()
+			
 {
 	if(peonmins<56)
 	{
@@ -101,23 +181,32 @@ void RACE::Harvest_Resources()
 		mins+=mining[56];
 		harvested_mins+=mining[56];
 	}
-	if(Vespene_Extractors>0)
+	if(peongas>0)//peongas<5*Vespene_Extractors)
 	{
-		if(peongas<5*Vespene_Extractors)
+		if(peongas<4)
 		{
-			gas+=gasing[peongas/Vespene_Extractors]*Vespene_Extractors;
-			harvested_gas+=gasing[peongas/Vespene_Extractors]*Vespene_Extractors;
-		} else
+			//TODO: Mehrere VespExt beachten!
+			gas+=gasing[peongas/*/Vespene_Extractors*/]/**Vespene_Extractors*/;
+			harvested_gas+=gasing[peongas/*Vespene_Extractors*/]/*Vespene_Extractors*/;
+		}
+		else
 		{
-			gas+=gasing[4]*Vespene_Extractors;
-			harvested_gas+=gasing[4]*Vespene_Extractors;
+			gas+=gasing[4];//*Vespene_Extractors;
+        	        harvested_gas+=gasing[4];//*Vespene_Extractors;
+      		
 		}
 	}
+/*	} else if(Vespene_Extractors>0)
+	{
+		gas+=gasing[4]*Vespene_Extractors;
+		harvested_gas+=gasing[4]*Vespene_Extractors;
+	}*/
 }
 
 // Account the costs of a production
 void RACE::Produce(unsigned char what)
 {
+	int i;
 	building[nr].RB=stats[race][what].BT;
 	mins-=stats[race][what].mins;
 	gas-=stats[race][what].gas;
@@ -128,123 +217,128 @@ void RACE::Produce(unsigned char what)
 		availible[what]=0;
 	if(stats[race][what].type==UPGRADE)
 	{
-		building[nr].RB+=force[what]*32;
+		building[nr].RB+=force[what]*3200;
 		mins-=stats[race][what].tmp*force[what];
 		gas-=stats[race][what].tmp*force[what];
         }
+					
 	building[nr].IP=IP;
 	ok=1;
+        nr=255;
+        for(i=0;i<MAX_BUILDINGS;i++) if(building[i].RB==0)
+        {
+                nr=i;
+                i=MAX_BUILDINGS;
+        }
 }
 
-
-// some functions to modify the list of orders
 void RACE::Mutate()
 {
-	unsigned char k,ta,tb,i,x,y,tmp[MAX_LENGTH];
-	//length=MAX_LENGTH;
-	if(length==0) return;
+        unsigned char k,ta,tb,i,x,y,tmp[MAX_LENGTH];
+        //length=MAX_LENGTH;
+        if(length==0) return;
 
-	for(x=0;x<MAX_LENGTH;x++)
-		if(rand()%1000==0)
-		{
-	
-			switch(rand()%3)
-			{
-				//TODO: wenn generateBuildOrder==1 dann bleibts stehen!
-				case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
-					if((settings.generateBuildOrder==0)||((Variabel[Build_Bv[Code[x][0]]]==1)&&(Variabel[Build_Bv[Code[x][1]]]==1)))
-					for(y=x;y<MAX_LENGTH-1;y++)
-					{
-						Code[y][0]=Code[y+1][0];
-						Code[y][1]=Code[y+1][1];
-					};
-					break;
-				case 1://add one variabel entry
-					for(y=MAX_LENGTH-1;y>x;y--)
-					{
-						Code[y][0]=Code[y-1][0];
-						Code[y][1]=Code[y-1][1];
-					}
-					y=rand()%Max_Build_Types;
-					if(settings.generateBuildOrder==1)
-						while(Variabel[y]==0) y=rand()%Max_Build_Types;
-					Code[x][0]=y;
-					y=rand()%Max_Build_Types;
-					if(settings.generateBuildOrder==1)
-						while(Variabel[y]==0) y=rand()%Max_Build_Types;
-					Code[x][1]=y;						
-					break;
+        for(x=0;x<MAX_LENGTH;x++)
+                if(rand()%1000==0)
+                {
 
-				case 2://change one entry
-					k=rand()%2;
-					if(Variabel[Build_Bv[Code[x][k]]]==1)
-					{
-						y=rand()%Max_Build_Types;//Optimieren
-						if(settings.generateBuildOrder==1)
-							while(Variabel[y]==0) y=rand()%Max_Build_Types;
-						Code[x][k]=y;
-					};break;
-			}
-		}
-		else 
-		if(rand()%MAX_LENGTH==0)
-		{
-		//exchange two entries
-			y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-			if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-			if(x!=y)
-			{
-				k=rand()%2;
-				ta=Code[x][k];
-				Code[x][k]=Code[y][k];
-				Code[y][k]=ta;
-			}
-		}
-		else 
-		if(rand()%MAX_LENGTH==0)
-		{
-		//exchange two entries
-			y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
-			if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
-			if(x!=y)
-			{
-				ta=Code[x][0];
-				Code[x][0]=Code[y][0];
-				Code[y][0]=ta;
-				ta=Code[x][1];
-				Code[x][1]=Code[y][1];
-				Code[y][1]=ta;
-			}
-		} else
+                        switch(rand()%3)
+                        {
+                                //TODO: wenn generateBuildOrder==1 dann bleibts stehen!
+                                case 0://delete one variabel entry and move - Mehrere Schmieden/Kasernen etc. zulassen!
+                                        if((settings.generateBuildOrder==0)||((Variabel[Build_Bv[Code[x][0]]]==1)&&(Variabel[Build_Bv[Code[x][1]]]==1)))
+                                        for(y=x;y<MAX_LENGTH-1;y++)
+                                        {
+                                                Code[y][0]=Code[y+1][0];
+                                                Code[y][1]=Code[y+1][1];
+                                        };
+                                        break;
+                                case 1://add one variabel entry
+                                        for(y=MAX_LENGTH-1;y>x;y--)
+                                        {
+                                                Code[y][0]=Code[y-1][0];
+                                                Code[y][1]=Code[y-1][1];
+                                        }
+                                        y=rand()%Max_Build_Types;
+                                        if(settings.generateBuildOrder==1)
+                                                while(Variabel[y]==0) y=rand()%Max_Build_Types;
+                                        Code[x][0]=y;
+                                        y=rand()%Max_Build_Types;
+                                        if(settings.generateBuildOrder==1)
+                                                while(Variabel[y]==0) y=rand()%Max_Build_Types;
+                                        Code[x][1]=y;
+                                        break;
 
-		//move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
-		//TODO switch ta and tb if tb<ta
-		if(rand()%MAX_LENGTH==0)
-		{
-			ta=rand()%length;
-			tb=rand()%length;
-			x=rand()%length; //move it here
-			if((ta<tb)&&(x>tb))
-			{
-				for(i=0;i<x-tb;i++) tmp[i]=Code[i+tb][0];
-				for(i=ta;i<tb;i++) Code[i+x-tb][0]=Code[i][0];
-				for(i=0;i<x-tb;i++) Code[ta+i][0]=tmp[i];
-				for(i=0;i<x-tb;i++) tmp[i]=Code[i+tb][1];
-				for(i=ta;i<tb;i++) Code[i+x-tb][1]=Code[i][1];
-				for(i=0;i<x-tb;i++) Code[ta+i][1]=tmp[i];
-	        } 
-			else
-			if((ta<tb)&&(x<ta))
-			{
-				for(i=0;i<ta-x;i++)	tmp[i]=Code[i+x][0];
-				for(i=ta;i<tb;i++) Code[x+i-ta][0]=Code[i][0];
-				for(i=0;i<ta-x;i++) Code[tb-x][0]=tmp[i];		
-				for(i=0;i<ta-x;i++)	tmp[i]=Code[i+x][1];
-				for(i=ta;i<tb;i++) Code[x+i-ta][1]=Code[i][1];
-				for(i=0;i<ta-x;i++) Code[tb-x][1]=tmp[i];		
-			}
-		}
-		
+                                case 2://change one entry
+                                        k=rand()%2;
+                                        if(Variabel[Build_Bv[Code[x][k]]]==1)
+                                        {
+                                                y=rand()%Max_Build_Types;//Optimieren
+                                                if(settings.generateBuildOrder==1)
+                                                        while(Variabel[y]==0) y=rand()%Max_Build_Types;
+                                                Code[x][k]=y;
+                                        };break;
+                        }
+                }
+                else
+                if(rand()%MAX_LENGTH==0)
+                {
+                //exchange two entries
+                        y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
+                        if(x!=y)
+                        {
+                                k=rand()%2;
+                                ta=Code[x][k];
+                                Code[x][k]=Code[y][k];
+                                Code[y][k]=ta;
+                        }
+                }
+                else
+                if(rand()%MAX_LENGTH==0)
+                {
+                //exchange two entries
+                        y=rand()%MAX_LENGTH; //TODO: Aendern in bevorzugtes Ziel => Naehe
+                        if(abs(x-y)>(MAX_LENGTH/2)) y=rand()%MAX_LENGTH;
+                        if(x!=y)
+                        {
+                                ta=Code[x][0];
+                                Code[x][0]=Code[y][0];
+                                Code[y][0]=ta;
+                                ta=Code[x][1];
+                                Code[x][1]=Code[y][1];
+                                Code[y][1]=ta;
+                        }
+                } else
+
+                //move a block of orders  [a..b..ta..tb..c..d] -> [a..ta..tb..b..c..d]
+                //TODO switch ta and tb if tb<ta
+                if(rand()%MAX_LENGTH==0)
+                {
+                        ta=rand()%length;
+                        tb=rand()%length;
+                        x=rand()%length; //move it here
+                        if((ta<tb)&&(x>tb))
+                        {
+                                for(i=0;i<x-tb;i++) tmp[i]=Code[i+tb][0];
+                                for(i=ta;i<tb;i++) Code[i+x-tb][0]=Code[i][0];
+                                for(i=0;i<x-tb;i++) Code[ta+i][0]=tmp[i];
+                                for(i=0;i<x-tb;i++) tmp[i]=Code[i+tb][1];
+                                for(i=ta;i<tb;i++) Code[i+x-tb][1]=Code[i][1];
+                                for(i=0;i<x-tb;i++) Code[ta+i][1]=tmp[i];
+                }
+                        else
+                        if((ta<tb)&&(x<ta))
+                        {
+                                for(i=0;i<ta-x;i++)     tmp[i]=Code[i+x][0];
+                                for(i=ta;i<tb;i++) Code[x+i-ta][0]=Code[i][0];
+                                for(i=0;i<ta-x;i++) Code[tb-x][0]=tmp[i];
+                                for(i=0;i<ta-x;i++)     tmp[i]=Code[i+x][1];
+                                for(i=ta;i<tb;i++) Code[x+i-ta][1]=Code[i][1];
+                                for(i=0;i<ta-x;i++) Code[tb-x][1]=tmp[i];
+                        }
+                }
+
 }
 
 // Reset all ongoing data (between two runs)
@@ -285,6 +379,7 @@ void RACE::Init()
 	peonmins=4;
 	peongas=0;
 	IP=0;ok=0;timer=0;n=0;min=0;suc=0;ready=0;nr=0;
+	availible[VESPENE_GEYSIRS]=settings.Vespene_Geysirs;
 	InitRaceSpecific();
 }
 
@@ -382,7 +477,7 @@ void RACE::generateBasicBuildorder()
 				else
 				{
 					//building!
-					if((stats[race][j].type==BUILDING)&&(race==ZERG))
+					if(stats[race][j].type==BUILDING)//&&(race=ZERG))
 					{
 						i++;
 						Basic[i][0]=Build_Bv[DRONE];

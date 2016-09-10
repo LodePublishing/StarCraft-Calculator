@@ -1,12 +1,12 @@
-#ifndef __IO_H
-#define __IO_H
+#ifndef IO_H
+#define IO_H
 
 #define HEIGHT 16 // Number of entries (build order list)
-#define WIDTH 13 // witdh of the entries
+#define WIDTH 11 // witdh of the entries
 
 inline int UpperCase(char x) {if(x>91) return (x-32); else return(x);}
-extern inline void setColor(unsigned char c);
-extern inline void setAt(unsigned char cnt);
+extern void setColor(unsigned char c);
+extern void setAt(unsigned char cnt);
 
 #ifdef WIN32
 #include <windows.h>

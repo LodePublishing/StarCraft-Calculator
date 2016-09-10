@@ -124,7 +124,7 @@
 	}
 	
 // Test whether the item can be build (minerals, gas, supply, buildings, ...)
-	void Player_Terra::Build(unsigned char what)
+/*	void Player_Terra::Build(unsigned char what)
 	{
 		unsigned char m;
 		suc=0;
@@ -421,25 +421,24 @@
 	}
 			if((suc==0)&&(ok==0))
 				suc=1;
-	}
+	}*/
 
 // Do one run, go through one build order and record the results	
 	void Player_Terra::Calculate()
 	{
-		unsigned char tt,j,tSupply,tMax_Supply;
+		unsigned char tt,j;//,tSupply,tMax_Supply;
 		ready=0;
 		timer=0;
-		harvested_gas=0;
-		harvested_mins=0;
-		
+		    harvested_gas=0;
+		                    harvested_mins=0;
+
+
 		Vespene_Av=settings.Vespene_Geysirs;		
 		Vespene_Extractors=0;
 		tt=0;
 
 		while((timer<settings.Max_Time) && (ready==0) && (IP<MAX_LENGTH))
 		{
-			tSupply=Supply;// for the log file
-			tMax_Supply=Max_Supply;
 			BuildingRunning=0;
 
 			Harvest_Resources();
@@ -452,107 +451,49 @@
 					building[j].RB--;
 					if(building[j].RB==0)
 					{
-						if((settings.Time_to_Enemy>0)&&(building[j].type<COMMAND_CENTER)&&(building[j].on_the_run==0)&&(building[j].type!=SCV)&&(building[j].type!=DROPSHIP))
-						{
-							building[j].on_the_run=1;
-							if(building[j].type==VULTURE)
-							{
-								if(force[ION_THRUSTERS]>0)
-									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
-								else
-									building[j].RB+=settings.Time_to_Enemy;
-							}
-							else if((building[j].type==MARINE)||(building[j].type==FIREBAT))
-							{
-								if((force[STIM_PACKS]>0)&&(force[MARINE]<4*force[MEDIC]))
-									building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
-								else
-									building[j].RB+=settings.Time_to_Enemy;
-							}
-							else if(building[j].type==WRAITH)
-								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*0.75);
-							else if((building[j].type<SIEGE_TANK)||(building[j].type==MEDIC)||(building[j].type==SCV)||(building[j].type==GOLIATH)||(building[j].type==GHOST)||(building[j].type==VALKYRIE)||(building[j].type==SCIENCE_VESSEL))
-								building[j].RB+=settings.Time_to_Enemy;
-							else if(building[j].type==BATTLE_CRUISER)
-								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
-						}
+						if(stats[TERRA][building[j].type].facility>0)
+							availible[stats[TERRA][building[j].type].facility]++;
+						
 						switch(building[j].type)
 						{
-							case SCV:peonmins++;availible[COMMAND_CENTER]++;break;
+							case SCV:peonmins++;break;
 							case SUPPLY_DEPOT:Supply+=8;Max_Supply+=8;break;
 							case COMMAND_CENTER:Supply+=10;Max_Supply+=8;break;
-							case REFINERY:break;
-							case MARINE:
-							case FIREBAT:
-							case MEDIC:
-							case GHOST:availible[BARRACKS]++;break;
 							case CONTROL_TOWER:av_starport++;break;
 							case MACHINE_SHOP:av_factory++;break;
-							case SIEGE_TANK:av_factory++;break;
+							case SIEGE_TANK:av_factory++;break; //~~
 							case VULTURE:
 							case GOLIATH:if(availible[FACTORY]<force[FACTORY]-force[MACHINE_SHOP]) availible[FACTORY]++;
-								else av_factory++;break;
+								else av_factory++;break; //~~
 							case SCIENCE_VESSEL:
 							case BATTLE_CRUISER:
 							case DROPSHIP:
-							case VALKYRIE:av_starport++;break;
+							case VALKYRIE:av_starport++;break;//~~
 							case WRAITH:if(availible[STARPORT]<force[STARPORT]-force[CONTROL_TOWER]) availible[STARPORT]++;
-								else av_starport++;break;
+								else av_starport++;break; //~~
 	
-							case STIM_PACKS:
-							case U238_SHELLS:
-							case RESTORATION:
-							case OPTICAL_FLARE:
-							case CADUCEUS_REACTOR:availible[ACADEMY]++;break;
-
-
-							case LOCKDOWN:
-							case PERSONNEL_CLOAKING:
-							case MOEBIUS_REACTOR:
-							case OCULAR_IMPLANTS:availible[COVERT_OPS]++;break;
-
-							case EMP_SHOCKWAVE:
-							case IRRADIATE:
-							case TITAN_REACTOR:availible[SCIENCE_FACILITY]++;break;
-
-							case SPIDER_MINES:
-							case TANK_SIEGE_MODE:
-							case ION_THRUSTERS:
-							case CHARON_BOOSTER:availible[MACHINE_SHOP]++;break;
-
-							case YAMATO_GUN:
-							case COLOSSUS_REACTOR:availible[PHYSICS_LAB]++;break;
-
-							case CLOAKING_FIELD:
-							case APOLLO_REACTOR:availible[CONTROL_TOWER]++;break;
-
 							case INFANTRY_ARMOR:
-							case INFANTRY_WEAPONS:availible[ENGINEERING_BAY]++;availible[building[j].type]=1;break;
-							case COMSAT_STATION:
-							case NUCLEAR_SILO:availible[COMMAND_CENTER]++;break;
-							case COVERT_OPS:
-							case PHYSICS_LAB:availible[SCIENCE_FACILITY]++;break;
+							case INFANTRY_WEAPONS:
 							case VEHICLE_PLATING:
 							case VEHICLE_WEAPONS:
 							case SHIP_PLATING:
-							case SHIP_WEAPONS:availible[ARMORY]++;availible[building[j].type]=1;break;
+							case SHIP_WEAPONS:availible[building[j].type]=1;break;
 							default:break;
 						}
 						if(building[j].RB==0)
 						{
 							CheckReady(j);
 							if(stats[0][building[j].type].type==2) 
-							{
+//							{
 								peonmins++;
-								peonbuilding--;
-							}
+//								peonbuilding--;
+//							}
 						}
 					}
 				}
 			}
 			
 			tt++;
-			ok=0;
 			if(Code[IP][0]<Code[IP][1])
 			{
 				program[IP].dominant=0;
@@ -565,27 +506,28 @@
 				Build(Build_Av[Code[IP][1]]);
 				if(ok==0) {program[IP].dominant=0;Build(Build_Av[Code[IP][0]]);}
 			}
-			if(suc>0) program[IP].success=suc;
+//			if(suc>0) program[IP].success=suc;
+//			else
 			if((ok==1)||(tt>267))
 			{
 				if(tt<=267) program[IP].time=timer;
 				else 
 				{
-					program[IP].success=8;
+//					program[IP].success=8;
 					program[IP].time=20000;
 				}
-				program[IP].need_Supply=tMax_Supply-tSupply;
-				program[IP].have_Supply=tMax_Supply;
+//				program[IP].need_Supply=tMax_Supply-tSupply;
+//				program[IP].have_Supply=tMax_Supply;
 				tt=0;
 				IP++;
 			}
 		//Scoutpeon
-		if((settings.Scout_Time>0)&&(timer==settings.Scout_Time)&&((peonmins>0)||(peongas>0)))
+/*		if((settings.Scout_Time>0)&&(timer==settings.Scout_Time)&&((peonmins>0)||(peongas>0)))
 		{
 			if(peonmins>0)
 				peonmins--;
 			else peongas--;			
-		}
+		}*/
 		
 		timer++;
 	}

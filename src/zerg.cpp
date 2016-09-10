@@ -142,7 +142,7 @@
 	}
 
 
-	void Player_Zerg::Build(unsigned char what)
+/*	void Player_Zerg::Build(unsigned char what)
 	{
 		unsigned char m,i;
 		suc=0;
@@ -471,7 +471,7 @@
 	}
 			if((suc==0)&&(ok==0))
 				suc=1;
-	}
+	}*/
 
 	
 	void Player_Zerg::Calculate()
@@ -535,13 +535,13 @@
 								building[j].RB+=(unsigned short)(settings.Time_to_Enemy*1.25);
 						}
 					// End of the 'run to enemy' part
-						
+						if(stats[ZERG][building[j].type].facility>0)
+							availible[stats[ZERG][building[j].type].facility]++;
 						switch(building[j].type)
 						{
 							case DRONE:peonmins++;break;
 							case OVERLORD:Supply+=8;Max_Supply+=8;break;
 							case HATCHERY:larvacounter++;larvae++;larva[larvacounter]=21;Supply++;Max_Supply++;break;
-							case EXTRACTOR:break;		
 							case LAIR:force[HATCHERY]--;break;
 							case HIVE:force[LAIR]--;break;
 							case GREATER_SPIRE:force[SPIRE]--;break;
@@ -555,16 +555,8 @@
 										availible[LAIR]++;
 								   else availible[HIVE]++;
 								   break;
-							case METABOLIC_BOOST:
-							case ADRENAL_GLANDS:availible[SPAWNING_POOL]++;break;
-
-							case CHITINOUS_PLATING:
-							case ANABOLIC_SYNTHESIS:availible[ULTRALISK_CAVERN]++;break;
-
-
-
 										/// UHUHOHO !! what if burrowing is researched in a lair and a new hatchery is built?	mmmh?
-										//Maybe implement for every building[] an origin pointer, in which building type it was researched!
+										//Maybe implement for every building[] an origin pointer, in which building type it was researched! hehe yes... that is implemented in wcc :)
 							case BURROWING:
 							   if(availible[HATCHERY]<force[HATCHERY])
 								   availible[HATCHERY]++;
@@ -573,22 +565,6 @@
 							   else availible[HIVE]++;
 							   break;
 							
-							case METASYNAPTIC_NODE:
-							case PLAGUE:
-							case CONSUME:availible[DEFILER_MOUND]++;break;
-
-							case ENSNARE:
-							case SPAWN_BROODLING:
-							case GAMETE_MEIOSIS:availible[QUEENS_NEST]++;break;
-
-							case MUSCULAR_AUGMENTS:
-							case GROOVED_SPINES:
-							case LURKER_ASPECT:availible[HYDRALISK_DEN]++;break;
-							
-							case CARAPACE:
-							case MELEE_ATTACKS:
-							case MISSILE_ATTACKS:availible[EVOLUTION_CHAMBER]++;break;
-
 							case FLYER_CARAPACE:
 							case FLYER_ATTACKS:
 								if(availible[SPIRE]<force[SPIRE])
@@ -615,7 +591,6 @@
 				}
 
 			tt++;
-			ok=0;
 			if(Code[IP][0]<Code[IP][1])
 			{
 				program[IP].dominant=0;
@@ -629,7 +604,7 @@
 				if(ok==0) {program[IP].dominant=0;Build(Build_Av[Code[IP][0]]);}
 			}
 		// suc and ok is modified by 'Build'
-			if(suc>0) program[IP].success=suc;
+			if(suc>0) program[IP].success=suc; else
 			if((ok==1)||(tt>267))
 			{
 				if(tt<=267) program[IP].time=timer;

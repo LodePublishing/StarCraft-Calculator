@@ -25,7 +25,7 @@ void Init()
 }
 
 
-unsigned char TranslateData(int argc, char* argv[])
+int TranslateData(int argc, char* argv[])
 {
 	//TODO: Check unsigned char <> unsigned short counting variables (especially s,t,u)
 	
@@ -84,7 +84,7 @@ unsigned char TranslateData(int argc, char* argv[])
 				fseek (pFile2, 0, SEEK_SET);
 				fread(buffer,1,size,pFile2);
 				fclose(pFile2);
-				printf("File closed, data saved [%i Bytes].\n",size);
+				//printf("File closed, data saved [%i Bytes].\n",size);
 			} else  // not 'I'
 	// B? User called 'scc' with a goal / build order list as parameter
 			if(UpperCase(argv[1][1])=='B')

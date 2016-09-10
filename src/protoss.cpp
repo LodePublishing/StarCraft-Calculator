@@ -115,7 +115,7 @@
 		} else need_Gas=0;
 	}
 
-	void Player_Protoss::Build(unsigned char what)
+/*	void Player_Protoss::Build(unsigned char what)
 	{
 	   unsigned char m;
 	   suc=0;
@@ -367,7 +367,7 @@
 	}
 			if((suc==0)&&(ok==0))
 				suc=1;
-	}
+	}*/
 
 	
 	void Player_Protoss::Calculate()
@@ -449,58 +449,20 @@
 								break;
 						}
 					}
+						if(stats[PROTOSS][building[j].type].facility>0)
+							availible[stats[PROTOSS][building[j].type].facility]++;
 
 						switch(building[j].type)
 						{
-							case PROBE:peonmins++;availible[NEXUS]++;break;
+							case PROBE:peonmins++;break;
 							case PYLON:Supply+=8;Max_Supply+=8;break;
 							case NEXUS:Supply+=9;Max_Supply+=9;break;
-							case ASSIMILATOR:break;
-							case ZEALOT:
-							case DRAGOON:
-							case DARK_TEMPLAR:
-							case HIGH_TEMPLAR:availible[GATEWAY]++;break;
-							
-							case REAVER:
-							case SHUTTLE:
-							case OBSERVER:availible[ROBOTICS_FACILITY]++;break;		
-							case SCOUT:
-							case CORSAIR:
-							case ARBITER:
-							case CARRIER:availible[STARGATE]++;break;
-							case ARGUS_TALISMAN:
-							case KHAYDARIN_AMULET:
-							case PSIONIC_STORM:
-							case HALLUCINATION:
-							case MIND_CONTROL:
-							case MAELSTROM:availible[TEMPLAR_ARCHIVES]++;break;
-			
-							case KHAYDARIN_CORE:
-							case RECALL:
-							case STASIS_FIELD:availible[ARBITER_TRIBUNAL]++;break;
-			
-							case ARGUS_JEWEL:
-							case APIAL_SENSORS:
-							case GRAVITIC_THRUSTERS:				
-							case DISRUPTION_WEB:
-							case CARRIER_CAPACITY:availible[FLEET_BEACON]++;break;
-			
-							case LEG_ENHANCEMENTS:availible[CITADEL_OF_ADUN]++;break;
-			
-							case GRAVITIC_DRIVE:
-							case SCARAB_DAMAGE:
-							case REAVER_CAPACITY:availible[ROBOTICS_SUPPORT_BAY]++;break;
-			
-							case SENSOR_ARRAY:
-							case GRAVITIC_BOOSTERS:availible[OBSERVATORY]++;break;
 			
 							case PLASMA_SHIELDS:
 							case ARMOR:
-							case GROUND_WEAPONS:availible[FORGE]++;availible[building[j].type]=1;break;	
-
+							case GROUND_WEAPONS:
 							case PLATING:
-							case AIR_WEAPONS:availible[CYBERNETICS_CORE]++;availible[building[j].type]=1;break;
-							case SINGULARITY_CHARGE:availible[CYBERNETICS_CORE]++;break;
+							case AIR_WEAPONS:availible[building[j].type]=1;break;
 							default:break;
 						}
 					if(building[j].RB==0)
@@ -511,8 +473,6 @@
 			}
 			
 		        tt++;
-			ok=0;
-			
 			if(Code[IP][0]<Code[IP][1])
 			{
 				program[IP].dominant=0;
@@ -525,7 +485,7 @@
 				Build(Build_Av[Code[IP][1]]);
 				if(ok==0) {program[IP].dominant=0;Build(Build_Av[Code[IP][0]]);}
 			}
-			if(suc>0) program[IP].success=suc;
+			if(suc>0) program[IP].success=suc; else
 			if((ok==1)||(tt>267))
 			{
 				if(tt<=267) program[IP].time=timer;

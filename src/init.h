@@ -7,7 +7,7 @@ struct myBO
 };
 
 extern myBO bo[];
-extern void Init();
-extern unsigned char TranslateData(int argc, char* argv[]);
+void Init();
+int TranslateData(int argc, char* argv[]);
 #endif
 		

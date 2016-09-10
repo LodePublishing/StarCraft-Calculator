@@ -28,7 +28,7 @@
 #include "io.h"
 #include "init.h"
 
-#include "namen.h"
+#include "names.h"
 #include "settings.h"
 
 #define gizmowidth 35
@@ -43,7 +43,35 @@ GOAL goal[MAX_GOALS]; // GOAL := what buildings should be there AT THE END
 unsigned char Basic[MAX_LENGTH][2],Basic_Length;
 
 
+/*
+void crossOver(int * parent1, int * parent2, int * child1, int * child2)
+{
+        unsigned char counter,i,num;
+        counter=MAX_LENGTH;
+        unsigned char * c;
 
+        for(i=0;i<MAX_LENGTH;i++)
+        {
+                if(rand()%counter<4)
+                {
+                        num=MAX_LENGTH-counter;
+                        memcpy(child1+i-num,parent1+i-num,num);
+                        memcpy(child1+i-num+MAX_LENGTH,parent2+i-num+MAX_LENGTH,num);
+                        memcpy(child2+i-num+MAX_LENGTH,parent1+i-num+MAX_LENGTH,num);
+                        memcpy(child2+i-num,parent2+i-num,num);
+                        counter=MAX_LENGTH;
+                        c=child1;
+                        child1=child2;
+                        child2=c;
+                }
+                counter--;
+        }
+        num=MAX_LENGTH-counter;
+        memcpy(child1+counter,parent1+counter,num);
+        memcpy(child1+counter+MAX_LENGTH,parent2+counter+MAX_LENGTH,num);
+        memcpy(child2+counter+MAX_LENGTH,parent1+counter+MAX_LENGTH,num);
+        memcpy(child2+counter,parent2+counter,num);
+}*/
 int compare(const void * a,const void * b)
 {
 	if(( (*(RACE*)a).pFitness<(*(RACE*)b).pFitness)||(((*(RACE*)a).pFitness==(*(RACE*)b).pFitness)&&((*(RACE*)a).sFitness<=(*(RACE*)b).sFitness)))
@@ -73,7 +101,7 @@ int main(int argc, char* argv[])
 
 
 	// TODO: make some significant variables...	
-	unsigned short run,rfit,afit,sfit;
+	int run,rfit,afit,sfit;
 	unsigned char counter,gcount;
 	char I[11],O[9],R[7];
 	char tmp[255];
@@ -143,7 +171,7 @@ int main(int argc, char* argv[])
 //	}
 
 	
-
+	RACE * temppp;
 	RACE * Save[RUNNINGS];
 // TODO: Looks pretty hacked... maybe implement a better method later to allow the virtual construction in RACE
 	if(race==TERRA)
@@ -361,6 +389,7 @@ printf("Goals\n");
 
 		for(s=0;s<MAX_PLAYER;s++)
 			(*player[s]).Init();
+
 		for(s=1;s<MAX_PLAYER;s++)
 			(*player[s]).Mutate();
 		
@@ -369,6 +398,16 @@ printf("Goals\n");
 
 // Determine the best build order depending on the primary fitness (needed time and completed goals) and the secondary fitness (gathered resources)		
 		qsort(*player,MAX_PLAYER,race_size,compare);
+		/*for(s=0;s<MAX_PLAYER;s++)
+			for(t=0;t<MAX_PLAYER;t++)
+				if((player[s]->pFitness<player[t]->pFitness)||((player[s]->pFitness==player[t]->pFitness)&&(player[s]->sFitness<player[t]->sFitness)))
+				{
+					temppp=player[s];
+					player[s]=player[t];
+					player[t]=temppp;
+				};*/
+			
+		
 
 		// bigger than afit or sfit? good! We completed another goal or at least a part of it
 		// Maybe implement another parameter to deactivate sFitness... will (maybe!) cause faster calculation but worse build orders (in terms of resources)
@@ -431,22 +470,22 @@ printf("Goals\n");
 		print("[resources] [time]");
 		gotoxy(0,5);
 		print("------------------");
-		gotoxy(2,6);sprintf(tmp,"  %5.4i",(int)(player[0]->harvested_mins+player[0]->harvested_gas));
+		gotoxy(2,6);sprintf(tmp,"  %5.4i",(/*player[0]->harvested_mins+*/player[0]->harvested_gas)/100);
 		print(tmp);
 		setAt(gcount);
-		gotoxy(13,6);if(player[0]->timer<settings.Max_Time) { sprintf(tmp,"%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);print(tmp);} else print(" ---- ");
+		gotoxy(13,6);if(player[0]->timer<settings.Max_Time) { sprintf(tmp,"%.2i:%.2i",player[0]->timer/60,player[0]->timer%60);print(tmp);} else { sprintf(tmp," %i ",player[0]->pFitness);print(tmp);};
 		
 	setColor(31);
 if((calc%80==0)||(calc%80==1)) setColor(37); else setColor(31);
-	gotoxy(20,3);print("     ooo    ooo   ooo   o      oo    ooo ");
+	gotoxy(20,3);print("     ooo    ooo   ooo   o      oo     ooo");
 if((calc%80==2)||(calc%80==3)) setColor(37); else setColor(31);
 	gotoxy(20,4);print("   o      o     o      o     o  o       o");
 if((calc%80==4)||(calc%80==5)) setColor(37); else setColor(31);
 	gotoxy(20,5);print("    o    o     o      o     o  o      o  ");
 if((calc%80==6)||(calc%80==7)) setColor(37); else setColor(31);
-	gotoxy(20,6);print("    o   o     o      o     o  o     o    ");
+	gotoxy(20,6);print("    o   o     o      o     o  o       o ");
 if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
-	gotoxy(20,7);print("ooo     ooo   ooo   o  o   oo     ooooo  ");
+	gotoxy(20,7);print("ooo     ooo   ooo   o  o   oo     ooo  ");
 		
 		for(s=0;s<MAX_GOALS;s++)
 			tgoal[s]=goal[s].what;
@@ -670,6 +709,7 @@ if((calc%80==8)||(calc%80==9)) setColor(37); else setColor(31);
 			player[t]->pFitness=player[0]->pFitness;
 			player[t]->sFitness=player[0]->sFitness;
 		}
+
 		for(s=1;s<MAX_PLAYER;s++)
 		{
 			t=rand()%MAX_PLAYER;

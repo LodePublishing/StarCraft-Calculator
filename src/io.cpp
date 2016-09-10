@@ -1,8 +1,8 @@
-#include "io.h"
+#include <stdio.h>
 #include "main.h"
-#include "stdio.h"
+#include "io.h"
 
-inline void setColor(unsigned char c)
+void setColor(unsigned char c)
 {
 	if(colors==0) return;
 	#ifdef WIN32
@@ -13,7 +13,7 @@ inline void setColor(unsigned char c)
 	#endif
 };
 
-inline void setAt(unsigned char cnt)
+void setAt(unsigned char cnt)
 {
 	if(cnt<4) setColor(37);//White
 	else if(cnt<8) setColor(33);//Green
