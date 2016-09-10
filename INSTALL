@@ -1,0 +1,19 @@
+Installation / First run:
+
+Windows: 
+
+Just execute the 'scc.exe'
+You should do this in FULLSCREEN mode to improve the speed.
+In order to do this, press ALT+ENTER.
+To cancel the calculation press CTRL+C.
+
+Linux: 
+
+Just type 'make' and then './scc'
+You should do this in FULLSCREEN mode to improve the speed.
+To cancel the calculation press CTRL+C
+scc.exe won't work correctly with the Windowsemulator 'WINE'.
+
+
+	
+

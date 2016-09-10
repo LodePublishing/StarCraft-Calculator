@@ -197,7 +197,7 @@
 	}
 
 
-	void Player_Zerg::Build(unsigned short what)
+	void Player_Zerg::Build(unsigned char what)
 	{
 		unsigned char m,i;
 		suc=0;
@@ -259,6 +259,7 @@
 						building[n].type=255;
 						building[n].RB=0;
 						program[IP].built=1;
+						program[building[n].IP].built=1;
 					} 
 			}
 			//TODO: Think about inserting suc= here... 

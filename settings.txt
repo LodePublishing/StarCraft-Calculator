@@ -1,8 +1,9 @@
 Remember: only *change* numbers, do not add or remove them. 
 These settings are fail-safe settings.
 You might want to change it in certain circumstances.
-Oh... and do not write 'Zero' or 'One' instead of the actual number ;-).
-
+AND DO NOT write 'Zero' or 'One'! Insert instead the actual number ;-).
+(yes, I know, I should work over the file input algorithm :} )
+Oh and please do not hesitate to ask me questions, I will put them in the FAQ :)
 
 ---------------
 Input / Output:
@@ -18,6 +19,15 @@ Detailed Output 1
 -- a 'Zero' will result in a compact view of the build order which is probably
 -- much more readable
 
+Line correction 1
+-- Some consoles have an additional line (twenty five instead of twenty four).
+-- If you set this to 'Zero' it looks better in some consoles (like the
+-- standard linux text console)
+
+Gizmo 1
+-- That scrolling text at the top and at the bottom :)
+-- Just set it to 'Zero' if you are sick of it ;-)
+-- I will work over the text in the next version
 
 ------------
 Map Options:
@@ -29,6 +39,13 @@ Time to Enemy 0
 -- SCC will adjust the time to each unit as the speed is different.
 -- I will add here another setting for air units later.
 -- A zero will switch this option off.
+-- WARNING: IF YOU SET BOTH 'Time to Enemy' AND THE TIMES FOR UNITS IN THE 
+-- 'goal_*.txt' FILES, RETHINK WHETHER THIS GOALS ARE POSSIBLE...
+-- example: 'Time to Enemy' is set to ninty while two zealots are set 
+-- to five minutes: ninty seconds (ToT) + eighty (two zealots) + thirty
+-- (pylon) + sixty (gateway) = ~four minutes... Theoretically enough
+-- but you also have to gather minerals. The calculation will end in 
+-- a weird result... :[
 
 Vespine Geysirs 1
 -- This setting describes how many Vespine Geysirs are near the main base.

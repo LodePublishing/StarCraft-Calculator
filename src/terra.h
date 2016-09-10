@@ -6,7 +6,7 @@ class Player_Terra: public RACE
 	unsigned char av_starport,av_factory;
 public:
 	virtual void Set_Goals();
-	virtual void Build(unsigned short what);
+	virtual void Build(unsigned char what);
 	virtual void Calculate();
 	virtual void InitRaceSpecific();
 	virtual void readjust_goals();

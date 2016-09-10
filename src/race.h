@@ -13,10 +13,10 @@ public:
 	
 	//TODO: gather new data for mining and gasing
 	
-	unsigned short IP,min,n;
+	unsigned short min,n;
 	unsigned short peonmins,peongas, peonbuilding, length,BuildingRunning;
 	short Supply,Max_Supply;
-	unsigned char suc;
+	unsigned char suc,IP;
 
 	unsigned char ready;
 	struct Program
@@ -41,7 +41,7 @@ public:
 
 	// => zerg.h, terra.h, protoss.h
 	virtual void Set_Goals() {};
-	virtual void Build() {};
+	virtual void Build(unsigned char what) {};
 	virtual void Calculate() {}; 
 	virtual void InitRaceSpecific() {};
 	virtual void readjust_goals() {};
@@ -55,6 +55,7 @@ public:
 	void Harvest_Resources();
 	void Init();
 	RACE();
+
 };
 
 #endif //__RACE_H

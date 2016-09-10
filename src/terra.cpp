@@ -186,7 +186,7 @@
 	}
 	
 // Test whether the item can be build (minerals, gas, supply, buildings, ...)
-	void Player_Terra::Build(unsigned short what)
+	void Player_Terra::Build(unsigned char what)
 	{
 		unsigned char m;
 		suc=0;
@@ -240,8 +240,7 @@
 			else if(nr<255)
 		{
 			switch(what) 
-	//TODO: Check whether instead of 'force>0 && avail>0' only 'avail>0' is enough
-	// Maybe optimize the order of checks to improve speed
+	// TODO: Maybe optimize the order of checks to improve speed
 			{
 				case MARINE:
 					if(availible[BARRACKS]>0) 

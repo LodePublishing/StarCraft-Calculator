@@ -21,7 +21,7 @@ void RACE::CalculateFitness()
 	        	{
 	                	if(goal[i].what>force[i])
 				{
-					if(ftime[i]>0) 
+					if(ftime[i]>0) // ftime => when the last item is built 
 					{
 			//not all goals met and not below time
 						if(goal[i].time>0)
@@ -35,23 +35,26 @@ void RACE::CalculateFitness()
 			        		else pFitness+=(100*force[i])/goal[i].what;
 					}
 				}
-				else
+				else //force >= goal
 				{
-					if((goal[i].time>0)&&(ftime[i]>goal[i].time))
-						pFitness+=(goal[i].time*100/ftime[i]);
-					else pFitness+=100;
+				if((goal[i].time>0)&&(ftime[i]>goal[i].time))
+					pFitness+=(goal[i].time*100/ftime[i]);
+				else pFitness+=100;
 					
 					if(goal[i].what<force[i])
 						sFitness-=(force[i]-goal[i].what)*(stats[race][i].mins+stats[race][i].gas);
 				}
 		}
-// TODO: Check for very small 'goal.time' values, probably in scc.cpp	 
+// TODO: Check for very small 'goal.time' values, probably in scc.cpp!!	 
 	for(i=0;i<MAX_GOALS;i++)
 		bonus[i]=goal[i].what-force[i];
 	for(i=0;i<MAX_BUILDINGS;i++)
                 if((building[i].RB>0)&&(goal[building[i].type].what>force[building[i].type])&&(bonus[building[i].type]>0))
 		{
-	        	pFitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[race][building[i].type].BT));
+			if((goal[building[i].type].time>0)&&(force[building[i].type]==0))
+	                	pFitness+=(building[i].RB*100*goal[building[i].type].time*force[i])/(goal[building[i].type].what*stats[race][building[i].type].BT*setup.Max_Time);
+			else 				   		
+				pFitness+=((building[i].RB*100)/(goal[building[i].type].what*stats[race][building[i].type].BT));
 			bonus[building[i].type]--;
 		}
 	}
@@ -138,22 +141,24 @@ void RACE::Produce(unsigned char what)
 void RACE::Mutate()
 {
 	unsigned char ta,tb,i,x,y,tmp[MAX_LENGTH];
+	length=MAX_LENGTH;
+	if(length==0) return;
 	
 	for(i=0;i<setup.Mutations;i++)
 	{
 		//delete one entry
 		if(rand()%setup.Mutation_Rate==0)
 		{
-			x=rand()%MAX_LENGTH;
-			for(y=x;y<MAX_LENGTH-1;y++)
+			x=rand()%length; //MAX_LENGTH
+			for(y=x;y<length-1;y++)
 			program[y].order=program[y+1].order;
 		}
 	
 		//add one entry
 		if(rand()%setup.Mutation_Rate==0)
 		{
-			x=rand()%MAX_LENGTH;
-			for(y=MAX_LENGTH-1;y>x;y--)
+			x=rand()%length;
+			for(y=length-1;y>x;y--)
 				program[y].order=program[y-1].order;
 			program[x].order=rand()%Max_Build_Types;
 		}
@@ -161,15 +166,15 @@ void RACE::Mutate()
 		//change one entry
 		if(rand()%setup.Mutation_Rate==0)
 		{
-			x=rand()%MAX_LENGTH;
+			x=rand()%length;
 			program[x].order=rand()%Max_Build_Types;
 		}
 		
 		//exchange two entries
 		if(rand()%setup.Mutation_Rate==0)
 		{
-			x=rand()%MAX_LENGTH;
-			y=rand()%MAX_LENGTH;
+			x=rand()%length;
+			y=rand()%length;
 			ta=program[x].order;
 			program[x].order=program[y].order;
 			program[y].order=ta;
@@ -178,8 +183,8 @@ void RACE::Mutate()
 		//rotate a list [ta, ta+1, ..., tb] -> [ta+1, ..., tb, ta]
 		if(rand()%(setup.Mutation_Rate)==0)
 		{
-			ta=rand()%MAX_LENGTH;
-			tb=rand()%MAX_LENGTH;
+			ta=rand()%length;
+			tb=rand()%length;
 			if(ta<tb)
 			{
 				x=program[ta].order;
@@ -193,9 +198,9 @@ void RACE::Mutate()
 		//TODO switch ta and tb if tb<ta
 		if(rand()%(setup.Mutation_Rate)==0)
 		{
-			ta=rand()%MAX_LENGTH;
-			tb=rand()%MAX_LENGTH;
-			x=rand()%MAX_LENGTH; //move it here
+			ta=rand()%length;
+			tb=rand()%length;
+			x=rand()%length; //move it here
 			if((ta<tb)&&(x>tb))
 			{
 				for(i=0;i<x-tb;i++)
@@ -286,4 +291,3 @@ RACE::RACE()
 {
 }
 
-//TODO: put the function in another class... it affects only global variables

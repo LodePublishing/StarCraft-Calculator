@@ -3,13 +3,44 @@
 #include <stdlib.h>
 #include <math.h>
 
-inline void Fatal(char * strn) { setattr(0,31,40);printf("FATAL ERROR: ");setattr(0,37,40);printf("%s\nExiting...",strn);};
 Settings setup;
+
+#ifdef WIN32
+HANDLE scr;
+	
+const unsigned char colorsWin32[7]= //Translate Linux ANSI Colors to SetConsoleTextAttribute Colors
+{
+	FOREGROUND_RED,FOREGROUND_GREEN,FOREGROUND_RED|FOREGROUND_GREEN,FOREGROUND_BLUE,FOREGROUND_RED|FOREGROUND_BLUE,FOREGROUND_GREEN|FOREGROUND_BLUE,FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN
+};
+
+void print(const char * x) {DWORD num; WriteConsole(scr,x,strlen(x),&num,0); }
+
+#endif
+
+void Settings::setColor(unsigned char c)
+{
+	if(colors==0) return;
+	#ifdef WIN32
+
+	SetConsoleTextAttribute(scr,colorsWin32[c-31]);
+	#elif __linux__
+	printf("\033[0;%d;40m",c);
+	#endif
+};
+
+void Settings::Fatal(char * strn)
+{ 
+	setColor(31);
+	printf("FATAL ERROR: ");
+	setColor(37);
+	printf("%s\nExiting...",strn);
+}
+
 unsigned char Settings::InitSettings()
 {
 	const unsigned short power[4]={1,10,100,1000};
 	unsigned short size,s;
-        unsigned char d;
+    unsigned char d;
 	signed char t;
 	unsigned short data[DATA_SET_SIZE];
 	char * buffer;
@@ -64,6 +95,9 @@ unsigned char Settings::InitSettings()
 		}
 		s++;
 	}
+
+	//TODO: Check for additional numbers and print out an error !
+
 	delete buffer;
 	printf("Buffer freed and saved, checking data:\n");
 	
@@ -72,13 +106,15 @@ unsigned char Settings::InitSettings()
 
 	if(d<DATA_SET_SIZE)
 	{
-		setattr(0,31,40);
+		setColor(31);
 		printf("Not enough Data sets found (%i out of expected %i).\n",d,DATA_SET_SIZE);
-		setattr(0,37,40);
+		setColor(37);
 		printf("Please report this to ClawSoftware and/or get an original copy of the 'settings.txt'\n");
 		printf("Using defaults...\n");
 		colors=1;
 		Detailed_Output=1;
+		Console24Lines=1;
+		Gizmo=1;
 		Time_to_Enemy=50;
 		Vespene_Geysirs=1;
 		Mineral_Mod=100;
@@ -95,17 +131,19 @@ unsigned char Settings::InitSettings()
 	{
 		colors=data[0];
 		Detailed_Output=data[1];
-		Time_to_Enemy=data[2];
-		Vespene_Geysirs=data[3];
-		Mineral_Mod=data[4];
-		Mineral_Blocks=data[5];
-		Time_to_Wallin=data[6];
-		Scout_Time=data[7];
-		Max_Time=data[8];
-		Max_Generations=data[9];
-		Mutations=data[10];
-		Mutation_Rate=data[11];
-		Verbose=data[12];
+		Console24Lines=data[2];
+		Gizmo=data[3];
+		Time_to_Enemy=data[4];
+		Vespene_Geysirs=data[5];
+		Mineral_Mod=data[6];
+		Mineral_Blocks=data[7];
+		Time_to_Wallin=data[8];
+		Scout_Time=data[9];
+		Max_Time=data[10];
+		Max_Generations=data[11];
+		Mutations=data[12];
+		Mutation_Rate=data[13];
+		Verbose=data[14];
 	}
 
 	
@@ -125,6 +163,22 @@ unsigned char Settings::InitSettings()
 	       printf("Falling back to default: Detailed_Output = 0\n");
 	       Detailed_Output=0;
 	 }
+
+	if((Console24Lines!=0)&&(Console24Lines!=1))
+	{
+		printf("ERROR: 'Line correction' is not correctly initialized [%i].\n",Console24Lines);
+		printf("Please use 0 (for 25 line consoles like the linux text console) or 1 (standard)!\n");
+		printf("Falling back to default: Line_Correction = 1\n");
+		Console24Lines=1;
+	}
+
+	if((Gizmo!=0)&&(Gizmo!=1))
+	{
+		printf("ERROR: 'Gizmo' is not correctly initialized [%i].\n",Gizmo);
+		printf("Please use 0 (no scrolling text) or 1 (scrolling gizmo text :)!\n");
+		printf("Falling back to default: Gizmo = 1\n");
+		Gizmo=1;
+	}
 
 	if(Time_to_Enemy>300)
 	{
@@ -251,9 +305,9 @@ unsigned char Settings::InitSettings()
 	printf("Reformatting Data Minutes -> Seconds\n");
 	Max_Time*=60;
 	
-	setattr(0,32,40);
+	setColor(32);
 	printf("'settings.txt' successfully checked!\n");
-	setattr(0,37,40);
+	setColor(37);
 	return(0);
 };
 
@@ -353,9 +407,9 @@ unsigned char Settings::InitGoal(char I[11])
 	printf("Reformatting Data Minutes -> Seconds\n");
 	for(s=0;s<60;s++)
 		goal[s].time*=60;
-	setattr(0,32,40);
+	setColor(32);
 	printf("All goals [%i] successfully initialized!\n\n",count_goals);
-	setattr(0,37,40);
+	setColor(37);
 	return(0);
 }
 
@@ -363,26 +417,38 @@ void Settings::AdjustMining()
 {
 	unsigned short i,j,k;
 	float f,g;
-	const double * miningp[57];
+	const double * miningp[45];
 	switch(race)
 	{
-		case 0:for(i=0;i<57;i++) miningp[i]=&mining_t[i];for(i=0;i<5;i++) gasing[i]=gasing_t[i];break;
-		case 1:for(i=0;i<57;i++) miningp[i]=&mining_p[i];for(i=0;i<5;i++) gasing[i]=gasing_p[i];break;
-		case 2:for(i=0;i<57;i++) miningp[i]=&mining_z[i];for(i=0;i<5;i++) gasing[i]=gasing_z[i];break;
+		case 0:for(i=0;i<45;i++) miningp[i]=&mining_t[i];for(i=0;i<5;i++) gasing[i]=gasing_t[i];break;
+		case 1:for(i=0;i<45;i++) miningp[i]=&mining_p[i];for(i=0;i<5;i++) gasing[i]=gasing_p[i];break;
+		case 2:for(i=0;i<45;i++) miningp[i]=&mining_z[i];for(i=0;i<5;i++) gasing[i]=gasing_z[i];break;
 	}
 	g=Mineral_Blocks*Mineral_Mod/800.0;
-	for(i=0;i<57;i++)
-		if(i*8/Mineral_Blocks<57)
+	for(i=0;i<45;i++)
+		if(i*8/Mineral_Blocks<45)
 		{
 			f=i*(8.0/Mineral_Blocks);
 			k=0;
-			for(j=0;j<57;j++)
+			for(j=0;j<45;j++)
 			{
-				if((f+1>j)&&(f<=j)) { k=j;j=57;}
+				if((f+1>j)&&(f<=j)) { k=j;j=45;}
 			}
 			mining[i]=*miningp[k]*g;
 		}
-	        else mining[i]=*miningp[56]*g;
+	        else mining[i]=*miningp[44]*g;
 }
 
+Settings::Settings()
+{
+	#ifdef WIN32
+	scr=CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, CONSOLE_TEXTMODE_BUFFER, 0);
+	#endif	
+}
 
+Settings::~Settings()
+{
+	#ifdef WIN32
+	CloseHandle(scr);
+	#endif	
+}

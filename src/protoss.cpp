@@ -175,7 +175,7 @@
 			goal[i].what=0; // Just to be sure that these unfulfillable goals are not set
 	}
 
-	void Player_Protoss::Build(unsigned short what)
+	void Player_Protoss::Build(unsigned char what)
 	{
 	   unsigned char m;
 	   suc=0;

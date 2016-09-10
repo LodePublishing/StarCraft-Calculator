@@ -1,0 +1,19 @@
+Installation / Erster Start:
+
+Windows: 
+
+Einfach 'scc.exe' ausfuehren
+Du solltest das im VOLLBILD Modus machen um die Geschwindigkeit zu erhoehen.
+Um dies zu erreichen einfach ALT+ENTER druecken.
+Um die Berechnung abzubrechen STRG+C druecken.
+
+Linux: 
+
+Einfach 'make' und dann './scc' eingeben
+Du solltest das im VOLLBILD Modus machen um die Geschwidnigkeit zu erhoehen.
+Um die Berechnung abzubrechen STRG+C druecken.
+scc.exe wird nicht richtig mit dem Windowsemulator 'WINE' laufen.
+
+
+	
+
