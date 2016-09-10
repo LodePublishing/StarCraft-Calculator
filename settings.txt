@@ -8,12 +8,6 @@ Oh... and do not write 'Zero' or 'One' instead of the actual number ;-).
 Input / Output:
 ---------------
 
-Numbers 0
--- a 'One' means: The build order is printed with the number of the item
--- this will cost some space on the screen and only the first sixty out of 
--- hundred items will be printed. A 'Zero' will result in a brief presentation 
--- and the first hundred orders will be printed.
-
 Colors 1
 -- You might want to turn this to 'Zero' if your screen does not support
 -- colors.
@@ -41,7 +35,7 @@ Vespine Geysirs 1
 -- As there are no rules for an expansion in the calculator this really
 -- only means how many of them are near your starting position.
 
-Mineral Gathering modificator 100
+Mineral Gathering modificator 100 
 -- Well... I still have a hard time to figure out how much a drone/scv/probe
 -- really gathers. I did some tests, stopped the time etc. I think the
 -- relations between the number of gatherers is more or less correct.
@@ -53,7 +47,7 @@ Mineral Blocks 8
 -- will gather the same amount of minerals / minute no matter whether you have
 -- four, eight or sixteen.
 
-Time to wallin 0
+Time to wallin 0 *not yet implemented*
 -- Should defensive buildings be placed away from the main building?
 -- This result in higher delays as the drone has to reach the building site
 -- first.
@@ -71,7 +65,7 @@ Scout Time 160
 Internal Options:
 -----------------
 
-Max Time 45 (in minutes)
+Max Time 60 (in minutes)
 -- Max Time is to define the search space at the beginning.
 -- That means: The program will run slow at the beginning when using a high
 -- value and visa versa it will run fast at the beginning when using a small

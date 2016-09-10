@@ -7,13 +7,13 @@ Units
         Dark Templar 0  0
          Dark Archon 0  0
                Probe 0  0
-              Zealot 0  0 
-             Dragoon 12  0
-        High Templar 0  0
+              Zealot 3  5 
+             Dragoon 0  0
+        High Templar 2  0
               Archon 0  0
               Reaver 0  0
              Corsair 0  0
-             Shuttle 0  0
+             Shuttle 1  0
                Scout 0  0
              Arbiter 0  0
              Carrier 0  0
@@ -26,7 +26,7 @@ Buildings
          Assimilator 0  0
          Observatory 0  0
              Gateway 0  0
-       Photon Cannon 0  0
+       Photon Cannon 2  6
     Cybernetics Core 0  0
      Citadel Of Adun 0  0
     Templar Archives 0  0 
@@ -35,21 +35,21 @@ Buildings
         Fleet Beacon 0  0
     Arbiter Tribunal 0  0
 Robotics Support Bay 0  0 
-      Shield Battery 0  0
+      Shield Battery 1  7
 
 Researches
-       Psionic Storm 0  0
+       Psionic Storm 1  0
        Hallucination 0  0
               Recall 0  0
         Stasis Field 0  0
       Disruption Web 0  0
         Mind Control 0  0
            Maelstrom 0  0
-  Singularity Charge 1  0    (Dragoon range)
+  Singularity Charge 0  0    (Dragoon range)
     Leg Enhancements 0  0       (Zealot speed)
        Scarab Damage 0  0
      Reaver Capacity 0  0
-      Gravitic Drive 0  0     (Shuttle speed)
+      Gravitic Drive 1  0     (Shuttle speed)
         Sensor Array 0  0     (Observer sight range)
    Gravitic Boosters 0  0     (Observer speed)
     Khaydarin Amulet 0  0     (Dark Templar energy)

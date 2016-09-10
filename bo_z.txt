@@ -1,168 +1,185 @@
-StarCraft Evolution Chamber by ClawSoftware.de
+--------------------------------------------------
+------StarCraftCalculator by ClawSoftware.de------
 --------------------------------------------------
 
 Build Order of best Individual:
-Time used: 04:48 minutes
-[00:00] [04/09] Drone
-[00:18] [04/09] Drone
-[00:34] [04/09] Drone
-[00:48] [04/09] Drone
-[01:00] [04/09] Extractor
-[01:44] [04/09] Spawning Pool
-[01:57] [04/09] Drone
-[02:09] [04/09] Drone
-[02:10] [04/09] Mineral Drone to Gas
-[02:11] [04/09] Mineral Drone to Gas
-[02:12] [04/09] Mineral Drone to Gas
-[03:07] [04/09] Metabolic Boost
-[03:08] [04/09] Gas Drone to Mineral
-[03:14] [04/09] Overlord
-[03:26] [04/09] Zergling
-[03:54] [12/17] Zergling
-[03:55] [12/17] Zergling
-[04:04] [12/17] Zergling
-[04:05] [12/17] Mineral Drone to Gas
-[04:06] [12/17] Gas Drone to Mineral
-[04:16] [12/17] Zergling
-[04:41] [12/17] Overlord
-                           Zergling :  5 [Last one: 03:54]
-                              Drone :  8 [Last one: 00:23]
-                           Overlord :  2 [Last one: 03:54]
-                           Hatchery :  1 [Last one: 00:00]
-                      Spawning Pool :  1 [Last one: 03:07]
-                          Extractor :  1 [Last one: 01:43]
-                    Metabolic Boost :  1 [Last one: 04:47]
-Harvested Minerals : 1075
-Harvested Gas      : 306
-Minerals at the end: 25
-Gas at the end     : 206
+Time used: 07:46 minutes
+[00:00] [04/09]                Drone [OK]
+[00:18] [05/09]                Drone [enough Minerals]
+[00:34] [06/09]                Drone [enough Minerals]
+[00:48] [07/09]            Extractor [enough Minerals]
+[01:39] [06/09]        Spawning Pool [enough Minerals]
+[01:54] [05/09]                Drone [enough Minerals]
+[01:55] [06/09] Mineral Drone to Gas [OK]
+[01:56] [06/09] Mineral Drone to Gas [OK]
+[03:02] [06/09]                 Lair [Building availible]
+[03:03] [06/09] Gas Drone to Mineral [OK]
+[03:12] [06/09]                Drone [enough Minerals]
+[03:27] [07/09]                Drone [enough Minerals]
+[03:28] [08/09] Mineral Drone to Gas [OK]
+[03:44] [08/09]                Drone [enough Minerals]
+[04:42] [09/09]         Queen's Nest [Building availible]
+[04:43] [08/09]                Drone [OK]
+[04:54] [09/09]             Overlord [enough Minerals]
+[05:45] [09/17]                 Hive [Building availible]
+[05:49] [09/17]                Drone [enough Minerals]
+[06:00] [10/17]                Drone [enough Minerals]
+[06:11] [11/17]                Drone [enough Minerals]
+[06:20] [12/17]                Drone [enough Minerals]
+[06:29] [13/17]                Drone [enough Minerals]
+[06:30] [14/17] Mineral Drone to Gas [OK]
+[06:49] [14/17]                Drone [Larva availible]
+[07:09] [15/17]                Drone [Larva availible]
+
+----------------------------
+------Force at the end------
+----------------------------
+
+                Drone : 16 [Last one: 07:32]
+             Overlord :  2 [Last one: 05:34]
+                 Hive :  1 [Last one: 07:45]
+         Queen's Nest :  1 [Last one: 05:45]
+        Spawning Pool :  1 [Last one: 03:02]
+            Extractor :  1 [Last one: 01:31]
+
+Harvested Minerals : 1935
+Harvested Gas      : 633
+Minerals at the end: 135
+Gas at the end     : 133
+
 ------------------------------
 
 Other possible solutions: 
-Time used: 04:51 minutes
-[00:00] [04/09] Drone
-[00:18] [04/09] Drone
-[00:34] [04/09] Extractor
-[01:17] [04/09] Mineral Drone to Gas
-[01:40] [04/09] Spawning Pool
-[03:10] [04/09] Metabolic Boost
-[03:11] [04/09] Gas Drone to Mineral
-[03:12] [04/09] Zergling
-[03:18] [04/09] Zergling
-[03:37] [04/09] Zergling
-[03:56] [04/09] Zergling
-[03:57] [04/09] Mineral Drone to Gas
-[04:20] [04/09] Zergling
-[04:21] [04/09] Mineral Drone to Gas
-                           Zergling :   5 [Last one: 03:40]
-                              Drone :   4 [Last one: 00:23]
-                           Overlord :   1 [Last one: 00:00]
-                           Hatchery :   1 [Last one: 00:00]
-                      Spawning Pool :   1 [Last one: 03:03]
-                          Extractor :   1 [Last one: 01:17]
-                    Metabolic Boost :   1 [Last one: 04:50]
-Harvested Minerals : 691
-Harvested Gas      : 173
-Minerals at the end: 41
-Gas at the end     : 73
+Time used: 07:54 minutes
+[00:00] [04/09]                Drone [OK]
+[00:18] [05/09]                Drone [enough Minerals]
+[00:34] [06/09]            Extractor [enough Minerals]
+[01:17] [05/09] Mineral Drone to Gas [Building availible]
+[01:40] [05/09]        Spawning Pool [enough Minerals]
+[02:05] [04/09]                Drone [enough Minerals]
+[03:10] [05/09]                 Lair [enough Gas]
+[03:26] [05/09]                Drone [enough Minerals]
+[03:45] [06/09]                Drone [enough Minerals]
+[03:46] [07/09] Mineral Drone to Gas [OK]
+[04:05] [07/09]                Drone [enough Minerals]
+[04:50] [08/09]         Queen's Nest [Building availible]
+[05:53] [07/09]                 Hive [Building availible]
+[06:01] [07/09]                Drone [enough Minerals]
+[06:30] [08/09]             Overlord [enough Minerals]
+[06:42] [08/09]                Drone [enough Minerals]
+[07:10] [09/09]                Drone [Supply satisfied]
+[07:11] [10/17]                Drone [OK]
+[07:17] [11/17]                Drone [enough Minerals]
+[07:38] [12/17]             Overlord [enough Minerals]
+[07:39] [12/17] Mineral Drone to Gas [OK]
+[07:50] [12/17]                Drone [Larva availible]
+----------------------------
+------Force at the end------
+----------------------------
+
+                Drone :  12 [Last one: 07:40]
+             Overlord :   2 [Last one: 07:10]
+                 Hive :   1 [Last one: 07:53]
+         Queen's Nest :   1 [Last one: 05:53]
+        Spawning Pool :   1 [Last one: 03:03]
+            Extractor :   1 [Last one: 01:17]
+
+Harvested Minerals : 1543
+Harvested Gas      : 574
+Minerals at the end: 43
+Gas at the end     : 224
+
 ------------------------------
 
-Time used: 04:48 minutes
-[00:00] [04/09] Drone
-[00:18] [04/09] Drone
-[00:34] [04/09] Drone
-[00:48] [04/09] Drone
-[01:00] [04/09] Extractor
-[01:44] [04/09] Spawning Pool
-[01:45] [04/09] Mineral Drone to Gas
-[01:59] [04/09] Drone
-[02:14] [04/09] Drone
-[02:15] [04/09] Mineral Drone to Gas
-[03:07] [04/09] Metabolic Boost
-[03:09] [04/09] Overlord
-[03:22] [04/09] Zergling
-[03:49] [12/17] Zergling
-[03:50] [12/17] Gas Drone to Mineral
-[03:51] [12/17] Mineral Drone to Gas
-[03:52] [12/17] Zergling
-[03:53] [12/17] Gas Drone to Mineral
-[03:54] [12/17] Mineral Drone to Gas
-[03:59] [12/17] Zergling
-[04:11] [12/17] Zergling
-[04:29] [12/17] Zergling
-[04:30] [12/17] Break up Building
-                           Zergling :   5 [Last one: 03:50]
-                              Drone :   8 [Last one: 00:23]
-                           Overlord :   2 [Last one: 03:49]
-                           Hatchery :   1 [Last one: 00:00]
-                      Spawning Pool :   1 [Last one: 03:07]
-                          Extractor :   1 [Last one: 01:43]
-                    Metabolic Boost :   1 [Last one: 04:47]
-Harvested Minerals : 1095
-Harvested Gas      : 292
-Minerals at the end: 95
-Gas at the end     : 192
+Time used: 07:57 minutes
+[00:00] [04/09]                Drone [OK]
+[00:18] [05/09]                Drone [enough Minerals]
+[00:34] [06/09]            Extractor [enough Minerals]
+[00:51] [05/09]                Drone [enough Minerals]
+[01:17] [06/09] Mineral Drone to Gas [Building availible]
+[01:50] [06/09]        Spawning Pool [enough Minerals]
+[02:09] [05/09]                Drone [enough Minerals]
+[02:27] [06/09]                Drone [enough Minerals]
+[03:13] [07/09]                 Lair [Building availible]
+[03:22] [07/09]                Drone [enough Minerals]
+[03:35] [08/09]                Drone [enough Minerals]
+[03:57] [09/09]             Overlord [enough Minerals]
+[03:58] [09/09] Mineral Drone to Gas [OK]
+[04:37] [09/09]                Drone [Supply satisfied]
+[04:38] [10/17]                Drone [OK]
+[04:53] [11/17]         Queen's Nest [Building availible]
+[05:03] [10/17]                Drone [enough Minerals]
+[05:12] [11/17]                Drone [enough Minerals]
+[05:21] [12/17]                Drone [enough Minerals]
+[05:22] [13/17] Mineral Drone to Gas [OK]
+[05:56] [13/17]                 Hive [enough Minerals]
+[06:04] [13/17]                Drone [enough Minerals]
+[06:12] [14/17]                Drone [enough Minerals]
+[06:20] [15/17]                Drone [enough Minerals]
+[06:21] [16/17] Mineral Drone to Gas [OK]
+[06:37] [16/17]                Drone [Larva availible]
+----------------------------
+------Force at the end------
+----------------------------
+
+                Drone :  17 [Last one: 07:00]
+             Overlord :   2 [Last one: 04:37]
+                 Hive :   1 [Last one: 07:56]
+         Queen's Nest :   1 [Last one: 05:56]
+        Spawning Pool :   1 [Last one: 03:13]
+            Extractor :   1 [Last one: 01:17]
+
+Harvested Minerals : 2177
+Harvested Gas      : 659
+Minerals at the end: 577
+Gas at the end     : 309
+
 ------------------------------
 
-Time used: 04:50 minutes
-[00:00] [04/09] Drone
-[00:18] [04/09] Drone
-[01:13] [04/09] Spawning Pool
-[01:28] [04/09] Extractor
-[02:11] [04/09] Mineral Drone to Gas
-[02:12] [04/09] Mineral Drone to Gas
-[03:09] [04/09] Metabolic Boost
-[03:10] [04/09] Zergling
-[03:11] [04/09] Gas Drone to Mineral
-[03:12] [04/09] Gas Drone to Mineral
-[03:13] [04/09] Zergling
-[03:32] [04/09] Zergling
-[03:33] [04/09] Mineral Drone to Gas
-[03:56] [04/09] Zergling
-[04:21] [04/09] Zergling
-[04:22] [04/09] Mineral Drone to Gas
-                           Zergling :   5 [Last one: 03:38]
-                              Drone :   4 [Last one: 00:23]
-                           Overlord :   1 [Last one: 00:00]
-                           Hatchery :   1 [Last one: 00:00]
-                      Spawning Pool :   1 [Last one: 02:36]
-                          Extractor :   1 [Last one: 02:11]
-                    Metabolic Boost :   1 [Last one: 04:49]
-Harvested Minerals : 689
-Harvested Gas      : 196
-Minerals at the end: 39
-Gas at the end     : 96
-------------------------------
+Time used: 07:46 minutes
+[00:00] [04/09]                Drone [OK]
+[00:18] [05/09]                Drone [enough Minerals]
+[00:34] [06/09]                Drone [enough Minerals]
+[00:48] [07/09]            Extractor [enough Minerals]
+[01:39] [06/09]        Spawning Pool [enough Minerals]
+[01:54] [05/09]                Drone [enough Minerals]
+[01:55] [06/09] Mineral Drone to Gas [OK]
+[01:56] [06/09] Mineral Drone to Gas [OK]
+[03:02] [06/09]                 Lair [Building availible]
+[03:14] [06/09]                Drone [enough Minerals]
+[03:33] [07/09]                Drone [enough Minerals]
+[03:49] [08/09]                Drone [enough Minerals]
+[04:42] [09/09]         Queen's Nest [Building availible]
+[04:43] [08/09]                Drone [OK]
+[05:00] [09/09]             Overlord [enough Minerals]
+[05:01] [09/09] Gas Drone to Mineral [OK]
+[05:45] [09/17]                 Hive [Building availible]
+[05:48] [09/17]                Drone [enough Minerals]
+[05:57] [10/17]                Drone [enough Minerals]
+[05:58] [11/17] Mineral Drone to Gas [OK]
+[06:08] [11/17]                Drone [enough Minerals]
+[06:18] [12/17]                Drone [enough Minerals]
+[06:28] [13/17]                Drone [Larva availible]
+[06:29] [14/17] Mineral Drone to Gas [OK]
+[06:48] [14/17]                Drone [Larva availible]
+[07:08] [15/17]                Drone [Larva availible]
+[07:09] [16/17] Mineral Drone to Gas [OK]
+[07:28] [16/17]                Drone [Larva availible]
+----------------------------
+------Force at the end------
+----------------------------
 
-Time used: 04:54 minutes
-[00:00] [04/09] Drone
-[00:18] [04/09] Drone
-[00:34] [04/09] Extractor
-[00:51] [04/09] Drone
-[01:17] [04/09] Mineral Drone to Gas
-[01:50] [04/09] Spawning Pool
-[02:09] [04/09] Drone
-[02:27] [04/09] Drone
-[03:13] [04/09] Metabolic Boost
-[03:14] [04/09] Zergling
-[03:35] [04/09] Overlord
-[03:47] [04/09] Zergling
-[03:48] [04/09] Gas Drone to Mineral
-[03:49] [04/09] Mineral Drone to Gas
-[04:15] [12/17] Zergling
-[04:16] [12/17] Zergling
-[04:24] [12/17] Zergling
-[04:25] [12/17] Mineral Drone to Gas
-                           Zergling :   5 [Last one: 03:42]
-                              Drone :   7 [Last one: 00:23]
-                           Overlord :   2 [Last one: 04:15]
-                           Hatchery :   1 [Last one: 00:00]
-                      Spawning Pool :   1 [Last one: 03:13]
-                          Extractor :   1 [Last one: 01:17]
-                    Metabolic Boost :   1 [Last one: 04:53]
-Harvested Minerals : 998
-Harvested Gas      : 215
-Minerals at the end: 98
-Gas at the end     : 115
+                Drone :  16 [Last one: 07:31]
+             Overlord :   2 [Last one: 05:40]
+                 Hive :   1 [Last one: 07:45]
+         Queen's Nest :   1 [Last one: 05:45]
+        Spawning Pool :   1 [Last one: 03:02]
+            Extractor :   1 [Last one: 01:31]
+
+Harvested Minerals : 1948
+Harvested Gas      : 611
+Minerals at the end: 348
+Gas at the end     : 261
+
 ------------------------------
 
