@@ -9,9 +9,24 @@
 #define LARVA_MAX 200
 #define MAX_BUILDINGS 12 // How many buildings can you built simultaneously?
 
-#define UNIT_TYPE_COUNT 102
+#define UNIT_TYPE_COUNT 100
 #define MAX_GOALS 100
 
+
+struct LOCATION
+{
+	int force[UNIT_TYPE_COUNT];
+	int availible[UNIT_TYPE_COUNT];
+};
+
+
+struct GOAL
+{
+        int unit;//!
+        int time;
+        int count;
+        int location;
+};
 
 #define TERRA 0
 #define PROTOSS 1
@@ -325,9 +340,6 @@
 //evtl ueberlegen einfach mehrere goals mit unit, anzahl zu nehmen...
 //some global variables
 
-extern int gRace;
-extern int gColors;
-
 const int gasing_z[5]=
 {
 0,
@@ -423,15 +435,6 @@ struct UNIT_STATISTICS
 
 #define MAX_LOCATIONS 8
 
-struct MAP
-{
-	int mineralCount,geysirCount;
-//        int isCliff; //only reachable per dropship
-//      int canShootbetweenwhichconnection... (cliffdrop oder so...)
-        int distance[MAX_LOCATIONS]; //~~~
-//        int x,y;//~~~ => in map data und static machen!
-};
-//Je nach Map verteilen...  Mit Dire Straits mal anfangen...
 
 
 
@@ -446,7 +449,7 @@ struct MAP
 
 // TODO: Alternativ Prerequisites!!!
 
-const UNIT_STATISTICS stats[RACES][MAX_GOALS]=
+const UNIT_STATISTICS stats[RACES][UNIT_TYPE_COUNT]=
 {
 {
 {"                NULL",  0,    0,    0,  0, 0, {0, 0}, {0 ,0, 0}, {0, 0, 0}, 0, 0, 0, 100},
